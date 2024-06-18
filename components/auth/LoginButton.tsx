@@ -9,6 +9,7 @@ interface LoginButtonProps {
   mode?: "modal" | "redirect"
   asChild?: boolean
   isLink?: boolean
+  loginHref?: string
 }
 
 const LoginButton = ({
@@ -16,11 +17,12 @@ const LoginButton = ({
   mode = "redirect",
   asChild,
   isLink = false,
+  loginHref = "/user/login",
 }: LoginButtonProps) => {
   const router = useRouter()
 
   const handleClick = () => {
-    router.push("/auth/login")
+    router.push(loginHref)
   }
 
   if (mode === "modal") {
