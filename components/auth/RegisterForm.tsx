@@ -1,10 +1,12 @@
 "use client"
 
+import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { RegisterSchema } from "@/schemas"
+import { register } from "@/actions/register"
 import {
   Form,
   FormControl,
@@ -20,6 +22,10 @@ import { FormError } from "@/components/FormError"
 import { FormSuccess } from "@/components/FormSuccess"
 
 export const RegisterForm = () => {
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | undefined>("")
+  const [success, setSuccess] = useState<string | undefined>("")
+
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -30,7 +36,16 @@ export const RegisterForm = () => {
   })
 
   const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
-    console.log(values)
+    setError("")
+    setSuccess("")
+
+    startTransition(() => {
+      register(values)
+        .then(data => {
+          setError(data.error)
+          setSuccess(data.success)
+        })
+    })
   }
 
   return (
@@ -57,6 +72,7 @@ export const RegisterForm = () => {
                       {...field}
                       placeholder="Vikram Naik"
                       type="text"
+                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -74,6 +90,7 @@ export const RegisterForm = () => {
                       {...field}
                       placeholder="vikramnaik@gmail.com"
                       type="email"
+                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -90,6 +107,7 @@ export const RegisterForm = () => {
                     <Input
                       {...field}
                       type="password"
+                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -97,13 +115,13 @@ export const RegisterForm = () => {
               )}
             />
           </div>
-          <FormSuccess message="hello" />
-          <FormError message="" />
+          <FormSuccess message={success} />
+          <FormError message={error} />
           <Button
             type="submit"
             className="w-full"
           >
-            Login
+            {isPending ? "Registering..." : "Register"}
           </Button>
         </form>
       </Form>
