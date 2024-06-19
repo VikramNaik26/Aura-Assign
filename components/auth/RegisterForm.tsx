@@ -16,6 +16,8 @@ import {
 import { CardWrapper } from "@/components/auth/CardWrapper"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { FormError } from "@/components/FormError"
+import { FormSuccess } from "@/components/FormSuccess"
 
 export const RegisterForm = () => {
   const form = useForm<z.infer<typeof RegisterSchema>>({
@@ -95,6 +97,8 @@ export const RegisterForm = () => {
               )}
             />
           </div>
+          <FormSuccess message="hello" />
+          <FormError message="" />
           <Button
             type="submit"
             className="w-full"
