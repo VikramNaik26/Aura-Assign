@@ -1,5 +1,3 @@
-import Image from "next/image"
-
 import { AuthHeader } from "@/app/(auth)/_components/AuthHeader"
 import { Bounded } from "@/components/Bounded"
 import { RegisterForm } from "@/components/auth/RegisterForm"
