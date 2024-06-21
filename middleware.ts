@@ -1,5 +1,4 @@
 import NextAuth from "next-auth"
-import type { NextApiRequest } from "next"
 
 import authConfig from "@/auth.config"
 import {
@@ -27,7 +26,7 @@ export default auth((req) => {
   }
 
   if (!isLoggedIn && !isPublicRoute) {
-    return Response.redirect(new URL("/auth/login", nextUrl))
+    return Response.redirect(new URL("/user/login", nextUrl))
   }
 
   return

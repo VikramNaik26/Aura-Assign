@@ -42,8 +42,8 @@ export const LoginForm = () => {
     startTransition(() => {
       login(values)
         .then(data => {
-          setError(data.error)
-          setSuccess(data.success)
+          setError(data?.error)
+          setSuccess(data?.success)
         })
     })
   }
@@ -103,7 +103,7 @@ export const LoginForm = () => {
             type="submit"
             className="w-full"
           >
-            {isPending ? "Registering..." : "Register"}
+            {isPending ? "Processing..." : "Login"}
           </Button>
         </form>
       </Form>
