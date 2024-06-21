@@ -1,3 +1,5 @@
+import { Suspense } from "react"
+
 import { AuthHeader } from "@/app/(auth)/_components/AuthHeader"
 import { Bounded } from "@/components/Bounded"
 import { LoginForm } from "@/components/auth/LoginForm"
@@ -14,7 +16,9 @@ const UserLoginPage = () => {
         childClassName="h-full"
       >
         <AuthHeader />
-        <LoginForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <LoginForm />
+        </Suspense>
       </Bounded>
     </main >
   )
