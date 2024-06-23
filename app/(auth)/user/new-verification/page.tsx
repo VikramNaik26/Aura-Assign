@@ -4,9 +4,11 @@ import { NewVerificationForm } from '@/components/auth/NewVerificationForm'
 
 const NewVerification = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <NewVerificationForm />
-    </Suspense>
+    <main className="w-full h-full flex justify-center items-center">
+      <Suspense fallback={<div>Loading...</div>}>
+        <NewVerificationForm />
+      </Suspense>
+    </main>
   )
 }
 

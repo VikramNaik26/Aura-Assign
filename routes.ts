@@ -16,6 +16,9 @@ export const publicRoutes: string[] = [
 export const authRoutes: string[] = [
   "/user/login",
   "/user/register",
+  "/user/error",
+  "/user/reset",
+  "/user/new-password",
   "/org/login",
   "/org/register"
 ]
