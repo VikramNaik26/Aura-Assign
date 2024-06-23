@@ -1,14 +1,19 @@
 import LoginButton from "@/components/auth/LoginButton"
 
-export const AuthHeader = () => {
+interface AuthHeaderProps {
+  isOrg?: boolean
+}
+export const AuthHeader = ({
+  isOrg = false,
+}: AuthHeaderProps) => {
   return (
     <div className="self-start flex justify-around items-center w-full">
       <h2 className="">Aura Assign</h2>
       <LoginButton
         isLink
-        loginHref="/org/login"
+        loginHref={isOrg ? "/user/register" : "/org/register"}
       >
-        Organization login
+        {isOrg ? "User registration" : "Organization registration"}
       </LoginButton>
     </div>
   )

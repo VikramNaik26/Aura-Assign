@@ -6,7 +6,7 @@ import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { RegisterSchema } from "@/schemas"
-import { register } from "@/actions/register"
+import { register, registerOrg } from "@/actions/register"
 import {
   Form,
   FormControl,
@@ -21,7 +21,13 @@ import { Button } from "@/components/ui/button"
 import { FormError } from "@/components/FormError"
 import { FormSuccess } from "@/components/FormSuccess"
 
-export const RegisterForm = () => {
+interface RegisterFormProps {
+  isOrg?: boolean
+}
+
+export const RegisterForm = ({
+  isOrg = false
+}: RegisterFormProps) => {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
   const [success, setSuccess] = useState<string | undefined>("")
@@ -40,19 +46,28 @@ export const RegisterForm = () => {
     setSuccess("")
 
     startTransition(() => {
-      register(values)
-        .then(data => {
-          setError(data?.error)
-          setSuccess(data?.success)
-        })
+      if (isOrg) {
+        registerOrg(values)
+          .then(data => {
+            setError(data?.error)
+            setSuccess(data?.success)
+          })
+
+      } else {
+        register(values)
+          .then(data => {
+            setError(data?.error)
+            setSuccess(data?.success)
+          })
+      }
     })
   }
 
   return (
     <CardWrapper
-      headerLabel="Create a new account"
+      headerLabel={isOrg ? "Create an organizational account" : "Create a new account"}
       backButtonLabel="Have an account?"
-      backButtonHref="/user/login"
+      backButtonHref={isOrg ? "/user/login" : "/org/login"}
       showSocial
     >
       <Form {...form}>
@@ -66,11 +81,11 @@ export const RegisterForm = () => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{isOrg ? "Organization Name" : "Full Name"}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Vikram Naik"
+                      placeholder={isOrg ? "Aura Assign" : "Vikram Naik"}
                       type="text"
                       disabled={isPending}
                     />
@@ -84,7 +99,7 @@ export const RegisterForm = () => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{isOrg ? "Organization Email" : "Email"}</FormLabel>
                   <FormControl>
                     <Input
                       {...field}

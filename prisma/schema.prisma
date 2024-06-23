@@ -32,6 +32,16 @@ model User {
   twoFactorConfirmation TwoFactorConfirmation?
 }
 
+model Organization {
+  id                    String                 @id @default(cuid())
+  name                  String?
+  email                 String?                @unique
+  password              String?
+  emailVerified         DateTime?              @map("email_verified")
+  image                 String?
+  role                  UserRole               @default(ORGANIZATION)
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String  @map("user_id")

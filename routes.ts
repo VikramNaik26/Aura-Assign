@@ -5,7 +5,8 @@
 */
 export const publicRoutes: string[] = [
   "/",
-  "/user/new-verification"
+  "/user/new-verification",
+  "/org/new-verification"
 ]
 
 /**
@@ -20,7 +21,10 @@ export const authRoutes: string[] = [
   "/user/reset",
   "/user/new-password",
   "/org/login",
-  "/org/register"
+  "/org/register",
+  "/org/error",
+  "/org/reset",
+  "/org/new-password",
 ]
 
 /**

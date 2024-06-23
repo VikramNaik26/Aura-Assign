@@ -34,9 +34,12 @@ export const sendPasswordResetEmail = async (
 
 export const sendVerificationEmail = async (
   email: string,
-  token: string
+  token: string,
+  isOrg?: boolean
 ) => {
-  const confirmLink = `http://localhost:3000/user/new-verification?token=${token}`
+  const confirmLink = isOrg 
+    ? `http://localhost:3000/org/new-verification?token=${token}` 
+    : `http://localhost:3000/user/new-verification?token=${token}`
 
   try {
     await resend.emails.send({
