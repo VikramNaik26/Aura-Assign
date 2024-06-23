@@ -26,7 +26,7 @@ interface RegisterFormProps {
 }
 
 export const RegisterForm = ({
-  isOrg = false
+  isOrg = false,
 }: RegisterFormProps) => {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
@@ -66,9 +66,9 @@ export const RegisterForm = ({
   return (
     <CardWrapper
       headerLabel={isOrg ? "Create an organizational account" : "Create a new account"}
-      backButtonLabel="Have an account?"
-      backButtonHref={isOrg ? "/user/login" : "/org/login"}
-      showSocial
+      backButtonLabel="Already have an account?"
+      backButtonHref={isOrg ? "/org/login" : "/user/login"}
+      showSocial={isOrg ? false : true}
     >
       <Form {...form}>
         <form

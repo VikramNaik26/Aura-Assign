@@ -15,7 +15,7 @@ const UserLoginPage = () => {
         className="flex-grow my-auto h-full"
         childClassName="h-full"
       >
-        <AuthHeader />
+        <AuthHeader isLogin />
         <Suspense fallback={<div>Loading...</div>}>
           <LoginForm />
         </Suspense>

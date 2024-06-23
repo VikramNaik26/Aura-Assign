@@ -34,7 +34,7 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({
-  isOrg = false
+  isOrg = false,
 }: LoginFormProps) => {
   const searchParams = useSearchParams()
   const urlError = (
@@ -62,7 +62,6 @@ export const LoginForm = ({
 
     startTransition(() => {
       if (isOrg) {
-        console.log("org")
         orgLogin(values)
           .then(data => {
             if (data?.error) {
@@ -107,7 +106,7 @@ export const LoginForm = ({
       headerLabel="Welcome back!"
       backButtonLabel="Don't have an account?"
       backButtonHref={isOrg ? "/org/register" : "/user/register"}
-      showSocial
+      showSocial={isOrg ? false : true}
     >
       <Form {...form}>
         <form

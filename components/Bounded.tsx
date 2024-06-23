@@ -19,7 +19,7 @@ export const Bounded = ({
   return (
     <Comp
       className={cn(
-        'px-4 py-14 first:pt-10 md:px-6 md:py-20 lg:py-24',
+        'px-4 py-6',
         className,
       )}
       {...restProps}
