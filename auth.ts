@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import authConfig from "@/auth.config"
 import { db } from "@/lib/db"
 import { getUserById } from "@/data/users"
+import { getOrgById } from "@/data/organizations"
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation"
 
 export const {
@@ -30,31 +31,37 @@ export const {
       if (account?.provider !== "credentials") return true
 
       // prevent sign without email verification
-      const existingUser = await getUserById(user.id)
-      if (!existingUser || !existingUser.emailVerified) {
-        return false
-      }
+      const existingOrg = await getOrgById(user.id)
 
-      if (existingUser?.isTwoFactorEnabled) {
-        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id)
-
-        if (!twoFactorConfirmation) {
+      if (!existingOrg || !existingOrg.emailVerified) {
+        const existingUser = await getUserById(user.id)
+        if (!existingUser || !existingUser.emailVerified) {
           return false
         }
 
-        // Delete two factor confirmation for the next signin
-        await db.twoFactorConfirmation.delete({
-          where: {
-            userId: existingUser.id
-          }
-        })
+        if (existingUser?.isTwoFactorEnabled) {
+          const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id)
 
+          if (!twoFactorConfirmation) {
+            return false
+          }
+
+          // Delete two factor confirmation for the next signin
+          await db.twoFactorConfirmation.delete({
+            where: {
+              userId: existingUser.id
+            }
+          })
+
+          return true
+        }
         return true
       }
 
       return true
     },
     async session({ session, token }) {
+      console.log({ session, token })
       if (token.sub && session.user) {
         session.user.id = token.sub
       }
@@ -69,10 +76,18 @@ export const {
     async jwt({ token }) {
       if (!token.sub) return token
 
-      const existingUser = await getUserById(token.sub)
-      if (!existingUser) return token
+      const existingOrg = await getOrgById(token.sub)
 
-      token.role = existingUser.role
+      if (!existingOrg) {
+        const existingUser = await getUserById(token.sub)
+        if (!existingUser) return token
+
+        token.role = existingUser.role
+
+        return token
+      }
+
+      token.role = existingOrg.role
       return token
     }
   },

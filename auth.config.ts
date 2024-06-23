@@ -6,6 +6,7 @@ import Google from "next-auth/providers/google"
 
 import { LoginSchema } from "@/schemas"
 import { getUserByEmail } from "@/data/users"
+import { getOrgByEmail } from "./data/organizations"
 
 export default {
   providers: [
@@ -24,11 +25,25 @@ export default {
         if (validatedFields.success) {
           const { email, password } = validatedFields.data
 
-          const user = await getUserByEmail(email)
-          if (!user || !user.password) return null
+          const organization = await getOrgByEmail(email)
 
-          const passwordMatch = await bcrypt.compare(password, user.password)
-          if (passwordMatch) return user
+          if (!organization) {
+            const user = await getUserByEmail(email)
+            if (!user || !user.password) return null
+
+            const passwordMatch = await bcrypt.compare(password, user.password)
+            if (passwordMatch) {
+              return user
+            }
+          }
+
+          if (organization && organization.password) {
+            const passwordMatch = await bcrypt.compare(
+              password,
+              organization.password
+            )
+            if (passwordMatch) return organization
+          }
         }
         return null
       }

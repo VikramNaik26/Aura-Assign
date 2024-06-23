@@ -27,9 +27,15 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { FormError } from "@/components/FormError"
 import { FormSuccess } from "@/components/FormSuccess"
-import { login } from "@/actions/login"
+import { login, orgLogin } from "@/actions/login"
 
-export const LoginForm = () => {
+interface LoginFormProps {
+  isOrg?: boolean
+}
+
+export const LoginForm = ({
+  isOrg = false
+}: LoginFormProps) => {
   const searchParams = useSearchParams()
   const urlError = (
     searchParams?.get("error") === "OAuthAccountNotLinked"
@@ -55,25 +61,44 @@ export const LoginForm = () => {
     setSuccess("")
 
     startTransition(() => {
-      login(values)
-        .then(data => {
-          if (data?.error) {
-            form.reset()
-            setError(data?.error)
-          }
+      if (isOrg) {
+        console.log("org")
+        orgLogin(values)
+          .then(data => {
+            if (data?.error) {
+              form.reset()
+              setError(data?.error)
+            }
 
-          if (data?.success) {
-            form.reset()
-            setSuccess(data?.success)
-          }
+            if (data?.success) {
+              form.reset()
+              setSuccess(data?.success)
+            }
+          })
+          .catch(() => {
+            setError("Something went wrong")
+          })
+      } else {
+        login(values)
+          .then(data => {
+            if (data?.error) {
+              form.reset()
+              setError(data?.error)
+            }
 
-          if (data?.twoFactor) {
-            setShowTwoFactor(true)
-          }
-        })
-        .catch(() => {
-          setError("Something went wrong")
-        })
+            if (data?.success) {
+              form.reset()
+              setSuccess(data?.success)
+            }
+
+            if (data?.twoFactor) {
+              setShowTwoFactor(true)
+            }
+          })
+          .catch(() => {
+            setError("Something went wrong")
+          })
+      }
     })
   }
 
@@ -81,7 +106,7 @@ export const LoginForm = () => {
     <CardWrapper
       headerLabel="Welcome back!"
       backButtonLabel="Don't have an account?"
-      backButtonHref="/user/register"
+      backButtonHref={isOrg ? "/org/register" : "/user/register"}
       showSocial
     >
       <Form {...form}>
@@ -128,7 +153,7 @@ export const LoginForm = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{isOrg ? "Organizational Email" : "Email"}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -160,7 +185,7 @@ export const LoginForm = () => {
                         asChild
                         className="px-0 font-normal"
                       >
-                        <Link href="/user/reset">
+                        <Link href={isOrg ? "/org/reset" : "/user/reset"}>
                           Forgot password?
                         </Link>
                       </Button>
