@@ -74,6 +74,10 @@ export const LoginForm = ({
               form.reset()
               setSuccess(data?.success)
             }
+
+            if (!data?.error) {
+              toast.success("User successfully logged in")
+            }
           })
           .then(() => {
             toast.success("Organzation successfully logged in")
@@ -96,6 +100,10 @@ export const LoginForm = ({
 
             if (data?.twoFactor) {
               setShowTwoFactor(true)
+            }
+
+            if (!data?.error) {
+              toast.success("User successfully logged in")
             }
           })
           .then(() => {
