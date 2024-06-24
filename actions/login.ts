@@ -2,7 +2,6 @@
 
 import * as z from "zod"
 import { AuthError } from "next-auth"
-import bcrypt from "bcryptjs"
 
 import { LoginSchema } from "@/schemas"
 import { signIn } from "@/auth"
