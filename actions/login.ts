@@ -2,7 +2,6 @@
 
 import * as z from "zod"
 import { AuthError } from "next-auth"
-import bcrypt from "bcryptjs"
 
 import { LoginSchema } from "@/schemas"
 import { signIn } from "@/auth"
@@ -55,10 +54,12 @@ export const orgLogin = async (values: z.infer<typeof LoginSchema>) => {
     })
     return { success: "Logged in" }
   } catch (error) {
-    console.log(error)
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
+          return { error: "Invalid credentials" }
+
+        case "CallbackRouteError":
           return { error: "Invalid credentials" }
 
         default:
@@ -155,6 +156,9 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
+          return { error: "Invalid credentials" }
+
+        case "CallbackRouteError":
           return { error: "Invalid credentials" }
 
         default:

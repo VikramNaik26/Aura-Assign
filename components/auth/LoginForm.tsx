@@ -6,6 +6,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
 
 import { LoginSchema } from "@/schemas"
 import {
@@ -73,6 +74,10 @@ export const LoginForm = ({
               form.reset()
               setSuccess(data?.success)
             }
+
+            if (!data?.error) {
+              toast.success("User successfully logged in")
+            }
           })
           .catch(() => {
             setError("Something went wrong")
@@ -92,6 +97,10 @@ export const LoginForm = ({
 
             if (data?.twoFactor) {
               setShowTwoFactor(true)
+            }
+
+            if (!data?.error) {
+              toast.success("User successfully logged in")
             }
           })
           .catch(() => {
