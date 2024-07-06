@@ -2,25 +2,28 @@
 
 import {
   useQuery,
-  useMutation,
-  useQueryClient,
 } from "@tanstack/react-query"
-import { UserRole } from "@prisma/client"
 
-import { getUsers } from "@/actions/users"
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
+import { getEvents } from "@/actions/event"
 
 const Dashboard = () => {
-  const { data: users } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => getUsers(),
-    // enabled: !!session,
+  const organization = useCurrentOrgORUser()
+
+  const { data: events } = useQuery({
+    queryKey: ["events"],
+    queryFn: () => getEvents(organization?.id),
   })
 
-  const user = useCurrentOrgORUser()
-
   return (
-    <section>{JSON.stringify(user)}</section>
+    <section>
+      {events && events.map((event) => (
+        <div key={event.id}>
+          <h1>{event.name}</h1>
+          <p>{event.description}</p>
+        </div>
+      ))}
+    </section>
   )
 }
 

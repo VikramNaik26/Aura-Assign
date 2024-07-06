@@ -5,6 +5,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { EventSchema } from "@/schemas"
 import {
@@ -34,6 +35,18 @@ export const EventForm = (props: EventFormProps) => {
 
   const organization = useCurrentOrgORUser()
 
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: (event: z.infer<typeof EventSchema>) => createEvent(event, organization?.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] })
+    },
+    onError: () => {
+      setError('Something went wrong');
+    },
+  })
+
   const form = useForm<z.infer<typeof EventSchema>>({
     resolver: zodResolver(EventSchema),
     defaultValues: {
@@ -50,12 +63,12 @@ export const EventForm = (props: EventFormProps) => {
     setSuccess("")
 
     startTransition(() => {
-      createEvent(values, organization?.id)
+      mutation.mutateAsync(values)
         .then(data => {
-          // if (data?.error) {
-          //   form.reset()
-          //   setError(data?.error)
-          // }
+          if (data?.error) {
+            form.reset()
+            setError(data?.error)
+          }
 
           if (data?.success) {
             form.reset()

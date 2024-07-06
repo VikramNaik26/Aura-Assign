@@ -49,3 +49,12 @@ export const createEvent = async (values: z.infer<typeof EventSchema>, orgId?: s
     }
   }
 }
+
+export const getEvents = async (orgId?: string) => {
+  const organization = orgId ? await getOrgById(orgId) : null
+
+  const events = await db.event.findMany({
+    where: { orgId: organization?.id }
+  })
+  return events
+}
