@@ -20,7 +20,7 @@ const ProtectedLayout = ({
   return (
     <QueryClientProvider client={queryClient}>
       <main>
-        <section className="h-ful pl-8">
+        <section className="h-full px-4">
           <div className="flex gap-x-3 h-full">
             <Suspense fallback={<div>Loading...</div>}>
               <DashboardSidebar />

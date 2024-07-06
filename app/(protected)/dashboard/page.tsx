@@ -5,6 +5,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query"
+import { UserRole } from "@prisma/client"
 
 import { getUsers } from "@/actions/users"
 
@@ -16,16 +17,7 @@ const Dashboard = () => {
   })
 
   return (
-    <>
-      <section>Dashboard</section>
-      <section>
-        <ul>
-          {users?.map((user) => (
-            <li key={user.id}>{user.email}</li>
-          ))}
-        </ul>
-      </section>
-    </>
+    <section>Dashboard</section>
   )
 }
 

@@ -9,13 +9,16 @@ import {
 import { Header } from "@/components/auth/Header"
 import { Social } from "@/components/auth/Social"
 import { BackButton } from "@/components/auth/BackButton"
+import { cn } from "@/lib/utils"
+import { ClassNameValue } from "tailwind-merge"
 
 interface CardWrapperProps {
   children: React.ReactNode
   headerLabel: string
-  backButtonLabel: string
-  backButtonHref: string
+  backButtonLabel?: string
+  backButtonHref?: string
   showSocial?: boolean
+  className?: ClassNameValue
 }
 
 export const CardWrapper = ({
@@ -23,10 +26,11 @@ export const CardWrapper = ({
   headerLabel,
   backButtonLabel,
   backButtonHref,
-  showSocial
+  showSocial,
+  className
 }: CardWrapperProps) => {
   return (
-    <Card className="w-[440px] shadow-md my-auto">
+    <Card className={cn("w-[440px] shadow-md my-auto", className)}>
       <CardHeader>
         <Header label={headerLabel} />
       </CardHeader>
@@ -39,10 +43,12 @@ export const CardWrapper = ({
         </CardFooter>
       )}
       <CardFooter>
-        <BackButton
-          href={backButtonHref}
-          label={backButtonLabel}
-        />
+        {(backButtonHref && backButtonLabel) && (
+          <BackButton
+            href={backButtonHref}
+            label={backButtonLabel}
+          />
+        )}
       </CardFooter>
     </Card>
   )
