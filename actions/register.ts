@@ -34,11 +34,11 @@ export const registerOrg = async (values: z.infer<typeof RegisterSchema>) => {
   })
 
   const verificationToken = await generateVerificationToken(email)
-  await sendVerificationEmail(
-    verificationToken.email,
-    verificationToken.token,
-    true
-  )
+  // await sendVerificationEmail(
+  //   verificationToken.email,
+  //   verificationToken.token,
+  //   true
+  // )
 
   return { success: "Confirmation email sent" }
 }
@@ -67,11 +67,11 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   })
 
   const verificationToken = await generateVerificationToken(email)
-  await sendVerificationEmail(
-    verificationToken.email,
-    verificationToken.token,
-    false
-  )
+  // await sendVerificationEmail(
+  //   verificationToken.email,
+  //   verificationToken.token,
+  //   false
+  // )
 
   return { success: "Confirmation email sent" }
 }

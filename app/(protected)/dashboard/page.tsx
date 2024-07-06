@@ -1,21 +1,31 @@
-import { auth, signOut } from "@/auth"
+"use client"
 
-const Dashboard = async () => {
-  const session = await auth()
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query"
+
+import { getUsers } from "@/actions/users"
+
+const Dashboard = () => {
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => getUsers(),
+    // enabled: !!session,
+  })
 
   return (
-    <div>
-      {JSON.stringify(session)}
-      <form action={async () => {
-        "use server"
-
-        await signOut()
-      }}>
-        <button type="submit">
-          sign out
-        </button>
-      </form>
-    </div>
+    <>
+      <section>Dashboard</section>
+      <section>
+        <ul>
+          {users?.map((user) => (
+            <li key={user.id}>{user.email}</li>
+          ))}
+        </ul>
+      </section>
+    </>
   )
 }
 
