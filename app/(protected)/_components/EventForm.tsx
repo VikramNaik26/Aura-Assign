@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { FormError } from "@/components/FormError"
 import { createEvent } from "@/actions/event"
+import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
 
 interface EventFormProps {
   closeDialog: () => void
@@ -30,6 +31,8 @@ export const EventForm = (props: EventFormProps) => {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
   const [success, setSuccess] = useState<string | undefined>("")
+
+  const organization = useCurrentOrgORUser()
 
   const form = useForm<z.infer<typeof EventSchema>>({
     resolver: zodResolver(EventSchema),
@@ -43,12 +46,11 @@ export const EventForm = (props: EventFormProps) => {
   })
 
   const onSubmit = (values: z.infer<typeof EventSchema>) => {
-    console.log(values)
     setError("")
     setSuccess("")
 
     startTransition(() => {
-      createEvent(values)
+      createEvent(values, organization?.id)
         .then(data => {
           // if (data?.error) {
           //   form.reset()
@@ -61,9 +63,9 @@ export const EventForm = (props: EventFormProps) => {
             closeDialog()
           }
 
-          // if (!data?.error) {
-          //   toast.success("Event successfully created")
-          // }
+          if (!data?.error) {
+            toast.success("Event successfully created")
+          }
         })
         .catch(() => {
           setError("Something went wrong")

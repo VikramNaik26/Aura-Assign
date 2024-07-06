@@ -37,7 +37,7 @@ export const RegisterSchema = z.object({
 })
 
 export const EventSchema = z.object({
-  name: z.string({
+  name: z.string().min(3, {
     message: "Name is required"
   }),
   description: z.optional(z.string()),
@@ -45,5 +45,5 @@ export const EventSchema = z.object({
   time: z.string().regex(timeRegex, {
     message: "Time must be in HH:mm format"
   }),
-  date: z.string().date()
+  date: z.string().date().refine(val => !isNaN(Date.parse(val)), "Invalid date")
 })

@@ -8,6 +8,7 @@ import {
 import { UserRole } from "@prisma/client"
 
 import { getUsers } from "@/actions/users"
+import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
 
 const Dashboard = () => {
   const { data: users } = useQuery({
@@ -16,8 +17,10 @@ const Dashboard = () => {
     // enabled: !!session,
   })
 
+  const user = useCurrentOrgORUser()
+
   return (
-    <section>Dashboard</section>
+    <section>{JSON.stringify(user)}</section>
   )
 }
 

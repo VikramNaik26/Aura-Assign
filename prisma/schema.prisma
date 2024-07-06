@@ -105,9 +105,9 @@ model Event {
   imageUrl    String?
   time        DateTime
   date        DateTime
-  orgId       String
+  orgId       String?
 
-  organization Organization @relation(fields: [orgId], references: [id])
+  organization Organization? @relation(fields: [orgId], references: [id])
 
   @@index([orgId])
 }
