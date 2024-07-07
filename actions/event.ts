@@ -6,6 +6,15 @@ import { db } from "@/lib/db"
 import { EventSchema } from "@/schemas"
 import { getOrgById } from "@/data/organizations"
 
+export interface OrgEvent {
+  id: string
+  name: string
+  description?: string | null
+  imageUrl?: string | null
+  date: Date
+  time: Date
+}
+
 export const createEvent = async (values: z.infer<typeof EventSchema>, orgId?: string) => {
   try {
     const organization = orgId ? await getOrgById(orgId) : null
@@ -51,10 +60,51 @@ export const createEvent = async (values: z.infer<typeof EventSchema>, orgId?: s
 }
 
 export const getEvents = async (orgId?: string) => {
+  try {
+    const events = await db.event.findMany()
+    return events
+  } catch (error) {
+    return { error: 'Cannot find events' }
+  }
+}
+
+export const getEventsByOrgId = async (orgId?: string): Promise<OrgEvent[]> => {
+  try {
+    const organization = orgId ? await getOrgById(orgId) : null
+
+    const events = await db.event.findMany({
+      where: { orgId: organization?.id }
+    })
+
+    return events
+  } catch (error) {
+    console.error("Error fetching events:", error);
+
+    throw new Error("Failed to fetch events. Please try again later.");
+  }
+}
+
+export interface DeleteEventParams {
+  id: string
+  orgId?: string
+}
+
+export const deleteEvent = async ({ id, orgId }: DeleteEventParams) => {
+  if (!id) {
+    return { error: 'Missing id' }
+  }
+
   const organization = orgId ? await getOrgById(orgId) : null
 
-  const events = await db.event.findMany({
-    where: { orgId: organization?.id }
-  })
-  return events
+  if (!organization) {
+    return { error: 'Missing organization' }
+  }
+
+  try {
+    await db.event.delete({ where: { id } })
+
+    return { success: 'Event Deleted' }
+  } catch (error) {
+    return { error: 'Cannot delete event' }
+  }
 }
