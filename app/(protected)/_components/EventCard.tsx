@@ -167,7 +167,7 @@ export const EventCard = ({
           </Dialog>
         </div>
         <BackButton
-          href="/event"
+          href={`dashboard/event/${event?.id}`}
           label="More details"
           className="w-min text-gray-600"
         />

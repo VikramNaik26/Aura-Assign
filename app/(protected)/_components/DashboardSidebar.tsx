@@ -48,7 +48,7 @@ export const DashboardSidebar = () => {
           size='lg'
           className='font-normal justify-start w-full px-2'
         >
-          <Link href='/'>
+          <Link href='/dashboard'>
             <LayoutDashboard className="w-4 h-4 mr-2" />
             Event List
           </Link>
