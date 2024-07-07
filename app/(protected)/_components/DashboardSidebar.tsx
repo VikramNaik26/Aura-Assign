@@ -5,20 +5,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Poppins } from 'next/font/google'
-import { LayoutDashboard, Plus, Star } from 'lucide-react'
-import { VisuallyHidden } from '@reach/visually-hidden'
+import { LayoutDashboard, Star } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-  DialogHeader,
-} from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
-import { EventForm } from './EventForm'
+import { EventDialog } from './EventDialog'
 
 const font = Poppins({
   subsets: ['latin'],
@@ -48,29 +39,7 @@ export const DashboardSidebar = () => {
         </div>
       </Link>
       <div className="space-y-1 w-full">
-        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger className='w-full' asChild>
-            <Button
-              size='lg'
-              className='font-normal justify-start w-full px-2'
-              onClick={() => { console.log('clicked') }}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create an event!
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="p-0 w-auto bg-transparent border-none">
-            <DialogHeader>
-              <DialogTitle asChild>
-                <VisuallyHidden>Create an event</VisuallyHidden>
-              </DialogTitle>
-              <DialogDescription asChild>
-                <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
-              </DialogDescription>
-            </DialogHeader>
-            <EventForm closeDialog={closeDialog}/> 
-          </DialogContent>
-        </Dialog>
+        <EventDialog isDialogOpen={isDialogOpen} setDialogOpen={setDialogOpen} closeDialog={closeDialog} />
       </div>
       <div className="space-y-1 w-full">
         <Button

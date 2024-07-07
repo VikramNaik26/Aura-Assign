@@ -1,10 +1,10 @@
 "use client"
 
-import Image from "next/image";
-import { VisuallyHidden } from "@reach/visually-hidden";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import Image from "next/image"
+import { VisuallyHidden } from "@reach/visually-hidden"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState, useTransition } from "react"
+import { toast } from "sonner"
 
 import {
   Card,
@@ -13,7 +13,7 @@ import {
   CardTitle,
   CardContent,
   CardFooter
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 import {
   Dialog,
   DialogTrigger,
@@ -23,13 +23,13 @@ import {
   DialogHeader,
   DialogClose
 } from "@/components/ui/dialog"
-import { BackButton } from "@/components/auth/BackButton";
-import { Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { EventForm } from "./EventForm";
-import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser";
-import { deleteEvent } from "@/actions/event";
-import { FormError } from "@/components/FormError";
+import { BackButton } from "@/components/auth/BackButton"
+import { Edit, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { EventForm } from "./EventForm"
+import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
+import { deleteEvent } from "@/actions/event"
+import { FormError } from "@/components/FormError"
 
 interface EventCardProps {
   event: {
