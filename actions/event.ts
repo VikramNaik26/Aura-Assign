@@ -59,12 +59,13 @@ export const createEvent = async (values: z.infer<typeof EventSchema>, orgId?: s
   }
 }
 
-export const getEvents = async (orgId?: string) => {
+export const getEvents = async () => {
   try {
     const events = await db.event.findMany()
     return events
   } catch (error) {
-    return { error: 'Cannot find events' }
+    console.error('Error fetching events:', error)
+    throw new Error('Cannot find events')
   }
 }
 
@@ -121,7 +122,6 @@ export const getEventByNameAndOrg = async (name: string, orgId?: string) => {
       },
     })
 
-    console.log("BACK", {event})
     return event
   } catch (error) {
     console.error('Error fetching event:', error)

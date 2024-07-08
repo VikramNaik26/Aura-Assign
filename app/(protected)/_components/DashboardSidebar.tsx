@@ -6,10 +6,13 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Poppins } from 'next/font/google'
 import { LayoutDashboard, Star } from 'lucide-react'
+import { UserRole } from '@prisma/client'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { EventDialog } from './EventDialog'
+import { RoleGate } from "@/components/auth/RoleGate"
+import { useCurrentRole } from '@/hooks/useCurrentRole'
 
 const font = Poppins({
   subsets: ['latin'],
@@ -22,6 +25,10 @@ export const DashboardSidebar = () => {
 
   const [isDialogOpen, setDialogOpen] = useState<boolean>(false)
   const closeDialog = () => setDialogOpen(false)
+
+  const role = useCurrentRole()
+
+  if (!role) return null
 
   return (
     <aside className="hidden w-[206px] lg:flex flex-col space-y-6 pt-5 px-1">
@@ -38,9 +45,11 @@ export const DashboardSidebar = () => {
           </span>
         </div>
       </Link>
-      <div className="space-y-1 w-full">
-        <EventDialog isDialogOpen={isDialogOpen} setDialogOpen={setDialogOpen} closeDialog={closeDialog} />
-      </div>
+      <RoleGate role={role} allowedRole={UserRole.ORGANIZATION}>
+        <div className="space-y-1 w-full">
+          <EventDialog isDialogOpen={isDialogOpen} setDialogOpen={setDialogOpen} closeDialog={closeDialog} />
+        </div>
+      </RoleGate>
       <div className="space-y-1 w-full">
         <Button
           variant={favorites ? 'ghost' : 'secondary'}

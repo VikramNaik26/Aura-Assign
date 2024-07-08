@@ -9,15 +9,19 @@ import {
 } from 'react'
 import qs from 'query-string'
 import { useDebounceValue } from 'usehooks-ts'
+import { UserRole } from '@prisma/client'
 
 import { Input } from '@/components/ui/input'
 import { NavbarProps } from './Navbar'
 import { getEventByNameAndOrg } from '@/actions/event'
+import { useCurrentRole } from '@/hooks/useCurrentRole'
 
 export const SearchInput = (props: NavbarProps) => {
   const router = useRouter()
   const [value, setValue] = useState('')
   const [debounceValue] = useDebounceValue(value, 500)
+
+  const role = useCurrentRole()
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value)
@@ -25,7 +29,9 @@ export const SearchInput = (props: NavbarProps) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getEventByNameAndOrg(debounceValue, props.orgId)
+      const data = role === UserRole.USER
+        ? await getEventByNameAndOrg(debounceValue)
+        : await getEventByNameAndOrg(debounceValue, props.orgId)
       const url = qs.stringifyUrl({
         url: '/dashboard',
         query: {
