@@ -152,7 +152,7 @@ export const EventCard = ({
                   <CardDescription>Are you sure you wanna delete this event?</CardDescription>
                 </CardHeader>
                 <CardFooter className="flex gap-4">
-                  <DialogClose>
+                  <DialogClose asChild>
                     <Button disabled={isPending} variant="outline">
                       Cancel
                     </Button>

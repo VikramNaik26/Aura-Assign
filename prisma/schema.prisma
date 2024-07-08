@@ -110,4 +110,5 @@ model Event {
   organization Organization? @relation(fields: [orgId], references: [id])
 
   @@index([orgId])
+  @@index([name])
 }

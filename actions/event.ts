@@ -108,3 +108,21 @@ export const deleteEvent = async ({ id, orgId }: DeleteEventParams) => {
     return { error: 'Cannot delete event' }
   }
 }
+
+export const getEventByNameAndOrg = async (name: string, orgId?: string) => {
+  try {
+    const event = await db.event.findMany({
+      where: {
+        name: {
+          contains: name,
+          mode: 'insensitive',
+        },
+        orgId: orgId
+      },
+    })
+    return event
+  } catch (error) {
+    console.error('Error fetching event:', error)
+    return { error: 'Cannot find event' }
+  }
+}
