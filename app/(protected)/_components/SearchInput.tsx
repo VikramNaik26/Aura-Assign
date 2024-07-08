@@ -27,13 +27,11 @@ export const SearchInput = (props: NavbarProps) => {
     const fetchData = async () => {
       const data = await getEventByNameAndOrg(debounceValue, props.orgId)
       const url = qs.stringifyUrl({
-        url: '/dashboard/',
+        url: '/dashboard',
         query: {
           search: debounceValue
         },
       }, { skipNull: true, skipEmptyString: true })
-
-      console.log("DATA", { data })
 
       if ('error' in data) {
         console.error(data.error)
@@ -45,16 +43,17 @@ export const SearchInput = (props: NavbarProps) => {
 
         router.push(url)
 
+        props.setHasSearchQuery(true)
         props.setEvents(updatedArray.length ? updatedArray : [])
-        console.log("DATA END", { data })
       }
     }
 
     if (debounceValue && props.orgId) {
       fetchData()
     } else if (!debounceValue) {
+      props.setHasSearchQuery(false)
       const url = qs.stringifyUrl({
-        url: '/dashboard/',
+        url: '/dashboard',
         query: {}
       })
       router.push(url)

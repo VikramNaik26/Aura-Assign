@@ -120,6 +120,8 @@ export const getEventByNameAndOrg = async (name: string, orgId?: string) => {
         orgId: orgId
       },
     })
+
+    console.log("BACK", {event})
     return event
   } catch (error) {
     console.error('Error fetching event:', error)

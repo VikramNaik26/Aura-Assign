@@ -7,16 +7,18 @@ export interface NavbarProps {
   orgId?: string
   events: OrgEvent[]
   setEvents: Dispatch<SetStateAction<OrgEvent[]>>
+  setHasSearchQuery: Dispatch<SetStateAction<boolean>>
 }
 
 export const Navbar = ({
   orgId,
   events,
-  setEvents
+  setEvents,
+  setHasSearchQuery
 }: NavbarProps) => {
   return (
     <div className="hidden lg:flex lg:flex-1">
-      <SearchInput orgId={orgId} events={events} setEvents={setEvents} />
+      <SearchInput orgId={orgId} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
     </div>
   )
 }
