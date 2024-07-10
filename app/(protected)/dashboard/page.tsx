@@ -11,6 +11,7 @@ import { EventCard } from "../_components/EventCard"
 import { EmptyEvent } from "../_components/EmptyEvent"
 import { Navbar } from "../_components/Navbar"
 import { UserRole } from "@prisma/client"
+import { EmptySearch } from "../_components/EmptySearch"
 
 const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
@@ -39,7 +40,19 @@ const Dashboard = () => {
   }, [data, events, isLoading, hasSearchQuery, organizationOrUser])
 
   if (isLoading || status === "loading") {
-    return <div>Loading events..</div>
+    return (
+      <section className="px-4 py-6 h-full">
+        <Navbar.Skeleton />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-6" >
+          <EventCard.Skeleton />
+          <EventCard.Skeleton />
+          <EventCard.Skeleton />
+          <EventCard.Skeleton />
+          <EventCard.Skeleton />
+          <EventCard.Skeleton />
+        </div >
+      </section>
+    )
   }
 
   if (error) {
@@ -59,7 +72,7 @@ const Dashboard = () => {
     ) : (hasSearchQuery && !events.length) ? (
       <section className="px-4 py-6 h-full">
         <Navbar orgId={organizationOrUser?.id} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
-        <p>No events found</p>
+        <EmptySearch />
       </section>
     ) : (
       <EmptyEvent />

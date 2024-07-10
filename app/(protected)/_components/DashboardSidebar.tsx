@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { EventDialog } from './EventDialog'
 import { RoleGate } from "@/components/auth/RoleGate"
 import { useCurrentRole } from '@/hooks/useCurrentRole'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const font = Poppins({
   subsets: ['latin'],
@@ -29,7 +30,9 @@ export const DashboardSidebar = () => {
   const { role, status } = useCurrentRole()
 
   if (status === 'loading') {
-    return <div>loading...</div>
+    return (
+      <DashboardSidebar.Skeleton />
+    )
   }
 
   return (
@@ -80,6 +83,29 @@ export const DashboardSidebar = () => {
             Users
           </Link>
         </Button>
+      </div>
+    </aside>
+  )
+}
+
+DashboardSidebar.Skeleton = function DashboardSidebarSkeleton() {
+  return (
+    <aside className="hidden w-[206px] lg:flex flex-col space-y-6 pt-5 px-1">
+      <div className="flex items-center gap-x-2">
+        <Skeleton className="w-[34px] h-[34px] rounded" />
+        <Skeleton className="h-6 w-24" />
+      </div>
+
+      <div className="space-y-1 w-full">
+        <Skeleton className="h-12 w-full" />
+      </div>
+
+      <div className="space-y-1 w-full">
+        <Skeleton className="h-12 w-full" />
+      </div>
+
+      <div className="space-y-1 w-full">
+        <Skeleton className="h-12 w-full" />
       </div>
     </aside>
   )

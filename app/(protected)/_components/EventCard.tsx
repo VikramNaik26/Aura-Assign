@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogClose
 } from "@/components/ui/dialog"
+import { Skeleton } from "@/components/ui/skeleton"
 import { BackButton } from "@/components/auth/BackButton"
 import { Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -173,5 +174,13 @@ export const EventCard = ({
         />
       </CardFooter>
     </Card >
+  )
+}
+
+EventCard.Skeleton = function EventCardSkeleton() {
+  return (
+    <div className="aspect-[100/127] rounded-lg overflow-hidden">
+      <Skeleton className="h-full w-full" />
+    </div>
   )
 }

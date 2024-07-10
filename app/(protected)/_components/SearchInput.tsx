@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { NavbarProps } from './Navbar'
 import { getEventByNameAndOrg } from '@/actions/event'
 import { useCurrentRole } from '@/hooks/useCurrentRole'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const SearchInput = (props: NavbarProps) => {
   const router = useRouter()
@@ -81,3 +82,11 @@ export const SearchInput = (props: NavbarProps) => {
   )
 }
 
+SearchInput.Skeleton = function SearchInputSkeleton() {
+  return (
+    <div className='w-full relative'>
+      <Search className='absolute top-1/2 left-3 transform -translate-y-1/2 text-muted-foreground h-4 w-4' />
+      <Skeleton className='w-full sm:w-[400px] md:w-[460px] lg:w-[516px] h-10 pl-9' />
+    </div>
+  )
+}
