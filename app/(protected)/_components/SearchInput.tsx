@@ -21,7 +21,7 @@ export const SearchInput = (props: NavbarProps) => {
   const [value, setValue] = useState('')
   const [debounceValue] = useDebounceValue(value, 500)
 
-  const role = useCurrentRole()
+  const { role } = useCurrentRole()
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value)

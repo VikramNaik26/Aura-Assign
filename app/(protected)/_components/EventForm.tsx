@@ -33,7 +33,7 @@ export const EventForm = (props: EventFormProps) => {
   const [error, setError] = useState<string | undefined>("")
   const [success, setSuccess] = useState<string | undefined>("")
 
-  const organization = useCurrentOrgORUser()
+  const { data: organization } = useCurrentOrgORUser()
 
   const queryClient = useQueryClient()
 

@@ -16,17 +16,18 @@ const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
   const [hasSearchQuery, setHasSearchQuery] = useState(false)
 
-  const organizationOrUser = useCurrentOrgORUser()
+  const { data: organizationOrUser, status } = useCurrentOrgORUser()
 
   const { data, error, isLoading } = useQuery<OrgEvent[]>({
-    queryKey: ["events"],
+    queryKey: ["events", organizationOrUser?.id],
     queryFn: () => {
-      if (organizationOrUser?.role === UserRole.USER) {
+      if (organizationOrUser?.role === UserRole.ORGANIZATION) {
+        return getEventsByOrgId(organizationOrUser?.id)
+      } else {
         return getEvents()
       }
-      return getEventsByOrgId(organizationOrUser?.id)
     },
-    enabled: !!organizationOrUser?.id,
+    enabled: status === "authenticated"
   })
 
   useEffect(() => {
@@ -35,16 +36,15 @@ const Dashboard = () => {
     } else if (data && !hasSearchQuery) {
       setEvents(data)
     }
-  }, [data, events, hasSearchQuery])
+  }, [data, events, isLoading, hasSearchQuery, organizationOrUser])
 
-  if (isLoading) {
-    return <div>Loading...</div>
+  if (isLoading || status === "loading") {
+    return <div>Loading events..</div>
   }
 
   if (error) {
     return <div>Error loading events: {error.message}</div>
   }
-
 
   return (
     events?.length ? (
@@ -68,3 +68,4 @@ const Dashboard = () => {
 }
 
 export default Dashboard
+

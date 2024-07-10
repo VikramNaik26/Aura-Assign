@@ -5,6 +5,7 @@ import * as z from "zod"
 import { db } from "@/lib/db"
 import { EventSchema } from "@/schemas"
 import { getOrgById } from "@/data/organizations"
+import { auth } from "@/auth"
 
 export interface OrgEvent {
   id: string
@@ -74,7 +75,7 @@ export const getEventsByOrgId = async (orgId?: string): Promise<OrgEvent[]> => {
     const organization = orgId ? await getOrgById(orgId) : null
 
     const events = await db.event.findMany({
-      where: { orgId: organization?.id }
+      where: { orgId: organization?.id },
     })
 
     return events

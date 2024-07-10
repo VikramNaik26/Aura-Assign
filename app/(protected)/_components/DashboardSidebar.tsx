@@ -26,9 +26,11 @@ export const DashboardSidebar = () => {
   const [isDialogOpen, setDialogOpen] = useState<boolean>(false)
   const closeDialog = () => setDialogOpen(false)
 
-  const role = useCurrentRole()
+  const { role, status } = useCurrentRole()
 
-  if (!role) return null
+  if (status === 'loading') {
+    return <div>loading...</div>
+  }
 
   return (
     <aside className="hidden w-[206px] lg:flex flex-col space-y-6 pt-5 px-1">

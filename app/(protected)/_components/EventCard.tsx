@@ -68,7 +68,7 @@ export const EventCard = ({
   const handleDelete = (id?: string) => {
     setError("")
 
-    const orgId = organization?.id
+    const orgId = organization.data?.id
 
     if (!id || !orgId) {
       setError("Id missing")

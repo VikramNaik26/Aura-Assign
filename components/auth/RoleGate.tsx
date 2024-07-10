@@ -4,7 +4,7 @@ import { UserRole } from "@prisma/client"
 
 interface RoleGateProps {
   children: React.ReactNode
-  role: UserRole
+  role?: UserRole
   allowedRole: UserRole
 }
 
