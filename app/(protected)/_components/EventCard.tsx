@@ -5,6 +5,7 @@ import { VisuallyHidden } from "@reach/visually-hidden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
+import { UserRole } from "@prisma/client"
 
 import {
   Card,
@@ -29,8 +30,10 @@ import { Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EventForm } from "./EventForm"
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
+import { useCurrentRole } from "@/hooks/useCurrentRole"
 import { deleteEvent } from "@/actions/event"
 import { FormError } from "@/components/FormError"
+import { RoleGate } from "@/components/auth/RoleGate"
 
 interface EventCardProps {
   event: {
@@ -53,6 +56,8 @@ export const EventCard = ({
   const closeDialog = () => setIsDialogOpen(false)
 
   const organization = useCurrentOrgORUser()
+
+  const { role } = useCurrentRole()
 
   const queryClient = useQueryClient()
 
@@ -113,65 +118,72 @@ export const EventCard = ({
         <CardDescription>{event?.description}</CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between px-2">
-        <div className="flex min-w-[80px] gap-1">
-          <Dialog>
-            <DialogTrigger className='w-full flex-1' asChild>
-              <Button size="icon" variant="ghost">
-                <Edit className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="p-0 w-auto bg-transparent border-none">
-              <DialogHeader>
-                <DialogTitle asChild>
-                  <VisuallyHidden>Create an event</VisuallyHidden>
-                </DialogTitle>
-                <DialogDescription asChild>
-                  <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
-                </DialogDescription>
-              </DialogHeader>
-              <EventForm closeDialog={() => { }} />
-            </DialogContent>
-          </Dialog>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger className='w-full flex-1' asChild>
-              <Button size="icon" variant="ghost">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="p-0 w-auto bg-transparent border-none">
-              <DialogHeader>
-                <DialogTitle asChild>
-                  <VisuallyHidden>Create an event</VisuallyHidden>
-                </DialogTitle>
-                <DialogDescription asChild>
-                  <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
-                </DialogDescription>
-              </DialogHeader>
-              <Card className="sm:min-w-[500px] -my-4">
-                <CardHeader>
-                  <CardTitle className="text-lg">{event?.name}</CardTitle>
-                  <CardDescription>Are you sure you wanna delete this event?</CardDescription>
-                </CardHeader>
-                <CardFooter className="flex gap-4">
-                  <DialogClose asChild>
-                    <Button disabled={isPending} variant="outline">
-                      Cancel
+        <RoleGate role={role} allowedRole={UserRole.ORGANIZATION}>
+          <div className="flex min-w-[80px] gap-1">
+            <Dialog>
+              <DialogTrigger className='w-full flex-1' asChild>
+                <Button size="icon" variant="ghost">
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="p-0 w-auto bg-transparent border-none">
+                <DialogHeader>
+                  <DialogTitle asChild>
+                    <VisuallyHidden>Create an event</VisuallyHidden>
+                  </DialogTitle>
+                  <DialogDescription asChild>
+                    <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
+                  </DialogDescription>
+                </DialogHeader>
+                <EventForm closeDialog={() => { }} />
+              </DialogContent>
+            </Dialog>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger className='w-full flex-1' asChild>
+                <Button size="icon" variant="ghost">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="p-0 w-auto bg-transparent border-none">
+                <DialogHeader>
+                  <DialogTitle asChild>
+                    <VisuallyHidden>Create an event</VisuallyHidden>
+                  </DialogTitle>
+                  <DialogDescription asChild>
+                    <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
+                  </DialogDescription>
+                </DialogHeader>
+                <Card className="sm:min-w-[500px] -my-4">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{event?.name}</CardTitle>
+                    <CardDescription>Are you sure you wanna delete this event?</CardDescription>
+                  </CardHeader>
+                  <CardFooter className="flex gap-4">
+                    <DialogClose asChild>
+                      <Button disabled={isPending} variant="outline">
+                        Cancel
+                      </Button>
+                    </DialogClose>
+                    <Button disabled={isPending} variant="destructive" onClick={() => handleDelete(event?.id)}>
+                      Delete
                     </Button>
-                  </DialogClose>
-                  <Button disabled={isPending} variant="destructive" onClick={() => handleDelete(event?.id)}>
-                    Delete
-                  </Button>
-                  <FormError message={error} />
-                </CardFooter>
-              </Card>
-            </DialogContent>
-          </Dialog>
-        </div>
+                    <FormError message={error} />
+                  </CardFooter>
+                </Card>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </RoleGate>
         <BackButton
           href={`dashboard/event/${event?.id}`}
           label="More details"
           className="w-min text-gray-600"
         />
+        <RoleGate role={role} allowedRole={UserRole.USER}>
+          <Button variant="secondary" className="mr-3">
+            Apply now!
+          </Button>
+        </RoleGate>
       </CardFooter>
     </Card >
   )
