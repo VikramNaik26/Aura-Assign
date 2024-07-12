@@ -1,25 +1,30 @@
 import { Dispatch, SetStateAction } from "react"
-import { SearchInput } from "./SearchInput"
 
 import { OrgEvent } from "@/actions/event"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SearchInput } from "./SearchInput"
+import { UserButton } from "./UserButton"
+import { ExtendedUser } from "@/next-auth"
 
 export interface NavbarProps {
   orgId?: string
   events: OrgEvent[]
   setEvents: Dispatch<SetStateAction<OrgEvent[]>>
   setHasSearchQuery: Dispatch<SetStateAction<boolean>>
+  organizationOrUser?: ExtendedUser | undefined
 }
 
 export const Navbar = ({
   orgId,
   events,
   setEvents,
-  setHasSearchQuery
+  setHasSearchQuery,
+  organizationOrUser
 }: NavbarProps) => {
   return (
-    <div className="hidden lg:flex lg:flex-1">
+    <div className="hidden lg:flex lg:flex-1 justify-between">
       <SearchInput orgId={orgId} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
+      <UserButton organizationOrUser={organizationOrUser} />
     </div>
   )
 }

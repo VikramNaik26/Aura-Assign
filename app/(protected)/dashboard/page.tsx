@@ -62,7 +62,7 @@ const Dashboard = () => {
   return (
     events?.length ? (
       <section className="px-4 py-6 h-full">
-        <Navbar orgId={organizationOrUser?.id} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
+        <Navbar orgId={organizationOrUser?.id} organizationOrUser={organizationOrUser} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-6" >
           {events.map((event) => {
             return <EventCard key={event.id} event={event} />
@@ -71,7 +71,7 @@ const Dashboard = () => {
       </section>
     ) : (hasSearchQuery && !events.length) ? (
       <section className="px-4 py-6 h-full">
-        <Navbar orgId={organizationOrUser?.id} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
+        <Navbar orgId={organizationOrUser?.id} organizationOrUser={organizationOrUser} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
         <EmptySearch />
       </section>
     ) : (
