@@ -34,7 +34,6 @@ export const EventDialog = ({
           size='lg'
           variant={dashboard ? 'secondary' : 'default'}
           className={cn('font-normal justify-start w-full px-2', dashboard && 'w-min p-3 mb-4')}
-          onClick={() => { console.log('clicked') }}
         >
           <Plus className="w-4 h-4 mr-2" />
           Create an event!

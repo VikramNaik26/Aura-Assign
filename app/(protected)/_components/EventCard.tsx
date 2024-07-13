@@ -34,6 +34,7 @@ import { useCurrentRole } from "@/hooks/useCurrentRole"
 import { deleteEvent } from "@/actions/event"
 import { FormError } from "@/components/FormError"
 import { RoleGate } from "@/components/auth/RoleGate"
+import { EnrollForm } from "./EnrollForm"
 
 interface EventCardProps {
   event: {
@@ -147,10 +148,10 @@ export const EventCard = ({
               <DialogContent className="p-0 w-auto bg-transparent border-none">
                 <DialogHeader>
                   <DialogTitle asChild>
-                    <VisuallyHidden>Create an event</VisuallyHidden>
+                    <VisuallyHidden>Delete an event</VisuallyHidden>
                   </DialogTitle>
                   <DialogDescription asChild>
-                    <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
+                    <VisuallyHidden>This will permanently Delete an event</VisuallyHidden>
                   </DialogDescription>
                 </DialogHeader>
                 <Card className="sm:min-w-[500px] -my-4">
@@ -180,9 +181,24 @@ export const EventCard = ({
           className="w-min text-gray-600"
         />
         <RoleGate role={role} allowedRole={UserRole.USER}>
-          <Button variant="secondary" className="mr-3">
-            Apply now!
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="secondary" className="mr-3">
+                Apply now!
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="p-0 auto bg-transparent border-none">
+              <DialogHeader>
+                <DialogTitle asChild>
+                  <VisuallyHidden>Create an event</VisuallyHidden>
+                </DialogTitle>
+                <DialogDescription asChild>
+                  <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
+                </DialogDescription>
+              </DialogHeader>
+              <EnrollForm />
+            </DialogContent>
+          </Dialog>
         </RoleGate>
       </CardFooter>
     </Card >

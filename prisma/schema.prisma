@@ -20,16 +20,34 @@ enum UserRole {
 }
 
 model User {
-  id                    String                 @id @default(cuid())
-  name                  String?
-  email                 String?                @unique
-  password              String?
-  emailVerified         DateTime?              @map("email_verified")
-  image                 String?
-  role                  UserRole               @default(USER)
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String?   @unique
+  password           String?
+  emailVerified      DateTime? @map("email_verified")
+  image              String?
+  role               UserRole  @default(USER)
+  isTwoFactorEnabled Boolean   @default(false)
+
   accounts              Account[]
-  isTwoFactorEnabled    Boolean                @default(false)
+  userProfiles          UserProfile[]
+  enrollments           Enrollment[]
   twoFactorConfirmation TwoFactorConfirmation?
+}
+
+model UserProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  phoneNumber   String?
+  dateOfBirth   DateTime?
+  gender        String?
+  streetAddress String?
+  city          String?
+  state         String?
+  postalCode    String?
+  country       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Organization {
@@ -61,6 +79,34 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
+}
+
+model Enrollment {
+  id         String  @id @default(cuid())
+  userId     String
+  eventId    String
+  jobDetails String?
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+  time        DateTime
+  date        DateTime
+  orgId       String?
+
+  organization Organization? @relation(fields: [orgId], references: [id])
+  enrollments  Enrollment[]
+
+  @@index([orgId])
+  @@index([name])
 }
 
 model VerificationToken {
@@ -96,19 +142,4 @@ model TwoFactorConfirmation {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
-}
-
-model Event {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  imageUrl    String?
-  time        DateTime
-  date        DateTime
-  orgId       String?
-
-  organization Organization? @relation(fields: [orgId], references: [id])
-
-  @@index([orgId])
-  @@index([name])
 }
