@@ -2,6 +2,7 @@
 
 import { toast } from "sonner"
 import { useTransition } from "react"
+import { useRouter } from "next/navigation"
 
 import { logout } from "@/actions/logout"
 import { Button } from "@/components/ui/button"
@@ -14,12 +15,18 @@ export const LogoutButton = ({
   children
 }: LogoutButtonProps) => {
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const onClick = () => {
     startTransition(() => {
       logout()
-        .then(() => {
-          toast.success("Successfully logged out")
+       .then(() => {
+          router.push("/user/login")
+          location.reload()
+        })
+        .catch((error) => {
+          toast.error("Failed to logout")
+          console.error(error)
         })
     })
   }

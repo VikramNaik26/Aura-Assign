@@ -25,11 +25,22 @@ import { CardWrapper } from "@/components/auth/CardWrapper"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { FormError } from "@/components/FormError"
+import { createOrUpdateEnrollment } from "@/actions/enrollment"
+import { toast } from "sonner"
+import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
 
-export const EnrollForm = () => {
+interface EnrollFormProps {
+  eventId?: string
+  closeDialog: () => void
+}
+
+export const EnrollForm = ({
+  eventId, closeDialog
+}: EnrollFormProps) => {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
-  const [success, setSuccess] = useState<string | undefined>("")
+
+  const { data: user, status } = useCurrentOrgORUser()
 
   const form = useForm<z.infer<typeof EnrollmentSchema>>({
     resolver: zodResolver(EnrollmentSchema),
@@ -52,11 +63,35 @@ export const EnrollForm = () => {
 
   const onSubmit = (values: z.infer<typeof EnrollmentSchema>) => {
     setError("")
-    setSuccess("")
+
+    type Result<T> = { success: T; error?: never } | { error: string; details?: any; success?: never }
+
+    function isSuccess<T>(result: Result<T>): result is { success: T } {
+      return 'success' in result;
+    }
+
+    function isError(result: Result<any>): result is { error: string; details?: any } {
+      return 'error' in result;
+    }
 
     startTransition(() => {
-      console.log("values", values)
+      createOrUpdateEnrollment(values, user?.id, eventId)
+        .then(data => {
+          if (isError(data)) {
+            form.reset()
+            setError(data.error)
+          } else if (isSuccess(data)) {
+            form.reset()
+            setError("")
+            closeDialog()
+            toast.success("Enrollment successfully created")
+          }
+        })
     })
+  }
+
+  if (status === "loading") {
+    return <div>Loading</div>
   }
 
   return (
@@ -134,7 +169,7 @@ export const EnrollForm = () => {
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="01-01-2000"
+                        placeholder="YYYY-MM-DD"
                         type="text"
                         disabled={isPending}
                       />

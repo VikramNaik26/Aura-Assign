@@ -47,14 +47,20 @@ interface EventCardProps {
   } | null
 }
 
+export type DialogState = {
+  eventDialog: boolean;
+  enrollDialog: boolean;
+}
+
 export const EventCard = ({
   event
 }: EventCardProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+  const [isDialogOpen, setIsDialogOpen] = useState<DialogState>({ eventDialog: false, enrollDialog: false })
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
 
-  const closeDialog = () => setIsDialogOpen(false)
+  const closeEventDialog = () => setIsDialogOpen({ ...isDialogOpen, eventDialog: false })
+  const closeEnrollDialog = () => setIsDialogOpen({ ...isDialogOpen, enrollDialog: false })
 
   const organization = useCurrentOrgORUser()
 
@@ -90,7 +96,7 @@ export const EventCard = ({
           }
 
           if (data?.success) {
-            closeDialog()
+            closeEventDialog()
           }
 
           if (!data?.error) {
@@ -136,10 +142,10 @@ export const EventCard = ({
                     <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
                   </DialogDescription>
                 </DialogHeader>
-                <EventForm closeDialog={() => { }} />
+                <EventForm closeDialog={closeEventDialog} />
               </DialogContent>
             </Dialog>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen.eventDialog} onOpenChange={() => setIsDialogOpen({ ...isDialogOpen, eventDialog: !isDialogOpen.eventDialog })}>
               <DialogTrigger className='w-full flex-1' asChild>
                 <Button size="icon" variant="ghost">
                   <Trash2 className="h-4 w-4" />
@@ -181,7 +187,7 @@ export const EventCard = ({
           className="w-min text-gray-600"
         />
         <RoleGate role={role} allowedRole={UserRole.USER}>
-          <Dialog>
+          <Dialog open={isDialogOpen.enrollDialog} onOpenChange={() => setIsDialogOpen({ ...isDialogOpen, enrollDialog: !isDialogOpen.enrollDialog })}>
             <DialogTrigger asChild>
               <Button variant="secondary" className="mr-3">
                 Apply now!
@@ -196,7 +202,7 @@ export const EventCard = ({
                   <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
                 </DialogDescription>
               </DialogHeader>
-              <EnrollForm />
+              <EnrollForm eventId={event?.id} closeDialog={closeEnrollDialog} />
             </DialogContent>
           </Dialog>
         </RoleGate>

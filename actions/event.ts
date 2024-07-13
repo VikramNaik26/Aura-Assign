@@ -5,7 +5,6 @@ import * as z from "zod"
 import { db } from "@/lib/db"
 import { EventSchema } from "@/schemas"
 import { getOrgById } from "@/data/organizations"
-import { auth } from "@/auth"
 
 export interface OrgEvent {
   id: string
