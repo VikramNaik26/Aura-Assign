@@ -1,11 +1,12 @@
 "use client"
 
+import { useState, useTransition } from "react"
 import Image from "next/image"
 import { VisuallyHidden } from "@reach/visually-hidden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState, useTransition } from "react"
 import { toast } from "sonner"
 import { UserRole } from "@prisma/client"
+import { Edit, Loader2, Trash2 } from "lucide-react"
 
 import {
   Card,
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BackButton } from "@/components/auth/BackButton"
-import { Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EventForm } from "./EventForm"
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
@@ -35,6 +35,8 @@ import { deleteEvent } from "@/actions/event"
 import { FormError } from "@/components/FormError"
 import { RoleGate } from "@/components/auth/RoleGate"
 import { EnrollForm } from "./EnrollForm"
+import { Enrollments } from "@/actions/enrollment"
+import { hasEventId } from "@/lib/utils"
 
 interface EventCardProps {
   event: {
@@ -45,15 +47,19 @@ interface EventCardProps {
     date: Date,
     time: Date,
   } | null
+  enrollments?: Enrollments[]
+  isLoadingEnrollments?: boolean
 }
 
-export type DialogState = {
-  eventDialog: boolean;
-  enrollDialog: boolean;
+type DialogState = {
+  eventDialog: boolean
+  enrollDialog: boolean
 }
 
 export const EventCard = ({
-  event
+  event,
+  enrollments,
+  isLoadingEnrollments = false,
 }: EventCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState<DialogState>({ eventDialog: false, enrollDialog: false })
   const [isPending, startTransition] = useTransition()
@@ -62,7 +68,7 @@ export const EventCard = ({
   const closeEventDialog = () => setIsDialogOpen({ ...isDialogOpen, eventDialog: false })
   const closeEnrollDialog = () => setIsDialogOpen({ ...isDialogOpen, enrollDialog: false })
 
-  const organization = useCurrentOrgORUser()
+  const organizationOrUser = useCurrentOrgORUser()
 
   const { role } = useCurrentRole()
 
@@ -81,7 +87,7 @@ export const EventCard = ({
   const handleDelete = (id?: string) => {
     setError("")
 
-    const orgId = organization.data?.id
+    const orgId = organizationOrUser.data?.id
 
     if (!id || !orgId) {
       setError("Id missing")
@@ -189,8 +195,13 @@ export const EventCard = ({
         <RoleGate role={role} allowedRole={UserRole.USER}>
           <Dialog open={isDialogOpen.enrollDialog} onOpenChange={() => setIsDialogOpen({ ...isDialogOpen, enrollDialog: !isDialogOpen.enrollDialog })}>
             <DialogTrigger asChild>
-              <Button variant="secondary" className="mr-3">
-                Apply now!
+              <Button variant="secondary" className="mr-3" disabled={isLoadingEnrollments || hasEventId(enrollments as Enrollments[], event?.id)}>
+                {isLoadingEnrollments
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : hasEventId(enrollments as Enrollments[], event?.id)
+                    ? "Enrolled"
+                    : "Enroll now!"
+                }
               </Button>
             </DialogTrigger>
             <DialogContent className="p-0 auto bg-transparent border-none">

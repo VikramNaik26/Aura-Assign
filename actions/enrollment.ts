@@ -110,3 +110,23 @@ export const createOrUpdateEnrollment = async (
     }
   }
 }
+
+export interface Enrollments {
+  id: string
+  userId: string
+  eventId: string
+  jobDetails: string | null
+}
+
+export const getEnrollmentsByUserId = async (userId?: string) => {
+  try {
+    const enrollments = await db.enrollment.findMany({
+      where: { userId },
+    })
+
+    return enrollments as Enrollments[]
+  } catch (error) {
+    console.error('Error fetching enrollments:', error)
+    throw new Error('Cannot find enrollments')
+  }
+}

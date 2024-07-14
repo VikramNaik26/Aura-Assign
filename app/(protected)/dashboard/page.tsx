@@ -12,6 +12,7 @@ import { EmptyEvent } from "../_components/EmptyEvent"
 import { Navbar } from "../_components/Navbar"
 import { UserRole } from "@prisma/client"
 import { EmptySearch } from "../_components/EmptySearch"
+import { Enrollments, getEnrollmentsByUserId } from "@/actions/enrollment"
 
 const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
@@ -29,6 +30,14 @@ const Dashboard = () => {
       }
     },
     enabled: status === "authenticated"
+  })
+
+  const { data: enrollments, isLoading: isLoadingEnrollments } = useQuery<Enrollments[]>({
+    queryKey: ["enrollments", organizationOrUser?.id],
+    queryFn: () => {
+      return getEnrollmentsByUserId(organizationOrUser?.id)
+    },
+    enabled: !!organizationOrUser?.id && !!events,
   })
 
   useEffect(() => {
@@ -65,7 +74,7 @@ const Dashboard = () => {
         <Navbar orgId={organizationOrUser?.id} organizationOrUser={organizationOrUser} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-6" >
           {events.map((event) => {
-            return <EventCard key={event.id} event={event} />
+            return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
           })}
         </div >
       </section>
