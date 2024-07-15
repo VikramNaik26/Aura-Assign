@@ -6,7 +6,7 @@ import { VisuallyHidden } from "@reach/visually-hidden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { UserRole } from "@prisma/client"
-import { Edit, Loader2, Trash2 } from "lucide-react"
+import { Edit, Loader2, Trash2, CircleCheckBig } from "lucide-react"
 
 import {
   Card,
@@ -199,7 +199,10 @@ export const EventCard = ({
                 {isLoadingEnrollments
                   ? <Loader2 className="h-4 w-4 animate-spin" />
                   : hasEventId(enrollments as Enrollments[], event?.id)
-                    ? "Enrolled"
+                    ? <span className="flex justify-center items-center">
+                      Enrolled
+                      <CircleCheckBig className="ml-2 h-4 w-4" />
+                    </span>
                     : "Enroll now!"
                 }
               </Button>

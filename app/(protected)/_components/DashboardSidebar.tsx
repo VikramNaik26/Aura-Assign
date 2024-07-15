@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Poppins } from 'next/font/google'
-import { LayoutDashboard, Star } from 'lucide-react'
+import { CircleCheckBig, LayoutDashboard } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 
 import { Button } from '@/components/ui/button'
@@ -22,7 +22,7 @@ const font = Poppins({
 
 export const DashboardSidebar = () => {
   const searchParams = useSearchParams()
-  const favorites = searchParams.get('favorites')
+  const enrolled = searchParams.get('enrolled')
 
   const [isDialogOpen, setDialogOpen] = useState<boolean>(false)
   const closeDialog = () => setDialogOpen(false)
@@ -57,7 +57,7 @@ export const DashboardSidebar = () => {
       </RoleGate>
       <div className="space-y-1 w-full">
         <Button
-          variant={favorites ? 'ghost' : 'secondary'}
+          variant={enrolled ? 'ghost' : 'secondary'}
           asChild
           size='lg'
           className='font-normal justify-start w-full px-2'
@@ -69,20 +69,22 @@ export const DashboardSidebar = () => {
         </Button>
       </div>
       <div className="space-y-1 w-full">
-        <Button
-          variant={favorites ? 'secondary' : 'ghost'}
-          asChild
-          size='lg'
-          className='font-normal justify-start w-full px-2'
-        >
-          <Link href={{
-            pathname: '/',
-            query: { favorites: true },
-          }}>
-            <Star className="w-4 h-4 mr-2" />
-            Users
-          </Link>
-        </Button>
+        <RoleGate role={role} allowedRole={UserRole.USER}>
+          <Button
+            variant={enrolled ? 'secondary' : 'ghost'}
+            asChild
+            size='lg'
+            className='font-normal justify-start w-full px-2'
+          >
+            <Link href={{
+              pathname: '/dashboard',
+              query: { enrolled: true },
+            }}>
+              <CircleCheckBig className="w-4 h-4 mr-2" />
+              Enrolled events
+            </Link>
+          </Button>
+        </RoleGate>
       </div>
     </aside>
   )

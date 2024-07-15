@@ -128,3 +128,13 @@ export const getEventByNameAndOrg = async (name: string, orgId?: string) => {
     return { error: 'Cannot find event' }
   }
 }
+
+export const getEventById = async (id?: string) => {
+  try {
+    const event = await db.event.findUnique({ where: { id } })
+    return event
+  } catch (error) {
+    console.error('Error fetching event:', error)
+    return { error: 'Cannot find event' }
+  }
+}
