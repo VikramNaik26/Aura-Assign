@@ -31,7 +31,6 @@ export const EventForm = (props: EventFormProps) => {
   const closeDialog = props.closeDialog
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
-  const [success, setSuccess] = useState<string | undefined>("")
 
   const { data: organization } = useCurrentOrgORUser()
 
@@ -60,7 +59,6 @@ export const EventForm = (props: EventFormProps) => {
 
   const onSubmit = (values: z.infer<typeof EventSchema>) => {
     setError("")
-    setSuccess("")
 
     startTransition(() => {
       mutation.mutateAsync(values)
@@ -72,7 +70,6 @@ export const EventForm = (props: EventFormProps) => {
 
           if (data?.success) {
             form.reset()
-            setSuccess(data?.success)
             closeDialog()
           }
 

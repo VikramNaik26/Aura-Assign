@@ -4,6 +4,7 @@ import * as z from "zod"
 import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { EnrollmentSchema } from "@/schemas"
 import {
@@ -34,13 +35,28 @@ interface EnrollFormProps {
   closeDialog: () => void
 }
 
-export const EnrollForm = ({
-  eventId, closeDialog
-}: EnrollFormProps) => {
+export const EnrollForm = (props: EnrollFormProps) => {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
 
   const { data: user, status } = useCurrentOrgORUser()
+
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: ({ enrollment, userId, eventId }: {
+      enrollment: z.infer<typeof EnrollmentSchema>,
+      userId?: string,
+      eventId?: string
+    }) => createOrUpdateEnrollment(enrollment, userId, eventId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['enrolled-events'] })
+      queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+    },
+    onError: () => {
+      setError('Something went wrong');
+    },
+  })
 
   const form = useForm<z.infer<typeof EnrollmentSchema>>({
     resolver: zodResolver(EnrollmentSchema),
@@ -75,7 +91,11 @@ export const EnrollForm = ({
     }
 
     startTransition(() => {
-      createOrUpdateEnrollment(values, user?.id, eventId)
+      mutation.mutateAsync({
+        enrollment: values,
+        userId: user?.id,
+        eventId: props.eventId
+      })
         .then(data => {
           if (isError(data)) {
             form.reset()
@@ -83,8 +103,8 @@ export const EnrollForm = ({
           } else if (isSuccess(data)) {
             form.reset()
             setError("")
-            closeDialog()
-            toast.success("Enrollment successfully created")
+            props.closeDialog()
+            toast.success("Enrolled successfully")
           }
         })
     })

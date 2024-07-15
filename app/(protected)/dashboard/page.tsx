@@ -43,7 +43,7 @@ const Dashboard = () => {
   })
 
   const { data: enrolledEvents } = useQuery<OrgEvent[]>({
-    queryKey: ["enrolled-events"],
+    queryKey: ["enrolled-events", enrollments],
     queryFn: async () => {
       if (!enrollments || enrollments.length === 0) return []
 
