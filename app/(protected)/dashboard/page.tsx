@@ -5,15 +5,17 @@ import {
 } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
+import { UserRole } from "@prisma/client"
 
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
 import { getEventById, getEvents, getEventsByOrgId, OrgEvent } from "@/actions/event"
 import { EventCard } from "../_components/EventCard"
 import { EmptyEvent } from "../_components/EmptyEvent"
 import { Navbar } from "../_components/Navbar"
-import { UserRole } from "@prisma/client"
 import { EmptySearch } from "../_components/EmptySearch"
 import { Enrollments, getEnrollmentsByUserId } from "@/actions/enrollment"
+import { RoleGate } from "@/components/auth/RoleGate"
+import { EmptyEnroll } from "../_components/EmptyEnroll"
 
 const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
@@ -63,9 +65,9 @@ const Dashboard = () => {
   useEffect(() => {
     const isEnrolled = searchParams.get('enrolled') === 'true'
 
-    if (isEnrolled && enrolledEvents) {
-      setEvents(enrolledEvents)
-    } else if (events.length && hasSearchQuery) {
+    if (isEnrolled) {
+      setEvents(enrolledEvents as OrgEvent[])
+    } else if (events && events.length && hasSearchQuery) {
       setEvents(events)
     } else if (data && !hasSearchQuery) {
       setEvents(data)
@@ -119,9 +121,13 @@ const Dashboard = () => {
         />
         <EmptySearch />
       </section>
-    ) : (
-      <EmptyEvent />
-    )
+    ) : searchParams.get('enrolled') === 'true'
+      ? <EmptyEnroll />
+      : (
+        <RoleGate role={organizationOrUser.role} allowedRole={UserRole.ORGANIZATION}>
+          <EmptyEvent />
+        </RoleGate>
+      )
   )
 }
 
