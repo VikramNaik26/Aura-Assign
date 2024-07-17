@@ -1,11 +1,13 @@
 "use server"
 
 import * as z from "zod"
+import { DefaultSession } from "next-auth"
 
 import { db } from "@/lib/db"
 import { EnrollmentSchema } from "@/schemas"
 import { getUserById } from "@/data/users"
 import { getEventById } from "@/data/event"
+import { getUserProfileById } from "./users"
 
 type Result<T> = { success: T } | { error: string; details?: any }
 
@@ -128,5 +130,74 @@ export const getEnrollmentsByUserId = async (userId?: string) => {
   } catch (error) {
     console.error('Error fetching enrollments:', error)
     throw new Error('Cannot find enrollments')
+  }
+}
+
+export interface UserFromDB {
+  id: string
+  name: string | null
+  email: string | null
+  password: string | null
+  emailVerified: Date | null
+  image: string | null
+  role: "USER" | "ADMIN" | "ORGANIZATION"
+  isTwoFactorEnabled: boolean
+}
+
+export interface UserProfile {
+  phoneNumber: string | null
+  dateOfBirth: Date | null
+  gender: string | null
+  streetAddress: string | null
+  city: string | null
+  state: string | null
+  postalCode: string | null
+  country: string | null
+}
+
+export type MergedUser = Omit<UserFromDB, 'password'> & UserProfile
+
+export type ExtendedUserWithProfile = MergedUser & DefaultSession["user"] & {
+  // Add any additional fields here that are not in UserFromDB, UserProfile, or DefaultSession["user"]
+}
+
+function mergeUserData(user: UserFromDB, profile: UserProfile | null): ExtendedUserWithProfile {
+  const { password, ...userWithoutPassword } = user
+
+  return {
+    ...userWithoutPassword,
+    phoneNumber: profile?.phoneNumber ?? null,
+    dateOfBirth: profile?.dateOfBirth ?? null,
+    gender: profile?.gender ?? null,
+    streetAddress: profile?.streetAddress ?? null,
+    city: profile?.city ?? null,
+    state: profile?.state ?? null,
+    postalCode: profile?.postalCode ?? null,
+    country: profile?.country ?? null,
+    // Add any fields from DefaultSession["user"] if needed
+    // Add custom fields here
+  }
+}
+
+export const getEnrollmentsForEvent = async (eventId?: string): Promise<ExtendedUserWithProfile[]> => {
+  try {
+    const enrollments = await db.enrollment.findMany({
+      where: { eventId },
+    })
+
+    const users = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const user = await getUserById(enrollment.userId) as UserFromDB | null
+        const userProfile = await getUserProfileById(enrollment.userId)
+        if (!user) return null
+
+        return mergeUserData(user, userProfile)
+      })
+    )
+
+    return users.filter((user): user is ExtendedUserWithProfile => user !== null)
+  } catch (error) {
+    console.error('Error fetching enrollments:', error)
+    throw error
   }
 }

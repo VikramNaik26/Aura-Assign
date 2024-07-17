@@ -52,6 +52,7 @@ export const EnrollForm = (props: EnrollFormProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enrolled-events'] })
       queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+      queryClient.invalidateQueries({ queryKey: ['enrolled-users'] })
     },
     onError: () => {
       setError('Something went wrong');
