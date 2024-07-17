@@ -112,7 +112,8 @@ export const LoginForm = ({
 
   return (
     <CardWrapper
-      headerLabel="Welcome back!"
+      headerText="Welcome back!"
+      headerLabel="Enter your login credentials"
       backButtonLabel="Don't have an account?"
       backButtonHref={isOrg ? "/org/register" : "/user/register"}
       showSocial={isOrg ? false : true}

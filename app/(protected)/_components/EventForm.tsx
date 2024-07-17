@@ -85,6 +85,7 @@ export const EventForm = (props: EventFormProps) => {
 
   return (
     <CardWrapper
+      headerText="Create Event"
       headerLabel="Enter the event details!"
       className="w-[500px] -my-4"
     >

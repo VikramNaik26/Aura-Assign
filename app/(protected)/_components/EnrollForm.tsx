@@ -117,7 +117,8 @@ export const EnrollForm = (props: EnrollFormProps) => {
 
   return (
     <CardWrapper
-      headerLabel="Welcome back!"
+      headerText="Enroll in an event"
+      headerLabel="Enter the details below to enroll in an event"
       className="w-[680px] p-4 -ml-40 -mt-6"
     >
       <Form {...form}>

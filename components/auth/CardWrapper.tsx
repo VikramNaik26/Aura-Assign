@@ -14,25 +14,29 @@ import { ClassNameValue } from "tailwind-merge"
 
 interface CardWrapperProps {
   children: React.ReactNode
+  headerText?: string
   headerLabel: string
   backButtonLabel?: string
   backButtonHref?: string
   showSocial?: boolean
   className?: ClassNameValue
+  headerClassName?: ClassNameValue
 }
 
 export const CardWrapper = ({
   children,
+  headerText,
   headerLabel,
   backButtonLabel,
   backButtonHref,
   showSocial,
-  className
+  className,
+  headerClassName
 }: CardWrapperProps) => {
   return (
     <Card className={cn("w-[440px] shadow-md my-auto", className)}>
       <CardHeader>
-        <Header label={headerLabel} />
+        <Header headerText={headerText} label={headerLabel} headerClassName={headerClassName} />
       </CardHeader>
       <CardContent>
         {children}

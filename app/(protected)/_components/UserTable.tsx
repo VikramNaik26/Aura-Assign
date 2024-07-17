@@ -56,8 +56,10 @@ export const UserTable = ({
 
   return (
     <CardWrapper
-      headerLabel="Enrolled Users"
+      headerText="Enrolled Users"
+      headerLabel="List of users enrolled to this event"
       className="w-full"
+      headerClassName="items-start ml-4"
     >
       <Table>
         <TableHeader>
