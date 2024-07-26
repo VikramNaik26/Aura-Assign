@@ -204,19 +204,22 @@ export const EventForm = (props: EventFormProps) => {
           </div>
           <FormError message={error} />
           <div className="flex gap-6">
-            <Button
-              type={props.isEdit ? "button" : "submit"}
-              className={!props.isEdit ? "w-full" : "px-6"}
-            >
-              {props.isEdit ? "Edit" : "Create"}
-            </Button>
+
             <RoleGate role={organization?.role} allowedRole={UserRole.ORGANIZATION}>
               {props.isEdit && (
-                <Button
-                  type="button"
-                >
-                  Delete
-                </Button>
+                <>
+                  <Button
+                    type={props.isEdit ? "button" : "submit"}
+                    className={!props.isEdit ? "w-full" : "px-6"}
+                  >
+                    {props.isEdit ? "Edit" : "Create"}
+                  </Button>
+                  <Button
+                    type="button"
+                  >
+                    Delete
+                  </Button>
+                </>
               )}
             </RoleGate>
           </div>
