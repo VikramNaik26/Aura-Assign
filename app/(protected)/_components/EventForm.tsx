@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { ClassNameValue } from "tailwind-merge"
+import { UserRole } from "@prisma/client"
 
 import { EventSchema } from "@/schemas"
 import {
@@ -22,9 +24,17 @@ import { Button } from "@/components/ui/button"
 import { FormError } from "@/components/FormError"
 import { createEvent } from "@/actions/event"
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
+import { RoleGate } from "@/components/auth/RoleGate"
 
 interface EventFormProps {
-  closeDialog: () => void
+  closeDialog?: () => void
+  headerText?: string
+  headerLabel?: string
+  className?: ClassNameValue
+  headerClassName?: ClassNameValue
+  isEdit?: boolean
 }
 
 export const EventForm = (props: EventFormProps) => {
@@ -70,7 +80,9 @@ export const EventForm = (props: EventFormProps) => {
 
           if (data?.success) {
             form.reset()
-            closeDialog()
+            if (closeDialog) {
+              closeDialog()
+            }
           }
 
           if (!data?.error) {
@@ -85,9 +97,10 @@ export const EventForm = (props: EventFormProps) => {
 
   return (
     <CardWrapper
-      headerText="Create Event"
-      headerLabel="Enter the event details!"
-      className="w-[500px] -my-4"
+      headerText={props.headerText || "Create Event"}
+      headerLabel={props.headerLabel || "Enter the event details!"}
+      className={cn("w-[500px] -my-4", props.className)}
+      headerClassName={props.headerClassName}
     >
       <Form {...form}>
         <form
@@ -121,10 +134,9 @@ export const EventForm = (props: EventFormProps) => {
                   <FormItem>
                     <FormLabel>Event description</FormLabel>
                     <FormControl>
-                      <Input
+                      <Textarea
                         {...field}
                         placeholder="Enter description here"
-                        type="text"
                         disabled={isPending}
                       />
                     </FormControl>
@@ -132,67 +144,82 @@ export const EventForm = (props: EventFormProps) => {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event image</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter image"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="date"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Time</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="time"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!props.isEdit && (
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Event image</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter image"
+                          type="text"
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              <div className="flex gap-16">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="date"
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="time"
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </>
           </div>
           <FormError message={error} />
-          <Button
-            type="submit"
-            className="w-full"
-          >
-            Create
-          </Button>
+          <div className="flex gap-6">
+            <Button
+              type={props.isEdit ? "button" : "submit"}
+              className={!props.isEdit ? "w-full" : "px-6"}
+            >
+              {props.isEdit ? "Edit" : "Create"}
+            </Button>
+            <RoleGate role={organization?.role} allowedRole={UserRole.ORGANIZATION}>
+              {props.isEdit && (
+                <Button
+                  type="button"
+                >
+                  Delete
+                </Button>
+              )}
+            </RoleGate>
+          </div>
         </form>
       </Form>
     </CardWrapper>

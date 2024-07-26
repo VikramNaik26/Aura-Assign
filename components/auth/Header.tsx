@@ -22,7 +22,7 @@ export const Header = ({
   return (
     <div className={cn("w-full flex flex-col gap-y-4 items-center justify-center", headerClassName)}>
       <h1 className={cn(
-        "text-3xl font-semibold",
+        "text-2xl font-semibold",
         font.className
       )}>
         {headerText ? headerText : "Get started"}
