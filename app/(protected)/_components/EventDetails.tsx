@@ -17,6 +17,7 @@ export const EventDetails = ({
         headerLabel="Description of the event"
         headerClassName="items-start"
         isEdit
+        eventObject={event}
       />
       <EventImage />
     </div>

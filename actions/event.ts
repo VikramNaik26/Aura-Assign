@@ -15,7 +15,11 @@ export interface OrgEvent {
   time: Date
 }
 
-export const createEvent = async (values: z.infer<typeof EventSchema>, orgId?: string) => {
+export const createOrUpsertEvent = async (
+  values: z.infer<typeof EventSchema>,
+  orgId?: string,
+  eventId?: string
+) => {
   try {
     const organization = orgId ? await getOrgById(orgId) : null
 
@@ -45,11 +49,19 @@ export const createEvent = async (values: z.infer<typeof EventSchema>, orgId?: s
     if (organization?.id) {
       eventData.orgId = organization.id;
     }
-    await db.event.create({
-      data: eventData
-    })
 
-    return { success: 'Event Created' }
+    if (eventId) {
+      await db.event.update({
+        where: { id: eventId },
+        data: eventData
+      });
+      return { success: 'Event Successfully Updated' };
+    } else {
+      await db.event.create({
+        data: eventData
+      });
+      return { success: 'Event Successfully Created' };
+    }
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: 'Validation failed', details: error.errors };
@@ -104,7 +116,7 @@ export const deleteEvent = async ({ id, orgId }: DeleteEventParams) => {
   try {
     await db.event.delete({ where: { id } })
 
-    return { success: 'Event Deleted' }
+    return { success: 'Event Successfully Deleted' }
   } catch (error) {
     return { error: 'Cannot delete event' }
   }

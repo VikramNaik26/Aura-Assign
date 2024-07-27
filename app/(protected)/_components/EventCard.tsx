@@ -42,17 +42,18 @@ interface EventCardProps {
   event: {
     id: string,
     name: string,
-    description?: string | null,
-    imageUrl?: string | null,
+    description?: string | null
+    imageUrl?: string | null
     date: Date,
     time: Date,
-  } | null
+  } | undefined
   enrollments?: Enrollments[]
   isLoadingEnrollments?: boolean
 }
 
 type DialogState = {
-  eventDialog: boolean
+  editDialog: boolean
+  deleteDialog: boolean
   enrollDialog: boolean
 }
 
@@ -61,12 +62,17 @@ export const EventCard = ({
   enrollments,
   isLoadingEnrollments = false,
 }: EventCardProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState<DialogState>({ eventDialog: false, enrollDialog: false })
+  const [isDialogOpen, setIsDialogOpen] = useState<DialogState>({
+    editDialog: false,
+    deleteDialog: false,
+    enrollDialog: false
+  })
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
 
-  const closeEventDialog = () => setIsDialogOpen({ ...isDialogOpen, eventDialog: false })
-  const closeEnrollDialog = () => setIsDialogOpen({ ...isDialogOpen, enrollDialog: false })
+  const closeEditDialog = () => setIsDialogOpen(prev => ({ ...prev, editDialog: false }))
+  const closeDeleteDialog = () => setIsDialogOpen(prev => ({ ...prev, deleteDialog: false }))
+  const closeEnrollDialog = () => setIsDialogOpen(prev => ({ ...prev, enrollDialog: false }))
 
   const organizationOrUser = useCurrentOrgORUser()
 
@@ -102,11 +108,11 @@ export const EventCard = ({
           }
 
           if (data?.success) {
-            closeEventDialog()
+            closeDeleteDialog()
           }
 
           if (!data?.error) {
-            toast.success("Event successfully deleted")
+            toast.success(data?.success)
           }
         })
         .catch(() => {
@@ -133,7 +139,10 @@ export const EventCard = ({
       <CardFooter className="flex justify-between px-2">
         <RoleGate role={role} allowedRole={UserRole.ORGANIZATION}>
           <div className="flex min-w-[80px] gap-1">
-            <Dialog>
+            <Dialog
+              open={isDialogOpen.editDialog}
+              onOpenChange={(open) => setIsDialogOpen(prev => ({ ...prev, editDialog: open }))}
+            >
               <DialogTrigger className='w-full flex-1' asChild>
                 <Button size="icon" variant="ghost">
                   <Edit className="h-4 w-4" />
@@ -148,10 +157,17 @@ export const EventCard = ({
                     <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
                   </DialogDescription>
                 </DialogHeader>
-                <EventForm closeDialog={closeEventDialog} />
+                <EventForm
+                  closeDialog={closeEditDialog}
+                  eventObject={event}
+                  isUpdate
+                />
               </DialogContent>
             </Dialog>
-            <Dialog open={isDialogOpen.eventDialog} onOpenChange={() => setIsDialogOpen({ ...isDialogOpen, eventDialog: !isDialogOpen.eventDialog })}>
+            <Dialog
+              open={isDialogOpen.deleteDialog}
+              onOpenChange={(open) => setIsDialogOpen(prev => ({ ...prev, deleteDialog: open }))}
+            >
               <DialogTrigger className='w-full flex-1' asChild>
                 <Button size="icon" variant="ghost">
                   <Trash2 className="h-4 w-4" />
@@ -177,7 +193,7 @@ export const EventCard = ({
                         Cancel
                       </Button>
                     </DialogClose>
-                    <Button disabled={isPending} variant="destructive" onClick={() => handleDelete(event?.id)}>
+                    <Button disabled={isPending} onClick={() => handleDelete(event?.id)}>
                       Delete
                     </Button>
                     <FormError message={error} />

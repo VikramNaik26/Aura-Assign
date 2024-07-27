@@ -8,6 +8,8 @@ import { toast } from "sonner"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ClassNameValue } from "tailwind-merge"
 import { UserRole } from "@prisma/client"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
 
 import { EventSchema } from "@/schemas"
 import {
@@ -22,10 +24,9 @@ import { CardWrapper } from "@/components/auth/CardWrapper"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { FormError } from "@/components/FormError"
-import { createEvent } from "@/actions/event"
+import { OrgEvent, createOrUpsertEvent } from "@/actions/event"
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
 import { Textarea } from "@/components/ui/textarea"
-import { cn } from "@/lib/utils"
 import { RoleGate } from "@/components/auth/RoleGate"
 
 interface EventFormProps {
@@ -35,6 +36,9 @@ interface EventFormProps {
   className?: ClassNameValue
   headerClassName?: ClassNameValue
   isEdit?: boolean
+  eventObject?: OrgEvent
+  isUpdate?: boolean
+  handleDelete?: (id?: string) => void
 }
 
 export const EventForm = (props: EventFormProps) => {
@@ -47,7 +51,7 @@ export const EventForm = (props: EventFormProps) => {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: (event: z.infer<typeof EventSchema>) => createEvent(event, organization?.id),
+    mutationFn: (event: z.infer<typeof EventSchema>) => createOrUpsertEvent(event, organization?.id, props.eventObject?.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
     },
@@ -56,14 +60,33 @@ export const EventForm = (props: EventFormProps) => {
     },
   })
 
+  const extractDateAndTime = (
+    dateTime: Date | undefined
+  ): {
+    date: string, time: string
+  } => {
+    if (!dateTime) return { date: '', time: '' }
+    try {
+      return {
+        date: format(dateTime, 'yyyy-MM-dd'),
+        time: format(dateTime, 'HH:mm')
+      }
+    } catch (error) {
+      console.error("Error parsing date and time:", error)
+      return { date: '', time: '' }
+    }
+  }
+
+  const { date, time } = extractDateAndTime(props.eventObject?.date)
+
   const form = useForm<z.infer<typeof EventSchema>>({
     resolver: zodResolver(EventSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      imageUrl: "",
-      date: "",
-      time: "",
+      name: props.eventObject?.name || "",
+      description: props.eventObject?.description || "",
+      imageUrl: props.eventObject?.imageUrl || "",
+      date,
+      time
     }
   })
 
@@ -86,7 +109,7 @@ export const EventForm = (props: EventFormProps) => {
           }
 
           if (!data?.error) {
-            toast.success("Event successfully created")
+            toast.success(data?.success)
           }
         })
         .catch(() => {
@@ -204,22 +227,35 @@ export const EventForm = (props: EventFormProps) => {
           </div>
           <FormError message={error} />
           <div className="flex gap-6">
-
             <RoleGate role={organization?.role} allowedRole={UserRole.ORGANIZATION}>
-              {props.isEdit && (
+              {props.isEdit ? (
                 <>
                   <Button
-                    type={props.isEdit ? "button" : "submit"}
-                    className={!props.isEdit ? "w-full" : "px-6"}
+                    type="button"
+                    className="px-6"
                   >
-                    {props.isEdit ? "Edit" : "Create"}
+                    Edit
                   </Button>
                   <Button
                     type="button"
+                    onClick={() => {
+                      if (props.handleDelete && props.eventObject) {
+                        props.handleDelete?.(props.eventObject?.id)
+                      } else {
+                        toast.error("Something went wrong")
+                      }
+                    }}
                   >
                     Delete
                   </Button>
                 </>
+              ) : (
+                <Button
+                  type="submit"
+                  className="w-full"
+                >
+                  {props.isUpdate ? "Update" : "Create"}
+                </Button>
               )}
             </RoleGate>
           </div>
