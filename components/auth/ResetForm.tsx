@@ -21,7 +21,11 @@ import { FormError } from "@/components/FormError"
 import { FormSuccess } from "@/components/FormSuccess"
 import { reset } from "@/actions/reset"
 
-export const ResetForm = () => {
+interface ResetFormProps {
+  isOrg?: boolean
+}
+
+export const ResetForm = ({ isOrg = false }: ResetFormProps) => {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
   const [success, setSuccess] = useState<string | undefined>("")
@@ -50,7 +54,7 @@ export const ResetForm = () => {
     <CardWrapper
       headerLabel="Forgot your password"
       backButtonLabel="Back to login"
-      backButtonHref="/auth/login"
+      backButtonHref={isOrg ? "/org/login" : "/user/login"}
     >
       <Form {...form}>
         <form

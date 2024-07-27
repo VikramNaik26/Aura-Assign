@@ -76,7 +76,7 @@ export const LoginForm = ({
             }
 
             if (!data?.error) {
-              toast.success("User successfully logged in")
+              toast.success("Organization login successful")
             }
           })
           .then(() => {
@@ -103,7 +103,7 @@ export const LoginForm = ({
             }
 
             if (!data?.error) {
-              toast.success("User successfully logged in")
+              toast.success("User login successful")
             }
           })
           .then(() => {
@@ -118,7 +118,8 @@ export const LoginForm = ({
 
   return (
     <CardWrapper
-      headerLabel="Welcome back!"
+      headerText="Welcome back!"
+      headerLabel="Enter your login credentials"
       backButtonLabel="Don't have an account?"
       backButtonHref={isOrg ? "/org/register" : "/user/register"}
       showSocial={isOrg ? false : true}
