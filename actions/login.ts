@@ -37,11 +37,11 @@ export const orgLogin = async (values: z.infer<typeof LoginSchema>) => {
 
   if (!existingOrg.emailVerified) {
     const verificationToken = await generateVerificationToken(existingOrg.email)
-    await sendVerificationEmail(
-      existingOrg.email,
-      verificationToken.token,
-      true
-    )
+    // await sendVerificationEmail(
+    //   existingOrg.email,
+    //   verificationToken.token,
+    //   true
+    // )
 
     return { success: "Confirmation email sent!" }
   }
@@ -52,7 +52,7 @@ export const orgLogin = async (values: z.infer<typeof LoginSchema>) => {
       password,
       redirectTo: DEFAULT_LOGIN_REDIRECT
     })
-    return { success: "Logged in" }
+    return { success: "Organization Successfully logged in" }
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -136,10 +136,10 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     } else {
       const twoFactorToken = await generateTwoFactorToken(existingUser.email)
 
-      await sendTwoFactorTokenEmail(
-        twoFactorToken.email,
-        twoFactorToken.token
-      )
+      // await sendTwoFactorTokenEmail(
+      //   twoFactorToken.email,
+      //   twoFactorToken.token
+      // )
 
       return { twoFactor: true }
     }
@@ -151,7 +151,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
       password,
       redirectTo: DEFAULT_LOGIN_REDIRECT
     })
-    return { success: "Logged in" }
+    return { success: "User Successfully logged in" }
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
