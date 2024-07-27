@@ -52,7 +52,7 @@ export const orgLogin = async (values: z.infer<typeof LoginSchema>) => {
       password,
       redirectTo: DEFAULT_LOGIN_REDIRECT
     })
-    return { success: "Logged in" }
+    return { success: "Organization Successfully logged in" }
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -151,7 +151,7 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
       password,
       redirectTo: DEFAULT_LOGIN_REDIRECT
     })
-    return { success: "Logged in" }
+    return { success: "User Successfully logged in" }
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {

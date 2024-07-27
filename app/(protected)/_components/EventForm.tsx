@@ -45,6 +45,7 @@ export const EventForm = (props: EventFormProps) => {
   const closeDialog = props.closeDialog
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
+  const [isInputDisabled, setIsInputDisabled] = useState(props.isEdit)
 
   const { data: organization } = useCurrentOrgORUser()
 
@@ -143,7 +144,7 @@ export const EventForm = (props: EventFormProps) => {
                         {...field}
                         placeholder="Enter title here"
                         type="text"
-                        disabled={isPending}
+                        disabled={isPending || isInputDisabled}
                       />
                     </FormControl>
                     <FormMessage />
@@ -160,7 +161,7 @@ export const EventForm = (props: EventFormProps) => {
                       <Textarea
                         {...field}
                         placeholder="Enter description here"
-                        disabled={isPending}
+                        disabled={isPending || isInputDisabled}
                       />
                     </FormControl>
                     <FormMessage />
@@ -179,7 +180,7 @@ export const EventForm = (props: EventFormProps) => {
                           {...field}
                           placeholder="Enter image"
                           type="text"
-                          disabled={isPending}
+                          disabled={isPending || isInputDisabled}
                         />
                       </FormControl>
                       <FormMessage />
@@ -198,7 +199,7 @@ export const EventForm = (props: EventFormProps) => {
                         <Input
                           {...field}
                           type="date"
-                          disabled={isPending}
+                          disabled={isPending || isInputDisabled}
                         />
                       </FormControl>
                       <FormMessage />
@@ -215,7 +216,7 @@ export const EventForm = (props: EventFormProps) => {
                         <Input
                           {...field}
                           type="time"
-                          disabled={isPending}
+                          disabled={isPending || isInputDisabled}
                         />
                       </FormControl>
                       <FormMessage />
@@ -233,8 +234,9 @@ export const EventForm = (props: EventFormProps) => {
                   <Button
                     type="button"
                     className="px-6"
+                    onClick={() => setIsInputDisabled(!isInputDisabled)}
                   >
-                    Edit
+                    {isInputDisabled ? "Edit" : "Save"}
                   </Button>
                   <Button
                     type="button"

@@ -76,7 +76,7 @@ export const LoginForm = ({
             }
 
             if (!data?.error) {
-              toast.success("User successfully logged in")
+              toast.success("Organization login successful")
             }
           })
           .catch(() => {
@@ -100,7 +100,7 @@ export const LoginForm = ({
             }
 
             if (!data?.error) {
-              toast.success("User successfully logged in")
+              toast.success("User login successful")
             }
           })
           .catch(() => {
