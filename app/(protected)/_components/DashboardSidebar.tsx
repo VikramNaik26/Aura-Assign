@@ -40,10 +40,10 @@ export const DashboardSidebar = () => {
       <Link href="/">
         <div className="flex items-center gap-x-2">
           <Image
-            src="/logo.svg"
+            src="/logo.jpg"
             alt="logo"
-            width={34}
-            height={34}
+            width={50}
+            height={50}
           />
           <span className={cn('font-semibold text-sm', font.className)}>
             Aura Assign
