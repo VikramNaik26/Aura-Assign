@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss"
+import type { PluginUtils } from "tailwindcss/types/config"
 
-const config = {
+const config: Config = {
   darkMode: ["class"],
   content: [
     './pages/**/*.{ts,tsx}',
@@ -138,7 +139,34 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function({ addBase, theme }: { addBase: any, theme: any }) {
+      addBase({
+        'html': {
+          '--scrollbar-thumb': theme('colors.gray.400'),
+          '--scrollbar-thumb-hover': theme('colors.gray.400'),
+          '--scrollbar-track': theme('colors.gray.900'),
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'var(--scrollbar-thumb) var(--scrollbar-track)',
+        },
+        '::-webkit-scrollbar': {
+          width: '8px',
+          height: '8px',
+        },
+        '::-webkit-scrollbar-track': {
+          backgroundColor: 'var(--scrollbar-track)',
+        },
+        '::-webkit-scrollbar-thumb': {
+          backgroundColor: 'var(--scrollbar-thumb)',
+          borderRadius: '4px',
+          '&:hover': {
+            backgroundColor: 'var(--scrollbar-thumb-hover)',
+          },
+        }
+      })
+    }
+  ],
 } satisfies Config
 
 export default config
