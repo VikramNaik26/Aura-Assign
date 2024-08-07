@@ -22,7 +22,7 @@ const SignupButton = ({
   const router = useRouter()
 
   const handleClick = () => {
-    router.push("/user/signup")
+    router.push("/user/register")
   }
 
   if (mode === "modal") {

@@ -14,7 +14,6 @@ const OrgSignupPage = () => {
         <RegisterForm isOrg/>
       </Bounded>
       <section className="flex-1 bg-blue-50">
-        TODO: add image
       </section>
     </main>
   )
