@@ -24,7 +24,7 @@
     "@radix-ui/react-tooltip": "^1.1.2",
     "@reach/visually-hidden": "^0.18.0",
     "@tanstack/react-query": "^5.49.0",
-    "axios": "^1.7.2",
+    "axios": "^1.7.4",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
