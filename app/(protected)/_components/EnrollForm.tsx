@@ -5,6 +5,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Loader2 } from "lucide-react"
 
 import { EnrollmentSchema } from "@/schemas"
 import {
@@ -323,7 +324,7 @@ export const EnrollForm = (props: EnrollFormProps) => {
           >
             {
               isPending ?
-                "Processing..."
+                <Loader2 className="h-4 w-4 animate-spin" />
                 : "Enroll"
             }
           </Button>

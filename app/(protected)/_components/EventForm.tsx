@@ -10,6 +10,7 @@ import { ClassNameValue } from "tailwind-merge"
 import { UserRole } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import { Loader2 } from "lucide-react"
 
 import { EventSchema } from "@/schemas"
 import {
@@ -256,7 +257,13 @@ export const EventForm = (props: EventFormProps) => {
                   type="submit"
                   className="w-full"
                 >
-                  {props.isUpdate ? "Update" : "Create"}
+                  {
+                    props.isUpdate && !isPending
+                      ? "Update"
+                      : isPending
+                        ? <Loader2 className="h-4 animate-spin" />
+                        : "Create"
+                  }
                 </Button>
               )}
             </RoleGate>

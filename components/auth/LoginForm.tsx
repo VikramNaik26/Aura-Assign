@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 
 import { LoginSchema } from "@/schemas"
 import {
@@ -213,7 +214,7 @@ export const LoginForm = ({
           >
             {
               isPending ?
-                "Processing..."
+                <Loader2 className="h-4 w-4 animate-spin" />
                 : showTwoFactor
                   ? "Confirm"
                   : "Login"

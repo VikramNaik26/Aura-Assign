@@ -161,6 +161,8 @@ export const EventCard = ({
                   closeDialog={closeEditDialog}
                   eventObject={event}
                   isUpdate
+                  headerText="Edit Event"
+                  headerLabel="Update your event details"
                 />
               </DialogContent>
             </Dialog>

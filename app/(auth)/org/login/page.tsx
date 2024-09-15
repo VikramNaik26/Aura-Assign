@@ -8,7 +8,6 @@ const OrgLoginPage = () => {
   return (
     <main className="flex h-full">
       <section className="flex-1 bg-blue-50">
-        TODO: add image
       </section>
       <Bounded
         center
