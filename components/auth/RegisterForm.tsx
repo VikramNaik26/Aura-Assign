@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2 } from "lucide-react"
 
 import { RegisterSchema } from "@/schemas"
 import { register, registerOrg } from "@/actions/register"
@@ -52,7 +53,6 @@ export const RegisterForm = ({
             setError(data?.error)
             setSuccess(data?.success)
           })
-
       } else {
         register(values)
           .then(data => {
@@ -136,7 +136,13 @@ export const RegisterForm = ({
             type="submit"
             className="w-full"
           >
-            {isPending ? "Registering..." : "Register"}
+            {
+              isPending 
+              ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+              )
+                :"Register"
+            }
           </Button>
         </form>
       </Form>
