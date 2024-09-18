@@ -95,7 +95,7 @@ const Dashboard = () => {
 
   return (
     events?.length ? (
-      <section className="px-4 py-6 h-full w-full">
+      <section className="px-2 py-6 h-full w-full">
         <Navbar
           orgId={organizationOrUser?.id}
           organizationOrUser={organizationOrUser}
@@ -111,7 +111,7 @@ const Dashboard = () => {
           </span>
         </div>
         <div
-          className="flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-6 scrollbar-hide"
+          className="flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide"
         >
           {events.map((event) => {
             return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />

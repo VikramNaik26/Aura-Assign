@@ -13,16 +13,16 @@ export const BottomNavbar = () => {
         <nav className="flex-1 flex justify-around items-center [&>button]:w-16">
           <Link
             href="/dashboard"
-            className="flex flex-col items-center p-2"
+            className="flex flex-col items-center p-1"
           >
-            <Compass className="h-6 w-6 text-gray-500" />
+            <Compass className="h-5 w-5 text-gray-500" />
             <span className="text-xs text-gray-500 mt-1">Explore</span>
           </Link>
           <Link
             href="/dashboard/events"
-            className="flex flex-col items-center p-2"
+            className="flex flex-col items-center p-1"
           >
-            <Calendar className="h-6 w-6 text-gray-500" />
+            <Calendar className="h-5 w-5 text-gray-500" />
             <span className="text-xs text-gray-500 mt-1">Events</span>
           </Link>
           {/*
@@ -32,16 +32,16 @@ export const BottomNavbar = () => {
           */}
           <Link
             href="/dashboard/map"
-            className="flex flex-col items-center p-2"
+            className="flex flex-col items-center p-1"
           >
-            <MapPin className="h-6 w-6 text-gray-500" />
+            <MapPin className="h-5 w-5 text-gray-500" />
             <span className="text-xs text-gray-500 mt-1">Map</span>
           </Link>
           <Link
             href="/dashboard/profile"
-            className="flex flex-col items-center p-2"
+            className="flex flex-col items-center p-1"
           >
-            <User2 className="h-6 w-6 text-gray-500" />
+            <User2 className="h-5 w-5 text-gray-500" />
             <span className="text-xs text-gray-500 mt-1">Profile</span>
           </Link>
         </nav>
