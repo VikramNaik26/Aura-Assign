@@ -84,8 +84,6 @@ const Dashboard = () => {
           <EventCard.Skeleton />
           <EventCard.Skeleton />
           <EventCard.Skeleton />
-          <EventCard.Skeleton />
-          <EventCard.Skeleton />
         </div >
       </section>
     )
@@ -97,7 +95,7 @@ const Dashboard = () => {
 
   return (
     events?.length ? (
-      <section className="px-4 py-6 h-full">
+      <section className="px-4 py-6 h-full w-full">
         <Navbar
           orgId={organizationOrUser?.id}
           organizationOrUser={organizationOrUser}
@@ -105,7 +103,7 @@ const Dashboard = () => {
           setEvents={setEvents}
           setHasSearchQuery={setHasSearchQuery}
         />
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between mt-6 sm:hidden">
           <h2 className="text-xl font-semibold">Upcoming Events</h2>
           <span className="text-sm text-muted-foreground">
             See all
@@ -119,7 +117,7 @@ const Dashboard = () => {
             return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
           })}
         </div>
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mt-4 sm:hidden">
           <h2 className="text-xl font-semibold">Nearby Events</h2>
           <span className="text-sm text-muted-foreground">
             See all
