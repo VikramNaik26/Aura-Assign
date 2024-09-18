@@ -27,7 +27,7 @@ const ProtectedLayout = ({
               <DashboardSidebar />
               <BottomNavbar />
             </Suspense>
-            <div className="h-full flex-1">
+            <div className="h-full flex-1 w-full">
               {children}
             </div>
           </div>
