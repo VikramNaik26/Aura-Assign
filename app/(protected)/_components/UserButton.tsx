@@ -15,12 +15,15 @@ import {
 import { LogoutButton } from "./LogoutButton"
 import { Button } from "@/components/ui/button"
 import { ExtendedUser } from "@/next-auth"
+import { useRouter } from "next/navigation"
 
 interface UserButtonProps {
   organizationOrUser?: ExtendedUser | undefined
 }
 
 export const UserButton = ({ organizationOrUser }: UserButtonProps) => {
+  const router = useRouter()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex gap-4 justify-between items-center mr-4">
@@ -33,7 +36,7 @@ export const UserButton = ({ organizationOrUser }: UserButtonProps) => {
         <span className="text-sm w-max font-semibold">{organizationOrUser?.name}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40 mt-2" align="end">
-        <Button className="w-full" variant="ghost">
+        <Button className="w-full" variant="ghost" onClick={() => router.push('dashboard/profile')}>
           <DropdownMenuItem className="w-full">
             <User2 className="h-4 w-4 mr-2" />
             Profile
@@ -42,7 +45,7 @@ export const UserButton = ({ organizationOrUser }: UserButtonProps) => {
         <Button className="w-full" variant="ghost">
           <DropdownMenuItem className="w-full">
             <Settings2 className="h-4 w-4 mr-2" />
-          Settings
+            Settings
           </DropdownMenuItem>
         </Button>
         <LogoutButton>
