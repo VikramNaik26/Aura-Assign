@@ -16,6 +16,7 @@ import { EmptySearch } from "../_components/EmptySearch"
 import { Enrollments, getEnrollmentsByUserId } from "@/actions/enrollment"
 import { RoleGate } from "@/components/auth/RoleGate"
 import { EmptyEnroll } from "../_components/EmptyEnroll"
+import { StepForward } from "lucide-react"
 
 const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
@@ -83,8 +84,6 @@ const Dashboard = () => {
           <EventCard.Skeleton />
           <EventCard.Skeleton />
           <EventCard.Skeleton />
-          <EventCard.Skeleton />
-          <EventCard.Skeleton />
         </div >
       </section>
     )
@@ -96,7 +95,7 @@ const Dashboard = () => {
 
   return (
     events?.length ? (
-      <section className="px-4 py-6 h-full">
+      <section className="px-4 py-6 h-full w-full">
         <Navbar
           orgId={organizationOrUser?.id}
           organizationOrUser={organizationOrUser}
@@ -104,11 +103,27 @@ const Dashboard = () => {
           setEvents={setEvents}
           setHasSearchQuery={setHasSearchQuery}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-6" >
+        <div className="flex justify-between mt-6 sm:hidden">
+          <h2 className="text-xl font-semibold">Upcoming Events</h2>
+          <span className="text-sm text-muted-foreground">
+            See all
+            <StepForward className="inline ml-1" size={12} fill="currentColor" />
+          </span>
+        </div>
+        <div
+          className="flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-6 scrollbar-hide"
+        >
           {events.map((event) => {
             return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
           })}
-        </div >
+        </div>
+        <div className="flex justify-between mt-4 sm:hidden">
+          <h2 className="text-xl font-semibold">Nearby Events</h2>
+          <span className="text-sm text-muted-foreground">
+            See all
+            <StepForward className="inline ml-1" size={12} fill="currentColor" />
+          </span>
+        </div>
       </section>
     ) : (hasSearchQuery && !events.length) ? (
       <section className="px-4 py-6 h-full">

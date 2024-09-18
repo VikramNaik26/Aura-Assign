@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button"
 
 interface LogoutButtonProps {
   children: React.ReactNode
+  isProfile?: boolean
 }
 
 export const LogoutButton = ({
-  children
+  children,
+  isProfile = false
 }: LogoutButtonProps) => {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -33,7 +35,7 @@ export const LogoutButton = ({
 
   return (
     <Button
-      variant="ghost"
+      variant={isProfile ? "outline" : "ghost"}
       onClick={onClick}
       className="cursor-pointer w-full"
       disabled={isPending}
