@@ -22,9 +22,16 @@ export const Navbar = ({
   organizationOrUser
 }: NavbarProps) => {
   return (
-    <div className="hidden lg:flex lg:flex-1 justify-between">
-      <SearchInput orgId={orgId} events={events} setEvents={setEvents} setHasSearchQuery={setHasSearchQuery} />
-      <UserButton organizationOrUser={organizationOrUser} />
+    <div className="lg:flex lg:flex-1 justify-between">
+      <SearchInput
+        orgId={orgId}
+        events={events}
+        setEvents={setEvents}
+        setHasSearchQuery={setHasSearchQuery}
+      />
+      <div className="hidden lg:block">
+        <UserButton organizationOrUser={organizationOrUser} />
+      </div>
     </div>
   )
 }

@@ -122,7 +122,9 @@ export const EventCard = ({
   }
 
   return (
-    <Card className="sm:max-w-[300px] max-sm:w-[100%] flex flex-col justify-between">
+    <Card
+      className="sm:max-w-[300px] max-sm:w-[100%] flex flex-col justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none"
+    >
       <CardContent className="w-full max-w-[280px] max-h-[200px]">
         <Image
           src="/assets/nextTask.svg"
