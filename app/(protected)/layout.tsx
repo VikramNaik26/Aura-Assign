@@ -7,6 +7,7 @@ import {
 import { Suspense } from "react"
 
 import { DashboardSidebar } from "./_components/DashboardSidebar"
+import { BottomNavbar } from "./_components/BottomNavbar"
 
 const queryClient = new QueryClient()
 
@@ -20,10 +21,11 @@ const ProtectedLayout = ({
   return (
     <QueryClientProvider client={queryClient}>
       <main>
-        <section className="h-[100dvh] px-4">
+        <section className="h-[100dvh] w-full px-4">
           <div className="flex gap-x-3 h-full">
             <Suspense fallback={<div>Loading...</div>}>
               <DashboardSidebar />
+              <BottomNavbar />
             </Suspense>
             <div className="h-full flex-1">
               {children}

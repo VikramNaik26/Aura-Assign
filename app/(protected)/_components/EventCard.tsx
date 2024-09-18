@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { VisuallyHidden } from "@reach/visually-hidden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -70,6 +71,8 @@ export const EventCard = ({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
 
+  const router = useRouter()
+
   const closeEditDialog = () => setIsDialogOpen(prev => ({ ...prev, editDialog: false }))
   const closeDeleteDialog = () => setIsDialogOpen(prev => ({ ...prev, deleteDialog: false }))
   const closeEnrollDialog = () => setIsDialogOpen(prev => ({ ...prev, enrollDialog: false }))
@@ -123,22 +126,23 @@ export const EventCard = ({
 
   return (
     <Card
-      className="sm:max-w-[300px] max-sm:w-[100%] flex flex-col justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none"
+      className="sm:max-w-[300px] max-sm:w-[100%] flex flex-col justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none cursor-pointer"
+      onClick={() => router.push(`dashboard/event/${event?.id}`)}
     >
-      <CardContent className="w-full max-w-[280px] max-h-[200px]">
+      <CardContent className="w-full min-w-[220px] max-w-[300px] max-h-[200px] p-2 pb-0">
         <Image
-          src="/assets/nextTask.svg"
+          src="/assets/EventImageOne.svg"
           alt="Event"
           width={100}
           height={100}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover rounded-md"
         />
       </CardContent>
       <CardHeader>
         <CardTitle className="text-lg">{event?.name}</CardTitle>
         <CardDescription>{event?.description}</CardDescription>
       </CardHeader>
-      <CardFooter className="flex justify-between px-2">
+      <CardFooter className="px-2 hidden sm:flex justify-between ">
         <RoleGate role={role} allowedRole={UserRole.ORGANIZATION}>
           <div className="flex min-w-[80px] gap-1">
             <Dialog
@@ -247,7 +251,7 @@ export const EventCard = ({
 
 EventCard.Skeleton = function EventCardSkeleton() {
   return (
-    <div className="aspect-[100/127] rounded-lg overflow-hidden">
+    <div className="aspect-[186/100] sm:aspect-[100/127] rounded-lg overflow-hidden">
       <Skeleton className="h-full w-full" />
     </div>
   )
