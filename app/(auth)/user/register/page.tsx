@@ -13,7 +13,7 @@ const UserSignupPage = () => {
         <AuthHeader />
         <RegisterForm />
       </Bounded>
-      <section className="flex-1 bg-blue-50">
+      <section className="flex-1 bg-blue-50 hidden lg:block">
       </section>
     </main >
   )

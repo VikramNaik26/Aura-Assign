@@ -126,7 +126,7 @@ export const EventCard = ({
 
   return (
     <Card
-      className="sm:max-w-[300px] max-sm:w-[100%] flex flex-col justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none cursor-pointer"
+      className="sm:max-w-[300px] max-sm:w-[100%] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none cursor-pointer max-sm:first:ml-8"
       onClick={() => router.push(`dashboard/event/${event?.id}`)}
     >
       <CardContent className="w-full min-w-[220px] max-w-[300px] max-h-[200px] p-2 pb-0">
@@ -138,7 +138,7 @@ export const EventCard = ({
           className="w-full h-full object-cover rounded-md"
         />
       </CardContent>
-      <CardHeader>
+      <CardHeader className="p-4">
         <CardTitle className="text-lg">{event?.name}</CardTitle>
         <CardDescription>{event?.description}</CardDescription>
       </CardHeader>
