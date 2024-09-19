@@ -7,7 +7,7 @@ import { LoginForm } from "@/components/auth/LoginForm"
 const OrgLoginPage = () => {
   return (
     <main className="flex h-full">
-      <section className="flex-1 bg-blue-50">
+      <section className="flex-1 bg-blue-50 hidden lg:block">
       </section>
       <Bounded
         center

@@ -10,7 +10,7 @@ export const AuthHeader = ({
   isLogin = false
 }: AuthHeaderProps) => {
   return (
-    <div className="self-start flex px-16 py-4 justify-between items-center w-full">
+    <div className="self-start flex px-2 md:px-16 py-4 justify-between items-center w-full">
       <h2 className="">Aura Assign</h2>
       <LoginButton
         isLink
