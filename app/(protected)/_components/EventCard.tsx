@@ -37,7 +37,7 @@ import { FormError } from "@/components/FormError"
 import { RoleGate } from "@/components/auth/RoleGate"
 import { EnrollForm } from "./EnrollForm"
 import { Enrollments } from "@/actions/enrollment"
-import { hasEventId } from "@/lib/utils"
+import { cn, hasEventId } from "@/lib/utils"
 
 interface EventCardProps {
   event: {
@@ -49,6 +49,7 @@ interface EventCardProps {
     time: Date,
   } | undefined
   enrollments?: Enrollments[]
+  hasSearchQuery?: boolean
   isLoadingEnrollments?: boolean
 }
 
@@ -62,6 +63,7 @@ export const EventCard = ({
   event,
   enrollments,
   isLoadingEnrollments = false,
+  hasSearchQuery = false
 }: EventCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState<DialogState>({
     editDialog: false,
@@ -126,16 +128,25 @@ export const EventCard = ({
 
   return (
     <Card
-      className="sm:max-w-[300px] max-sm:w-[100%] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none cursor-pointer max-sm:first:ml-8"
+      className={cn(
+        `sm:max-w-[300px] max-sm:w-[100%] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none cursor-pointer max-sm:first:ml-8`,
+        hasSearchQuery && 'flex-row sm:flex-col w-full max-sm:first:ml-0'
+      )}
       onClick={() => router.push(`dashboard/event/${event?.id}`)}
     >
-      <CardContent className="w-full min-w-[220px] max-w-[300px] max-h-[200px] p-2 pb-0">
+      <CardContent className={cn(
+        "w-full min-w-[220px] max-w-[300px] max-h-[200px] p-2",
+        hasSearchQuery && "max-sm:min-w-28 max-sm:w-min"
+      )}>
         <Image
           src="/assets/EventImageOne.svg"
           alt="Event"
           width={100}
           height={100}
-          className="w-full h-full object-cover rounded-md"
+          className={cn(
+            "w-full h-full object-cover rounded-md",
+            hasSearchQuery && "max-sm:w-28 max-sm:h-24"
+          )}
         />
       </CardContent>
       <CardHeader className="p-4">

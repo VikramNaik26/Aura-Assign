@@ -17,6 +17,7 @@ import { Enrollments, getEnrollmentsByUserId } from "@/actions/enrollment"
 import { RoleGate } from "@/components/auth/RoleGate"
 import { EmptyEnroll } from "../_components/EmptyEnroll"
 import { StepForward } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
@@ -103,20 +104,30 @@ const Dashboard = () => {
           setEvents={setEvents}
           setHasSearchQuery={setHasSearchQuery}
         />
-        <div className="flex justify-between mt-6 sm:hidden">
-          <h2 className="text-xl font-semibold">Upcoming Events</h2>
-          <span className="text-sm text-muted-foreground">
-            See all
-            <StepForward className="inline ml-1" size={12} fill="currentColor" />
-          </span>
-        </div>
+        {!hasSearchQuery && (
+          <div className="flex justify-between mt-6 sm:hidden">
+            <h2 className="text-xl font-semibold">Upcoming Events</h2>
+            <span className="text-sm text-muted-foreground">
+              See all
+              <StepForward className="inline ml-1" size={12} fill="currentColor" />
+            </span>
+          </div>
+
+        )}
         <div
-          className="flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide max-sm:-ml-8"
+          className={cn(
+            `flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide max-sm:-ml-8`,
+            hasSearchQuery && 'flex-col max-sm:ml-0 w-full'
+          )}
         >
           {events.map((event) => {
+            if (hasSearchQuery) {
+              return <EventCard key={event.id} event={event} hasSearchQuery={hasSearchQuery} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
+            }
             return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
           })}
         </div>
+        {!hasSearchQuery && (
         <div className="flex justify-between mt-4 sm:hidden">
           <h2 className="text-xl font-semibold">Nearby Events</h2>
           <span className="text-sm text-muted-foreground">
@@ -124,6 +135,7 @@ const Dashboard = () => {
             <StepForward className="inline ml-1" size={12} fill="currentColor" />
           </span>
         </div>
+        )}
       </section>
     ) : (hasSearchQuery && !events.length) ? (
       <section className="px-4 py-6 h-full">
