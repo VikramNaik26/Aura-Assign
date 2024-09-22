@@ -260,9 +260,12 @@ export const EventCard = ({
   )
 }
 
-EventCard.Skeleton = function EventCardSkeleton() {
+EventCard.Skeleton = function EventCardSkeleton({ isList = false }: { isList?: boolean }) {
   return (
-    <div className="aspect-[186/100] sm:aspect-[100/127] rounded-lg overflow-hidden">
+    <div className={cn(
+      "aspect-[186/100] sm:aspect-[100/127] rounded-lg overflow-hidden",
+      isList && "aspect-[186/65] sm:aspect-[100/127]"
+    )}>
       <Skeleton className="h-full w-full" />
     </div>
   )

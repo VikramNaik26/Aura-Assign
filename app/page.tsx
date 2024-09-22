@@ -2,8 +2,16 @@ import React from 'react'
 
 import AnimatedContent from './_components/AnimatedContent'
 import { Bounded } from '@/components/Bounded'
+import { currentUser } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 
-const Home = () => {
+const Home = async () => {
+  const session = await currentUser()
+
+  if(session) {
+    redirect("/dashboard")
+  }
+
   return (
     <main className="bg-[#070815] min-h-[120dvh]">
       <Bounded

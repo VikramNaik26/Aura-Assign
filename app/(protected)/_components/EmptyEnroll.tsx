@@ -1,16 +1,32 @@
+import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { ClassNameValue } from "tailwind-merge"
 
-export const EmptyEnroll = () => {
+interface EmptyEnrollProps {
+  className?: ClassNameValue,
+  label?: string
+  imagePath?: string
+  subText?: string
+}
+
+export const EmptyEnroll = ({
+  className,
+  label,
+  imagePath,
+  subText
+}: EmptyEnrollProps) => {
   return (
-    <div className="flex flex-col justify-center items-center h-full">
+    <div className={
+      cn("flex flex-col justify-center items-center h-full", className)
+    }>
       <Image
         src="/assets/EnrollState.svg"
         alt="No events"
         height={240}
         width={240}
       />
-      <h2 className="text-3xl font-bold">No Enrolled Events</h2>
-      <p className="mt-2 text-lg text-muted-foreground">Start by enrolling in an event</p>
+      <h2 className="text-3xl font-bold">{label ?? "No Enrolled Events"}</h2>
+      <p className="mt-2 text-lg text-muted-foreground">{subText ?? "Start by enrolling in an event"}</p>
     </div>
   )
 }
