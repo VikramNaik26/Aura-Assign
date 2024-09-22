@@ -1,6 +1,14 @@
+import dynamic from 'next/dynamic';
+
+const MapWithNoSSR = dynamic(() => import('../../_components/Map'), {
+  ssr: false,
+})
+
 const Map = () => {
   return (
-    <div>Map</div>
+    <section>
+      <MapWithNoSSR />
+    </section>
   )
 }
 
