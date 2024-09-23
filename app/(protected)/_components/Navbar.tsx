@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { SearchInput } from "./SearchInput"
 import { UserButton } from "./UserButton"
 import { ExtendedUser } from "@/next-auth"
+import { CurrentLocation } from "./CurrentLocation"
 
 export interface NavbarProps {
   orgId?: string
@@ -23,6 +24,9 @@ export const Navbar = ({
 }: NavbarProps) => {
   return (
     <div className="lg:flex lg:flex-1 justify-between">
+      {/* <div>
+      <CurrentLocation />
+      </div> */}
       <SearchInput
         orgId={orgId}
         events={events}
