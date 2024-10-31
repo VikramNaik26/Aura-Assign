@@ -13,7 +13,7 @@ const Event = async ({ params }: { params: { id: string } }) => {
   if (!event) return null
 
   return (
-    <section className="p-4 flex flex-col gap-6">
+    <section className="sm:p-4 flex flex-col gap-6 -mx-4 md:mx-auto">
       <EventDetails event={event} />
       <RoleGate role={session?.user.role} allowedRole={UserRole.ORGANIZATION}>
         <UserTable event={event} />

@@ -58,7 +58,7 @@ export const UserTable = ({
     <CardWrapper
       headerText="Enrolled Users"
       headerLabel="List of users enrolled to this event"
-      className="w-full"
+      className="sm:w-full"
       headerClassName="items-start ml-4 text-sm"
     >
       <Table>
