@@ -7,13 +7,15 @@ interface EmptyEnrollProps {
   label?: string
   imagePath?: string
   subText?: string
+  date?: string
 }
 
 export const EmptyEnroll = ({
   className,
   label,
   imagePath,
-  subText
+  subText,
+  date
 }: EmptyEnrollProps) => {
   return (
     <div className={
