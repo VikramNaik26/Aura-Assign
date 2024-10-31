@@ -20,7 +20,7 @@ export const EventImage = async () => {
           alt="Product image"
           className="aspect-square w-full rounded-md object-cover"
           height="300"
-          src="/assets/nextTask.svg"
+          src="/assets/EventImageOne.svg"
           width="300"
         />
       </div>
