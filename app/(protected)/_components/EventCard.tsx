@@ -129,10 +129,14 @@ export const EventCard = ({
   return (
     <Card
       className={cn(
-        `sm:max-w-[300px] max-sm:w-[100%] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none cursor-pointer max-sm:first:ml-8`,
+        `sm:max-w-[300px] max-sm:w-[100%] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none max-sm:first:ml-8`,
         hasSearchQuery && 'flex-row sm:flex-col w-full max-sm:first:ml-0'
       )}
-      onClick={() => router.push(`dashboard/event/${event?.id}`)}
+      onClick={(e) => {
+        if (window.innerWidth < 640) {
+          router.push(`dashboard/event/${event?.id}`)
+        }
+      }}
     >
       <CardContent className={cn(
         "w-full min-w-[220px] max-w-[300px] max-h-[200px] p-2",
