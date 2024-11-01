@@ -1,12 +1,12 @@
 import dynamic from 'next/dynamic';
 
-const MapWithNoSSR = dynamic(() => import('../../_components/Map'), {
+const MapWithNoSSR = dynamic(() => import('../../_components/LeafletMap'), {
   ssr: false,
 })
 
 const Map = () => {
   return (
-    <section>
+    <section className='h-[110dvh] md:h-full'>
       <MapWithNoSSR />
     </section>
   )

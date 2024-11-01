@@ -3,9 +3,9 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Poppins } from 'next/font/google'
-import { CircleCheckBig, LayoutDashboard } from 'lucide-react'
+import { CircleCheckBig, LayoutDashboard, MapPin } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ const font = Poppins({
 
 export const DashboardSidebar = () => {
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const enrolled = searchParams.get('enrolled')
 
   const [isDialogOpen, setDialogOpen] = useState<boolean>(false)
@@ -57,7 +58,7 @@ export const DashboardSidebar = () => {
       </RoleGate>
       <div className="space-y-1 w-full">
         <Button
-          variant={enrolled ? 'ghost' : 'secondary'}
+          variant={enrolled || pathname === '/dashboard/map' ? 'ghost' : 'secondary'}
           asChild
           size='lg'
           className='font-normal justify-start w-full px-2'
@@ -68,8 +69,8 @@ export const DashboardSidebar = () => {
           </Link>
         </Button>
       </div>
-      <div className="space-y-1 w-full">
-        <RoleGate role={role} allowedRole={UserRole.USER}>
+      <RoleGate role={role} allowedRole={UserRole.USER}>
+        <div className="space-y-1 w-full">
           <Button
             variant={enrolled ? 'secondary' : 'ghost'}
             asChild
@@ -84,7 +85,20 @@ export const DashboardSidebar = () => {
               Enrolled events
             </Link>
           </Button>
-        </RoleGate>
+        </div>
+      </RoleGate>
+      <div className="space-y-1 w-full">
+        <Button
+          variant={pathname === '/dashboard/map' ? 'secondary' : 'ghost'}
+          asChild
+          size='lg'
+          className='font-normal justify-start w-full px-2'
+        >
+          <Link href='/dashboard/map'>
+            <MapPin className="w-4 h-4 mr-2" />
+            Map
+          </Link>
+        </Button>
       </div>
     </aside>
   )
