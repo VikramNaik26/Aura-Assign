@@ -1,8 +1,6 @@
 import React from 'react'
 import { usePathname } from 'next/navigation'
-import { UserRole } from '@prisma/client'
 import { Compass, MapPin, User2, Calendar, LucideIcon } from 'lucide-react'
-import { RoleGate } from '@/components/auth/RoleGate'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
