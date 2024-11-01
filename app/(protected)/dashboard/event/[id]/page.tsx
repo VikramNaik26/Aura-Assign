@@ -5,6 +5,7 @@ import { UserTable } from "@/app/(protected)/_components/UserTable"
 import { RoleGate } from "@/components/auth/RoleGate"
 import { auth } from "@/auth"
 import { EventDetails } from "@/app/(protected)/_components/EventDetails"
+import { BackButtonInAppBar } from "@/app/_components/BackButtonInAppBar"
 
 const Event = async ({ params }: { params: { id: string } }) => {
   const session = await auth()
@@ -13,7 +14,8 @@ const Event = async ({ params }: { params: { id: string } }) => {
   if (!event) return null
 
   return (
-    <section className="sm:p-4 flex flex-col gap-6 -mx-4 md:mx-auto">
+    <section className="relative sm:p-4 flex flex-col gap-6 -mx-4 md:mx-auto">
+      <BackButtonInAppBar />
       <EventDetails event={event} />
       <RoleGate role={session?.user.role} allowedRole={UserRole.ORGANIZATION}>
         <UserTable event={event} />
