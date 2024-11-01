@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import { MapPin, Crosshair, Loader2 } from 'lucide-react'
+import { MapPin, Crosshair, Loader2, MapPinned } from 'lucide-react'
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
 
 // Need to import Leaflet CSS
@@ -15,13 +15,11 @@ interface LatLng {
   lng: number
 }
 
-interface GeoSearchResult {
-  x: number
-  y: number
-  label: string
-  bounds: [[number, number], [number, number]]
-  raw: any
-  provider: string
+interface LocationDetails {
+  city: string
+  state: string
+  district: string
+  pincode: string
 }
 
 const defaultCenter: LatLng = {
@@ -29,7 +27,7 @@ const defaultCenter: LatLng = {
   lng: 74.8560,
 }
 
-// Fix for default marker icons in Leaflet with Next.js
+// Existing marker icon configurations from previous code...
 const markerIcon = L.icon({
   iconUrl: '/marker-icon.png',
   iconRetinaUrl: '/marker-icon-2x.png',
@@ -40,7 +38,6 @@ const markerIcon = L.icon({
   shadowSize: [41, 41]
 })
 
-// Custom marker icons
 const redMarkerIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -59,11 +56,11 @@ const blueMarkerIcon = new L.Icon({
   shadowSize: [41, 41]
 })
 
+// Existing MapEvents and DraggableMarker components...
 interface MapEventsProps {
   onLocationUpdate: (pos: LatLng) => void
 }
 
-// Component to handle map events and updates
 const MapEvents: React.FC<MapEventsProps> = ({ onLocationUpdate }) => {
   const map = useMapEvents({
     click(e) {
@@ -78,7 +75,6 @@ interface DraggableMarkerProps {
   onPositionChange: (pos: LatLng) => void
 }
 
-// Component to handle marker dragging
 const DraggableMarker: React.FC<DraggableMarkerProps> = ({ position, onPositionChange }) => {
   const map = useMap()
 
@@ -130,6 +126,34 @@ const Map: React.FC = () => {
   const [userLocation, setUserLocation] = useState<LatLng | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [map, setMap] = useState<L.Map | null>(null)
+  const [locationDetails, setLocationDetails] = useState<LocationDetails | null>(null)
+
+  // New function to fetch location details using Nominatim reverse geocoding
+  const fetchLocationDetails = async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
+      const data = await response.json()
+      
+      if (data.address) {
+        setLocationDetails({
+          city: data.address.city || data.address.town || data.address.village || 'N/A',
+          state: data.address.state || 'N/A',
+          district: data.address.county || 'N/A',
+          pincode: data.address.postcode || 'N/A'
+        })
+      }
+    } catch (error) {
+      console.error("Error fetching location details:", error)
+      setLocationDetails(null)
+    }
+  }
+
+  // Fetch location details whenever marker position changes
+  useEffect(() => {
+    if (markerPosition) {
+      fetchLocationDetails(markerPosition.lat, markerPosition.lng)
+    }
+  }, [markerPosition])
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -196,6 +220,19 @@ const Map: React.FC = () => {
           </h2>
           <p className="mb-1">Latitude: {markerPosition.lat.toFixed(6)}</p>
           <p className="mb-4">Longitude: {markerPosition.lng.toFixed(6)}</p>
+          
+          {locationDetails && (
+            <div>
+              <h2 className="text-xl font-semibold mb-2 flex items-center">
+                <MapPinned className="mr-2" /> Location Details
+              </h2>
+              <p className="mb-1">City: {locationDetails.city}</p>
+              <p className="mb-1">District: {locationDetails.district}</p>
+              <p className="mb-1">State: {locationDetails.state}</p>
+              <p>Pincode: {locationDetails.pincode}</p>
+            </div>
+          )}
+
           {userLocation && userLocation !== markerPosition && (
             <>
               <h2 className="text-xl font-semibold mb-2 flex items-center">
