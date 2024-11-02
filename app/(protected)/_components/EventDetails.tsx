@@ -129,6 +129,7 @@ export const EventDetails = ({
           headerClassName="items-start"
           isEdit
           eventObject={event}
+          handleDelete={handleDelete}
         />
       </div>
       <RoleGate role={role} allowedRole={UserRole.USER}>

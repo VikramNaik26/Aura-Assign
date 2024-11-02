@@ -155,7 +155,7 @@ export const EventCard = ({
       </CardContent>
       <CardHeader className="p-4">
         <CardTitle className="text-lg">{event?.name}</CardTitle>
-        <CardDescription>{event?.description}</CardDescription>
+        <CardDescription>{`${event?.description?.substring(0, 50)} ${event?.description && event?.description?.length > 50 ? '...' : ''}`}</CardDescription>
       </CardHeader>
       <CardFooter className="px-2 hidden sm:flex justify-between ">
         <RoleGate role={role} allowedRole={UserRole.ORGANIZATION}>
@@ -246,7 +246,7 @@ export const EventCard = ({
                 }
               </Button>
             </DialogTrigger>
-            <DialogContent className="p-0 auto bg-transparent border-none">
+            <DialogContent className="p-0 bg-transparent border-none">
               <DialogHeader>
                 <DialogTitle asChild>
                   <VisuallyHidden>Create an event</VisuallyHidden>
