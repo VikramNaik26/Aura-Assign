@@ -153,9 +153,9 @@ export const EventCard = ({
           )}
         />
       </CardContent>
-      <CardHeader className="p-4">
-        <CardTitle className="text-lg">{event?.name}</CardTitle>
-        <CardDescription>{`${event?.description?.substring(0, 50)} ${event?.description && event?.description?.length > 50 ? '...' : ''}`}</CardDescription>
+      <CardHeader className="p-4 items-start">
+        <CardTitle className="text-lg text-left">{event?.name}</CardTitle>
+        <CardDescription className="text-left">{`${event?.description?.substring(0, 50)} ${event?.description && event?.description?.length > 50 ? '...' : ''}`}</CardDescription>
       </CardHeader>
       <CardFooter className="px-2 hidden sm:flex justify-between ">
         <RoleGate role={role} allowedRole={UserRole.ORGANIZATION}>
