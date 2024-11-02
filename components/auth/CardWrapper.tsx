@@ -20,7 +20,8 @@ interface CardWrapperProps {
   backButtonHref?: string
   showSocial?: boolean
   className?: ClassNameValue
-  headerClassName?: ClassNameValue
+  headerClassName?: ClassNameValue,
+  isLoginForm?: boolean
 }
 
 export const CardWrapper = ({
@@ -31,10 +32,11 @@ export const CardWrapper = ({
   backButtonHref,
   showSocial,
   className,
-  headerClassName
+  headerClassName,
+  isLoginForm = false
 }: CardWrapperProps) => {
   return (
-    <Card className={cn("w-full max-sm:border-none max-sm:shadow-none sm:w-[440px] shadow-md my-auto", className)}>
+    <Card className={cn(`w-full max-sm:border-none max-sm:shadow-none shadow-md my-auto sm:${isLoginForm ? 'w-[440px]' : 'w-auto'}`, className)}>
       <CardHeader>
         <Header headerText={headerText} label={headerLabel} headerClassName={headerClassName} />
       </CardHeader>

@@ -124,13 +124,13 @@ export const EventForm = (props: EventFormProps) => {
     <CardWrapper
       headerText={props.headerText || "Create Event"}
       headerLabel={props.headerLabel || "Enter the event details!"}
-      className={cn("w-[500px] -my-4", props.className)}
+      className={cn("-my-4 w-full", props.className)}
       headerClassName={props.headerClassName}
     >
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6"
+          className="space-y-6 sm:min-w-[440px]"
         >
           <div className="space-y-4">
             <>
@@ -244,6 +244,7 @@ export const EventForm = (props: EventFormProps) => {
                     onClick={() => {
                       if (props.handleDelete && props.eventObject) {
                         props.handleDelete?.(props.eventObject?.id)
+                        history.back()
                       } else {
                         toast.error("Something went wrong")
                       }

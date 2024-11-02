@@ -124,6 +124,7 @@ export const LoginForm = ({
       backButtonLabel="Don't have an account?"
       backButtonHref={isOrg ? "/org/register" : "/user/register"}
       showSocial={isOrg ? false : true}
+      isLoginForm
     >
       <Form {...form}>
         <form

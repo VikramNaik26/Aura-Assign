@@ -117,220 +117,238 @@ export const EnrollForm = (props: EnrollFormProps) => {
   }
 
   return (
-    <CardWrapper
-      headerText="Enroll in an event"
-      headerLabel="Enter the details below to enroll in an event"
-      className="w-[680px] p-4 -ml-40 -mt-6"
-    >
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6"
-        >
-          <div className="flex justify-between items-start gap-6">
-            <div className="flex-1 space-y-6">
-              <FormField
-                control={form.control}
-                name="userProfile.name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fullname</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Vikram Naik"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="userProfile.email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="vikramnaik@gmail.com"
-                        type="email"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="userProfile.phoneNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone number</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="1234567890"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="userProfile.dateOfBirth"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="YYYY-MM-DD"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="userProfile.gender"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Gender</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select the Gender" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Male">Male</SelectItem>
-                        <SelectItem value="Female">Female</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex-1 space-y-6">
-              <FormField
-                control={form.control}
-                name="userProfile.streetAddress"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="D no 123344, House name"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="userProfile.city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Mangaluru"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="userProfile.state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Karnataka"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="userProfile.postalCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Postal code</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="575030"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="userProfile.country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Country</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="India"
-                        type="text"
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <FormError message={error} />
-          <Button
-            type="submit"
-            className="w-full"
-          >
-            {
-              isPending ?
-                <Loader2 className="h-4 w-4 animate-spin" />
-                : "Enroll"
-            }
-          </Button>
-        </form>
-      </Form>
-    </CardWrapper>
+    <div className="flex items-center justify-center p-4 min-h-screen">
+      <CardWrapper
+        headerText="Enroll in an event"
+        headerLabel="Enter the details below to enroll in an event"
+        className="sm:w-[80dvw] sm:-ml-12 md:min-w-[680px] md:-ml-32 max-w-[800px] bg-white rounded-lg shadow-lg .scrollbar-hide"
+      >
+        <div className="max-h-[80vh] overflow-y-auto">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 p-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="userProfile.name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fullname</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Vikram Naik"
+                            type="text"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="userProfile.email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="vikramnaik@gmail.com"
+                            type="email"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="userProfile.phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone number</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="1234567890"
+                            type="text"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="userProfile.dateOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date of Birth</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="YYYY-MM-DD"
+                            type="text"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="userProfile.gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gender</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select the Gender" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="userProfile.streetAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="D no 123344, House name"
+                            type="text"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="userProfile.city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Mangaluru"
+                            type="text"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="userProfile.state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Karnataka"
+                            type="text"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="userProfile.postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Postal code</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="575030"
+                            type="text"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="userProfile.country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="India"
+                            type="text"
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <FormError message={error} />
+              <div className="flex flex-col gap-4 md:flex-row">
+                <Button
+                  type="submit"
+                  className="w-full"
+                >
+                  {isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Enroll"
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  className="w-full"
+                  variant="outline"
+                  onClick={props.closeDialog}
+                >
+                  {isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Cancel"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+      </CardWrapper>
+    </div>
   )
 }
 
