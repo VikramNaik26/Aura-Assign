@@ -13,6 +13,7 @@ export interface OrgEvent {
   imageUrl?: string | null
   date: Date
   time: Date
+  location?: { address: string; lat: number; lng: number }
 }
 
 export const createOrUpsertEvent = async (
