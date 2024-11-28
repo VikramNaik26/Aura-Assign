@@ -15,8 +15,8 @@ const Home = async () => {
   return (
     <main className="bg-[#070815] min-h-[120dvh]">
       <Bounded
-        className='px-4 py-14 first:pt-10 md:px-6 md:py-20 lg:py-24 text-center h-full'
-        childClassName='px-4 py-14 first:pt-10 md:px-6 md:py-20 lg:py-24'
+        className='px-4 first:pt-10 md:px-6 text-center h-full'
+        childClassName='px-4 md:px-6'
       >
         <AnimatedContent />
       </Bounded>

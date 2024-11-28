@@ -8,6 +8,12 @@ import { MoveRight } from 'lucide-react'
 
 import usePrefersReducedMotion from '@/hooks/usePreferedReduceMotion'
 import SignupButton from '@/components/auth/SignupButton'
+import Features from '@/components/Features'
+import Contributors from '@/components/Contributors'
+import ProjectCAM from '@/components/ProjectCoordinatorAndMentor'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import Objectives from '@/components/Objectives'
 
 const AnimatedContent = () => {
   const container = useRef(null)
@@ -59,33 +65,41 @@ const AnimatedContent = () => {
   )
 
   return (
-    <div className="relative h-full" ref={container}>
-      <h1 className="hero__heading text-balanced text-4xl font-medium opacity-0 md:text-5xl text-white">
-        Aura Assign
-        <br />
-        <span className='text-3xl md:text-4xl'>
-          The Premier Platform for Vibrant Side Hustles
-        </span>
-      </h1>
-      <div className="hero__body mx-auto mt-6 max-w-md text-balance text-slate-300 opacity-0">
-        A web application designed to seamlessly connect individuals seeking occasional work opportunities with organizations in need of temporary human resources.
+    <>
+      <Header />
+      <div className="relative h-full" ref={container}>
+        <h1 className="hero__heading text-balanced text-4xl font-medium opacity-0 md:text-5xl text-white">
+          Aura Assign
+          <br />
+          <span className='text-3xl md:text-4xl'>
+            The Premier Platform for Vibrant Side Hustles
+          </span>
+        </h1>
+        <div className="hero__body mx-auto mt-6 max-w-md text-balance text-slate-300 opacity-0">
+          A cross platform application designed to seamlessly connect individuals seeking occasional work opportunities with organizations in need of temporary human resources.
+        </div>
+        <SignupButton
+          className="hero__button mt-8 opacity-0 text-xs"
+        >
+          Get Started for free
+          <MoveRight size="16" className='ml-2' />
+        </SignupButton>
+        <div className="hero__image glass-container mt-16 w-fit mx-auto opacity-0">
+          <div className="hero__glow absolute -inset-10 -z-10 bg-blue-500/30 opacity-0 blur-2xl filter" />
+          <Image
+            src="/assets/heroDesktop.svg"
+            alt="Empty"
+            height={1000}
+            width={1000}
+          />
+        </div>
+        <Objectives />
+        <Features />
+        <ProjectCAM />
+        <Contributors />
       </div>
-      <SignupButton
-        className="hero__button mt-8 opacity-0 text-xs"
-      >
-        Get Started for free
-        <MoveRight size="16" className='ml-2' />
-      </SignupButton>
-      <div className="hero__image glass-container mt-16 w-fit mx-auto opacity-0">
-        <div className="hero__glow absolute -inset-10 -z-10 bg-blue-500/30 opacity-0 blur-2xl filter" />
-        <Image
-          src="/assets/heroDesktop.svg"
-          alt="Empty"
-          height={1000}
-          width={1000}
-        />
-      </div>
-    </div>
+      <Footer />
+    </>
   )
 }
 export default AnimatedContent
