@@ -128,13 +128,13 @@ const Dashboard = () => {
           })}
         </div>
         {!hasSearchQuery && (
-        <div className="flex justify-between mt-4 sm:hidden">
-          <h2 className="text-xl font-semibold">Nearby Events</h2>
-          <span className="text-sm text-muted-foreground">
-            See all
-            <StepForward className="inline ml-1" size={12} fill="currentColor" />
-          </span>
-        </div>
+          <div className="flex justify-between mt-4 sm:hidden">
+            <h2 className="text-xl font-semibold">Nearby Events</h2>
+            <span className="text-sm text-muted-foreground">
+              See all
+              <StepForward className="inline ml-1" size={12} fill="currentColor" />
+            </span>
+          </div>
         )}
       </section>
     ) : (hasSearchQuery && !events.length) ? (
@@ -150,10 +150,21 @@ const Dashboard = () => {
       </section>
     ) : searchParams.get('enrolled') === 'true'
       ? <EmptyEnroll />
-      : (
+      : organizationOrUser.role === UserRole.ORGANIZATION ? (
         <RoleGate role={organizationOrUser.role} allowedRole={UserRole.ORGANIZATION}>
           <EmptyEvent />
         </RoleGate>
+      ) : (
+        <section className="px-4 py-6 h-full">
+          <Navbar
+            orgId={organizationOrUser?.id}
+            organizationOrUser={organizationOrUser}
+            events={events}
+            setEvents={setEvents}
+            setHasSearchQuery={setHasSearchQuery}
+          />
+          <EmptyEvent isUser />
+        </section>
       )
   )
 }
