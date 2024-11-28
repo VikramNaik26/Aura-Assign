@@ -127,10 +127,7 @@ export const EventCard = ({
   }
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only handle click if target is the card itself (not buttons/links inside)
-    if (e.currentTarget === e.target) {
-      router.push(`dashboard/event/${event?.id}`)
-    }
+    router.push(`dashboard/event/${event?.id}`)
   }
 
   return (
@@ -139,7 +136,6 @@ export const EventCard = ({
         `sm:max-w-[300px] max-sm:w-[100%] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none max-sm:first:ml-8`,
         hasSearchQuery && 'flex-row sm:flex-col w-full max-sm:first:ml-0'
       )}
-      onClick={handleCardClick}
     >
       <CardContent className={cn(
         "w-full min-w-[220px] max-w-[300px] max-h-[200px] p-2",
@@ -154,11 +150,12 @@ export const EventCard = ({
             "w-full h-full object-cover rounded-md",
             hasSearchQuery && "max-sm:w-28 max-sm:h-24"
           )}
+          onClick={handleCardClick}
         />
       </CardContent>
       <CardHeader className="p-4 items-start">
-        <CardTitle className="text-lg text-left">{event?.name}</CardTitle>
-        <CardDescription className="text-left">{`${event?.description?.substring(0, 50)} ${event?.description && event?.description?.length > 50 ? '...' : ''}`}</CardDescription>
+        <CardTitle onClick={handleCardClick} className="text-lg text-left">{event?.name}</CardTitle>
+        <CardDescription onClick={handleCardClick} className="text-left">{`${event?.description?.substring(0, 50)} ${event?.description && event?.description?.length > 50 ? '...' : ''}`}</CardDescription>
       </CardHeader>
       <CardFooter className="px-2 hidden sm:flex justify-between ">
         <RoleGate role={role} allowedRole={UserRole.ORGANIZATION}>
