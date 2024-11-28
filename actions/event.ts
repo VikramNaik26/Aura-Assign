@@ -39,12 +39,18 @@ export const createOrUpsertEvent = async (
       time: Date
       imageUrl?: string
       orgId?: string
+      address: string
+      latitude: number
+      longitude: number
     } = {
       name: values.name,
       description: values.description,
       date: date,
       time: date,
-      imageUrl: values.imageUrl
+      imageUrl: values.imageUrl,
+      address: values.location.address,
+      latitude: values.location.lat,
+      longitude: values.location.lng
     }
 
     if (organization?.id) {

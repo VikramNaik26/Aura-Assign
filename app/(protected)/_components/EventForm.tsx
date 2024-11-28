@@ -114,29 +114,29 @@ export const EventForm = (props: EventFormProps) => {
   const onSubmit = (values: z.infer<typeof EventSchema>) => {
     setError("")
     console.log("values", values)
-    // startTransition(() => {
-    //   mutation.mutateAsync(values)
-    //     .then(data => {
-    //       if (data?.error) {
-    //         form.reset()
-    //         setError(data?.error)
-    //       }
+    startTransition(() => {
+      mutation.mutateAsync(values)
+        .then(data => {
+          if (data?.error) {
+            form.reset()
+            setError(data?.error)
+          }
 
-    //       if (data?.success) {
-    //         form.reset()
-    //         if (closeDialog) {
-    //           closeDialog()
-    //         }
-    //       }
+          if (data?.success) {
+            form.reset()
+            if (closeDialog) {
+              closeDialog()
+            }
+          }
 
-    //       if (!data?.error) {
-    //         toast.success(data?.success)
-    //       }
-    //     })
-    //     .catch(() => {
-    //       setError("Something went wrong")
-    //     })
-    // })
+          if (!data?.error) {
+            toast.success(data?.success)
+          }
+        })
+        .catch(() => {
+          setError("Something went wrong")
+        })
+    })
   }
 
   const handleLocationSelect = (location: Location) => {
@@ -261,6 +261,7 @@ export const EventForm = (props: EventFormProps) => {
                           <MapComponent
                             selectedLocation={selectedLocation}
                             onLocationSelect={handleLocationSelect}
+                            disabled={isPending || isInputDisabled}
                           />
                           {selectedLocation && (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -293,7 +294,7 @@ export const EventForm = (props: EventFormProps) => {
                       onClick={() => {
                         if (props.handleDelete && props.eventObject) {
                           props.handleDelete?.(props.eventObject?.id)
-                          // history.back()
+                          history.back()
                         } else {
                           toast.error("Something went wrong")
                         }
@@ -322,11 +323,7 @@ export const EventForm = (props: EventFormProps) => {
                       variant="outline"
                       onClick={closeDialog}
                     >
-                      {
-                        isPending
-                          ? <Loader2 className="h-4 animate-spin" />
-                          : "Cancel"
-                      }
+                      Cancel
                     </Button>
                   </div>
                 )}

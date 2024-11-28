@@ -18,10 +18,12 @@ interface Location {
 interface MapComponentProps {
   selectedLocation: Location | null
   onLocationSelect: (location: Location) => void
+  disabled?: boolean
 }
 
 interface SearchFieldProps {
   onLocationSelect: (location: Location) => void
+  disabled?: boolean
 }
 
 interface GeoSearchResultEvent extends LeafletEvent {
@@ -44,7 +46,7 @@ const customIcon = new L.Icon({
 })
 
 
-const SearchField: React.FC<SearchFieldProps> = ({ onLocationSelect }) => {
+const SearchField: React.FC<SearchFieldProps> = ({ onLocationSelect, disabled }) => {
   const map = useMap()
   const [marker, setMarker] = useState<L.Marker | null>(null)
   const [isLocating, setIsLocating] = useState(false)
@@ -134,6 +136,7 @@ const SearchField: React.FC<SearchFieldProps> = ({ onLocationSelect }) => {
 
     // Handle map clicks
     const handleMapClick = async (e: LeafletMouseEvent) => {
+      if (disabled) return
       const { lat, lng } = e.latlng
 
       try {
@@ -206,12 +209,12 @@ const SearchField: React.FC<SearchFieldProps> = ({ onLocationSelect }) => {
         marker.remove()
       }
     }
-  }, [map, onLocationSelect, marker, provider, isLocating])
+  }, [map, onLocationSelect, marker, provider, isLocating, disabled])
 
   return null
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ selectedLocation, onLocationSelect }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ selectedLocation, onLocationSelect, disabled }) => {
   return (
     <div className="h-[300px] rounded-md border flex justify-center items-center">
       <MapContainer
@@ -221,12 +224,19 @@ const MapComponent: React.FC<MapComponentProps> = ({ selectedLocation, onLocatio
         ]}
         zoom={13}
         style={{ height: '100%', width: '100%' }}
+        dragging={!disabled}
+        zoomControl={!disabled}
+        scrollWheelZoom={!disabled}
+        doubleClickZoom={!disabled}
+        attributionControl={!disabled}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        <SearchField onLocationSelect={onLocationSelect} />
+        {!disabled && (
+          <SearchField onLocationSelect={onLocationSelect} disabled={disabled} />
+        )}
         {selectedLocation && (
           <Marker
             position={[selectedLocation.lat, selectedLocation.lng]}
