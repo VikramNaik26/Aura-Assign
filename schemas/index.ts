@@ -47,7 +47,12 @@ export const EventSchema = z.object({
   time: z.string().regex(timeRegex, {
     message: "Time must be in HH:mm format"
   }),
-  date: z.string().date().refine(val => !isNaN(Date.parse(val)), "Invalid date")
+  date: z.string().date().refine(val => !isNaN(Date.parse(val)), "Invalid date"),
+  location: z.object({
+    address: z.string(),
+    lat: z.number(),
+    lng: z.number()
+  })
 })
 
 export const UserProfileSchema = z.object({

@@ -121,9 +121,9 @@ export const EnrollForm = (props: EnrollFormProps) => {
       <CardWrapper
         headerText="Enroll in an event"
         headerLabel="Enter the details below to enroll in an event"
-        className="sm:w-[80dvw] sm:-ml-12 md:min-w-[680px] md:-ml-32 max-w-[800px] bg-white rounded-lg shadow-lg .scrollbar-hide"
+        className="sm:w-[80dvw] sm:-ml-12 md:min-w-[680px] md:-ml-32 max-w-[800px] bg-white rounded-lg shadow-lg"
       >
-        <div className="max-h-[80vh] overflow-y-auto">
+        <div className="max-h-[80vh] overflow-y-auto scrollbar-hide">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}

@@ -101,12 +101,15 @@ model Event {
   time        DateTime
   date        DateTime
   orgId       String?
-
   organization Organization? @relation(fields: [orgId], references: [id])
-  enrollments  Enrollment[]
+  enrollments Enrollment[]
+  address     String
+  latitude    Float
+  longitude   Float
 
   @@index([orgId])
   @@index([name])
+  @@index([address, latitude, longitude])
 }
 
 model VerificationToken {

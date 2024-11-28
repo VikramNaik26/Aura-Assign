@@ -6,7 +6,7 @@ export const BackButtonInAppBar = () => {
   return (
     <div 
       className="flex gap-2 lg:hidden fixed sm:static top-4 left-4 bg-white/40 p-1 rounded"
-      onClick={() => history.back()}
+      onClick={() => window.history.back()}
     >
       <ChevronLeftIcon className="h-6 w-6" />
       <span className="hidden sm:inline">Back</span>

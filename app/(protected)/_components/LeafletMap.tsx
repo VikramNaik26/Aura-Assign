@@ -95,9 +95,81 @@ const DraggableMarker: React.FC<DraggableMarkerProps> = ({ position, onPositionC
   )
 }
 
+
+const customSearchStyle = `
+.leaflet-control-geosearch {
+  position: absolute !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  z-index: 1000;
+}
+
+.leaflet-control-geosearch form {
+  margin-block: auto;
+  padding: 0.25rem;
+  border-radius: 0.4rem;
+  position: relative;
+
+  .reset {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding-inline: 0.5rem;
+    padding-block: 0.5rem 0;
+  }
+}
+
+.leaflet-control-geosearch form input {
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 8px;
+  padding-bottom: 0px;
+  font-size: 14px;
+}
+
+.leaflet-control-geosearch .results {
+  background: white;
+  border-radius: 12px;
+  margin-top: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.leaflet-control-geosearch .results > * {
+  padding: 10px 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.leaflet-control-geosearch .results > *:last-child {
+  border-bottom: none;
+}
+
+.leaflet-control-geosearch .results > *:hover {
+  background: #f8f9fa;
+}
+
+.leaflet-control-geosearch form .reset {
+  right: 16px;
+}
+
+@media (max-width: 560px) {
+  .leaflet-control-geosearch form {
+    margin-left: 36px;
+  }
+}
+`;
+
 const SearchControl: React.FC<{ map: L.Map }> = ({ map }) => {
   useEffect(() => {
     const provider = new OpenStreetMapProvider()
+    const styleSheet = document.createElement("style")
+    styleSheet.textContent = customSearchStyle
+    document.head.appendChild(styleSheet)
 
     const searchControl = new (GeoSearchControl as any)({
       provider: provider,
@@ -115,6 +187,7 @@ const SearchControl: React.FC<{ map: L.Map }> = ({ map }) => {
 
     return () => {
       map.removeControl(searchControl)
+      styleSheet.remove()
     }
   }, [map])
 
@@ -133,7 +206,7 @@ const Map: React.FC = () => {
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
       const data = await response.json()
-      
+
       if (data.address) {
         setLocationDetails({
           city: data.address.city || data.address.town || data.address.village || 'N/A',
@@ -220,7 +293,7 @@ const Map: React.FC = () => {
           </h2>
           <p className="mb-1">Latitude: {markerPosition.lat.toFixed(6)}</p>
           <p className="mb-4">Longitude: {markerPosition.lng.toFixed(6)}</p>
-          
+
           {locationDetails && (
             <div>
               <h2 className="text-xl font-semibold mb-2 flex items-center">

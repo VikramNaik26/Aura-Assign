@@ -224,3 +224,12 @@ body,
   @apply absolute -inset-[2px] -z-10 rounded border border-slate-100/20 bg-slate-200/10 backdrop-blur-md;
   content: '';
 }
+
+.objective-card {
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.objective-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}

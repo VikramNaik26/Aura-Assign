@@ -112,7 +112,7 @@ export const EventDetails = ({
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row-reverse gap-4 items-stretch justify-end w-full">
+      <div className="flex flex-col sm:flex-row-reverse gap-4 min-h-full">
         <div className="w-full md:max-w-[350px] sm:aspect-auto">
           <Image
             alt="Product image"
@@ -147,7 +147,7 @@ export const EventDetails = ({
               }
             </Button>
           </DialogTrigger>
-          <DialogContent className="p-0 auto bg-transparent border-none">
+          <DialogContent className="p-0 auto bg-transparent border-none z-[99999]">
             <DialogHeader>
               <DialogTitle asChild>
                 <VisuallyHidden>Create an event</VisuallyHidden>
@@ -160,6 +160,8 @@ export const EventDetails = ({
           </DialogContent>
         </Dialog>
       </RoleGate>
+      <div className="min-h-20">
+      </div>
     </>
   )
 }
