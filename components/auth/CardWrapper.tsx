@@ -36,7 +36,7 @@ export const CardWrapper = ({
   isLoginForm = false
 }: CardWrapperProps) => {
   return (
-    <Card className={cn(`w-full max-sm:border-none max-sm:shadow-none shadow-md my-auto sm:${isLoginForm ? 'w-[440px]' : 'w-auto'}`, className)}>
+    <Card className={cn(`max-sm:border-none max-sm:shadow-none shadow-md my-auto ${isLoginForm ? 'sm:w-[440px]' : 'sm:w-auto'} w-full`, className)}>
       <CardHeader>
         <Header headerText={headerText} label={headerLabel} headerClassName={headerClassName} />
       </CardHeader>

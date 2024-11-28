@@ -6,7 +6,24 @@ export const getEventById = async (id?: string) => {
       where: { id }
     })
 
-    return event
+    if (!event) {
+      return null
+    }
+
+    const transformedEvent = {
+      ...event,
+      location: {
+        address: event.address,
+        lat: event.latitude,
+        lng: event.longitude,
+      },
+    }
+
+    delete (transformedEvent as any).address;
+    delete (transformedEvent as any).latitude;
+    delete (transformedEvent as any).longitude;
+
+    return transformedEvent
   } catch (error) {
     return null
   }

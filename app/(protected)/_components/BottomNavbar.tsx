@@ -37,7 +37,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, icon: Icon, label }) => {
 
 export const BottomNavbar: React.FC = () => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-gray-200 p-2 z-10 shadow-[0_-4px_8px_0_rgba(0,0,0,0.06)] lg:hidden">
+    <div className="fixed z-[9999] bottom-0 left-0 right-0 bg-white border-gray-200 p-2 shadow-[0_-4px_8px_0_rgba(0,0,0,0.06)] lg:hidden">
       <div className="flex items-center justify-between max-w-md mx-auto">
         <nav className="flex-1 flex justify-around items-center [&>a]:w-16">
           <NavLink href="/dashboard" icon={Compass} label="Explore" />
