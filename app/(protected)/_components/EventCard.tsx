@@ -147,15 +147,15 @@ export const EventCard = ({
           width={100}
           height={100}
           className={cn(
-            "w-full h-full object-cover rounded-md",
+            "w-full h-full object-cover rounded-md cursor-pointer",
             hasSearchQuery && "max-sm:w-28 max-sm:h-24"
           )}
           onClick={handleCardClick}
         />
       </CardContent>
       <CardHeader className="p-4 items-start">
-        <CardTitle onClick={handleCardClick} className="text-lg text-left">{event?.name}</CardTitle>
-        <CardDescription onClick={handleCardClick} className="text-left">{`${event?.description?.substring(0, 50)} ${event?.description && event?.description?.length > 50 ? '...' : ''}`}</CardDescription>
+        <CardTitle onClick={handleCardClick} className="text-lg text-left cursor-pointer">{event?.name}</CardTitle>
+        <CardDescription onClick={handleCardClick} className="text-left cursor-pointer">{`${event?.description?.substring(0, 50)} ${event?.description && event?.description?.length > 50 ? '...' : ''}`}</CardDescription>
       </CardHeader>
       <CardFooter className="px-2 hidden sm:flex justify-between ">
         <RoleGate role={role} allowedRole={UserRole.ORGANIZATION}>

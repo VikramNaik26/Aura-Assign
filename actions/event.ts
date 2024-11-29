@@ -78,29 +78,41 @@ export const createOrUpsertEvent = async (
   }
 }
 
+const transformEvent = (event: any) => {
+  const transformedEvent = {
+    ...event,
+    location: {
+      address: event.address,
+      lat: event.latitude,
+      lng: event.longitude,
+    },
+  }
+  delete (transformedEvent as any).address
+  delete (transformedEvent as any).latitude
+  delete (transformedEvent as any).longitude
+  return transformedEvent
+}
+
 export const getEvents = async () => {
   try {
     const events = await db.event.findMany()
-    return events
+    return events.map(transformEvent)
   } catch (error) {
-    console.error('Error fetching events:', error)
-    throw new Error('Cannot find events')
+    console.error("Error fetching events:", error)
+    throw new Error("Cannot find events")
   }
 }
 
 export const getEventsByOrgId = async (orgId?: string): Promise<OrgEvent[]> => {
   try {
     const organization = orgId ? await getOrgById(orgId) : null
-
     const events = await db.event.findMany({
       where: { orgId: organization?.id },
     })
-
-    return events
+    return events.map(transformEvent)
   } catch (error) {
-    console.error("Error fetching events:", error);
-
-    throw new Error("Failed to fetch events. Please try again later.");
+    console.error("Error fetching events:", error)
+    throw new Error("Failed to fetch events. Please try again later.")
   }
 }
 
