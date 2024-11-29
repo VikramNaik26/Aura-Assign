@@ -1,15 +1,23 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { MapPin, Crosshair, Loader2, MapPinned } from 'lucide-react'
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
+import { UserRole } from "@prisma/client"
+import { useQuery } from "@tanstack/react-query"
 
-// Need to import Leaflet CSS
+// CSS Imports
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-geosearch/assets/css/leaflet.css'
 
+// Action and Hook Imports
+import { getEventById, getEvents, getEventsByOrgId, OrgEvent } from "@/actions/event"
+import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
+import { Enrollments, getEnrollmentsByUserId } from "@/actions/enrollment"
+
+// Type Definitions
 interface LatLng {
   lat: number
   lng: number
@@ -22,80 +30,32 @@ interface LocationDetails {
   pincode: string
 }
 
+// Default Location
 const defaultCenter: LatLng = {
   lat: 12.9141,
   lng: 74.8560,
 }
 
-// Existing marker icon configurations from previous code...
-const markerIcon = L.icon({
-  iconUrl: '/marker-icon.png',
-  iconRetinaUrl: '/marker-icon-2x.png',
-  shadowUrl: '/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-})
-
-const redMarkerIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-})
-
-const blueMarkerIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-})
-
-// Existing MapEvents and DraggableMarker components...
-interface MapEventsProps {
-  onLocationUpdate: (pos: LatLng) => void
-}
-
-const MapEvents: React.FC<MapEventsProps> = ({ onLocationUpdate }) => {
-  const map = useMapEvents({
-    click(e) {
-      onLocationUpdate(e.latlng)
-    },
+// Custom Marker Icons
+const createMarkerIcon = (iconUrl: string) => {
+  return L.icon({
+    iconUrl: iconUrl,
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
   })
-  return null
 }
 
-interface DraggableMarkerProps {
-  position: LatLng
-  onPositionChange: (pos: LatLng) => void
+const markerIcons = {
+  default: createMarkerIcon('/logoSmall.png'),
+  red: createMarkerIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png'),
+  blue: createMarkerIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png'),
+  green: createMarkerIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png')
 }
 
-const DraggableMarker: React.FC<DraggableMarkerProps> = ({ position, onPositionChange }) => {
-  const map = useMap()
-
-  return (
-    <Marker
-      position={position}
-      icon={redMarkerIcon}
-      draggable={true}
-      eventHandlers={{
-        dragend: (e) => {
-          const marker = e.target
-          const position = marker.getLatLng()
-          onPositionChange(position)
-          map.panTo(position)
-        },
-      }}
-    />
-  )
-}
-
-
+// Custom Search Control Styles
 const customSearchStyle = `
 .leaflet-control-geosearch {
   position: absolute !important;
@@ -105,6 +65,7 @@ const customSearchStyle = `
   width: 90%;
   max-width: 400px;
   z-index: 1000;
+  padding-left: 2rem;
 }
 
 .leaflet-control-geosearch form {
@@ -112,14 +73,16 @@ const customSearchStyle = `
   padding: 0.25rem;
   border-radius: 0.4rem;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .reset {
-    position: absolute;
-    right: 0;
-    top: 0;
-    padding-inline: 0.5rem;
-    padding-block: 0.5rem 0;
-  }
+.leaflet-control-geosearch form .reset { 
+  position: absolute;
+  right: 0.5rem;
+  top: 0.3rem;
+  cursor: pointer;
 }
 
 .leaflet-control-geosearch form input {
@@ -127,7 +90,6 @@ const customSearchStyle = `
   border: none;
   outline: none;
   padding: 8px;
-  padding-bottom: 0px;
   font-size: 14px;
 }
 
@@ -145,25 +107,46 @@ const customSearchStyle = `
   cursor: pointer;
 }
 
-.leaflet-control-geosearch .results > *:last-child {
-  border-bottom: none;
-}
-
 .leaflet-control-geosearch .results > *:hover {
   background: #f8f9fa;
 }
-
-.leaflet-control-geosearch form .reset {
-  right: 16px;
-}
-
-@media (max-width: 560px) {
-  .leaflet-control-geosearch form {
-    margin-left: 36px;
-  }
-}
 `;
 
+// Map Events Component
+const MapEvents: React.FC<{ onLocationUpdate: (pos: LatLng) => void }> = ({ onLocationUpdate }) => {
+  useMapEvents({
+    click(e) {
+      onLocationUpdate(e.latlng)
+    },
+  })
+  return null
+}
+
+// Draggable Marker Component
+const DraggableMarker: React.FC<{ 
+  position: LatLng, 
+  onPositionChange: (pos: LatLng) => void 
+}> = ({ position, onPositionChange }) => {
+  const map = useMap()
+
+  return (
+    <Marker
+      position={position}
+      icon={markerIcons.red}
+      draggable={true}
+      eventHandlers={{
+        dragend: (e) => {
+          const marker = e.target
+          const newPosition = marker.getLatLng()
+          onPositionChange(newPosition)
+          map.panTo(newPosition)
+        },
+      }}
+    />
+  )
+}
+
+// Search Control Component
 const SearchControl: React.FC<{ map: L.Map }> = ({ map }) => {
   useEffect(() => {
     const provider = new OpenStreetMapProvider()
@@ -194,6 +177,7 @@ const SearchControl: React.FC<{ map: L.Map }> = ({ map }) => {
   return null
 }
 
+// Main Map Component
 const Map: React.FC = () => {
   const [markerPosition, setMarkerPosition] = useState<LatLng>(defaultCenter)
   const [userLocation, setUserLocation] = useState<LatLng | null>(null)
@@ -201,7 +185,65 @@ const Map: React.FC = () => {
   const [map, setMap] = useState<L.Map | null>(null)
   const [locationDetails, setLocationDetails] = useState<LocationDetails | null>(null)
 
-  // New function to fetch location details using Nominatim reverse geocoding
+  const [events, setEvents] = useState<OrgEvent[]>([])
+  const [enrolledEvents, setEnrolledEvents] = useState<OrgEvent[]>([])
+  const { data: organizationOrUser, status } = useCurrentOrgORUser()
+  
+  // Events Query
+  const { data, error, isLoading: isLoadingEvents } = useQuery<OrgEvent[]>({
+    queryKey: ["events", organizationOrUser?.id],
+    queryFn: () => {
+      if (organizationOrUser?.role === UserRole.ORGANIZATION) {
+        return getEventsByOrgId(organizationOrUser?.id)
+      } else {
+        return getEvents()
+      }
+    },
+    enabled: status === "authenticated"
+  })
+
+  // Enrollments Query
+  const { data: enrollments, isLoading: isLoadingEnrollments } = useQuery<Enrollments[]>({
+    queryKey: ["enrollments", organizationOrUser?.id],
+    queryFn: () => {
+      return getEnrollmentsByUserId(organizationOrUser?.id)
+    },
+    enabled: !!organizationOrUser?.id
+  })
+
+  // Enrolled Events Query
+  const { data: enrolledEventsData } = useQuery<OrgEvent[]>({
+    queryKey: ["enrolled-events", enrollments],
+    queryFn: async () => {
+      if (!enrollments || enrollments.length === 0) return []
+
+      const events = await Promise.all(enrollments.map(async (enrollment) => {
+        const event = await getEventById(enrollment.eventId)
+        if (event && !("error" in event)) {
+          return event
+        }
+        return null
+      }))
+
+      return events.filter(event => event !== null) as OrgEvent[]
+    },
+    enabled: !!enrollments && !!enrollments.length
+  })
+
+  // Update events and enrolled events
+  useEffect(() => {
+    if (data) {
+      setEvents(data)
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (enrolledEventsData) {
+      setEnrolledEvents(enrolledEventsData)
+    }
+  }, [enrolledEventsData])
+
+  // Fetch Location Details
   const fetchLocationDetails = async (lat: number, lng: number) => {
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
@@ -221,13 +263,7 @@ const Map: React.FC = () => {
     }
   }
 
-  // Fetch location details whenever marker position changes
-  useEffect(() => {
-    if (markerPosition) {
-      fetchLocationDetails(markerPosition.lat, markerPosition.lng)
-    }
-  }, [markerPosition])
-
+  // Geolocation Effect
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -251,6 +287,14 @@ const Map: React.FC = () => {
     }
   }, [])
 
+  // Location Details Effect
+  useEffect(() => {
+    if (markerPosition) {
+      fetchLocationDetails(markerPosition.lat, markerPosition.lng)
+    }
+  }, [markerPosition])
+
+  // Loading State
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -266,7 +310,7 @@ const Map: React.FC = () => {
       <div className="flex-1 relative">
         <MapContainer
           center={markerPosition}
-          zoom={14}
+          zoom={10}
           style={{ width: '100%', height: '100%' }}
           ref={setMap}
         >
@@ -274,46 +318,111 @@ const Map: React.FC = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          
+          {/* Event Markers */}
+          {events.map((event) => (
+            event.location?.lat && event.location?.lng ? (
+              <Marker
+                key={event.id}
+                position={{ lat: event.location?.lat, lng: event.location?.lng }}
+                icon={markerIcons.default}
+              >
+                <Popup>
+                  <div className="font-bold">{event.name}</div>
+                  <div>{event.description}</div>
+                  <div className="text-sm text-gray-600">
+                    Date: {new Date(event.date).toLocaleDateString()}
+                  </div>
+                </Popup>
+              </Marker>
+            ) : null
+          ))}
+
+          {/* Enrolled Events Markers */}
+          {enrolledEvents.map((event) => (
+            event.location?.lat && event.location?.lng ? (
+              <Marker
+                key={event.id}
+                position={{ lat: event.location?.lat, lng: event.location?.lng }}
+                icon={markerIcons.green}
+              >
+                <Popup>
+                  <div className="font-bold">{event.name} (Enrolled)</div>
+                  <div>{event.description}</div>
+                  <div className="text-sm text-gray-600">
+                    Date: {new Date(event.date).toLocaleDateString()}
+                  </div>
+                </Popup>
+              </Marker>
+            ) : null
+          ))}
+
+          {/* User's Current Draggable Marker */}
           <DraggableMarker
             position={markerPosition}
             onPositionChange={setMarkerPosition}
           />
+
+          {/* User's Original Location Marker */}
           {userLocation && userLocation !== markerPosition && (
-            <Marker position={userLocation} icon={blueMarkerIcon} />
+            <Marker position={userLocation} icon={markerIcons.blue} />
           )}
+
           <MapEvents onLocationUpdate={setMarkerPosition} />
           {map && <SearchControl map={map} />}
         </MapContainer>
       </div>
 
+      {/* Location and Event Details Section */}
       <div className="bg-white p-4 shadow-md">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-xl font-semibold mb-2 flex items-center">
-            <MapPin className="mr-2" /> Selected Location
-          </h2>
-          <p className="mb-1">Latitude: {markerPosition.lat.toFixed(6)}</p>
-          <p className="mb-4">Longitude: {markerPosition.lng.toFixed(6)}</p>
-
-          {locationDetails && (
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Selected Location Details */}
             <div>
               <h2 className="text-xl font-semibold mb-2 flex items-center">
-                <MapPinned className="mr-2" /> Location Details
+                <MapPin className="mr-2" /> Selected Location
               </h2>
-              <p className="mb-1">City: {locationDetails.city}</p>
-              <p className="mb-1">District: {locationDetails.district}</p>
-              <p className="mb-1">State: {locationDetails.state}</p>
-              <p>Pincode: {locationDetails.pincode}</p>
-            </div>
-          )}
+              <p className="mb-1">Latitude: {markerPosition.lat.toFixed(6)}</p>
+              <p className="mb-4">Longitude: {markerPosition.lng.toFixed(6)}</p>
 
+              {locationDetails && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2 flex items-center">
+                    <MapPinned className="mr-2" /> Location Details
+                  </h3>
+                  <p className="mb-1">City: {locationDetails.city}</p>
+                  <p className="mb-1">District: {locationDetails.district}</p>
+                  <p className="mb-1">State: {locationDetails.state}</p>
+                  <p>Pincode: {locationDetails.pincode}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Event Summary */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Event Summary</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold">Total Events</h3>
+                  <p>{events.length}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Enrolled Events</h3>
+                  <p>{enrolledEvents.length}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* User's Original Location */}
           {userLocation && userLocation !== markerPosition && (
-            <>
+            <div className="mt-4">
               <h2 className="text-xl font-semibold mb-2 flex items-center">
                 <Crosshair className="mr-2" /> Your Detected Location
               </h2>
               <p className="mb-1">Latitude: {userLocation.lat.toFixed(6)}</p>
               <p>Longitude: {userLocation.lng.toFixed(6)}</p>
-            </>
+            </div>
           )}
         </div>
       </div>
