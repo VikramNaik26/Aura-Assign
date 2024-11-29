@@ -18,6 +18,7 @@ import { RoleGate } from "@/components/auth/RoleGate"
 import { EmptyEnroll } from "../_components/EmptyEnroll"
 import { StepForward } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Sidebar } from "../_components/Sidebar"
 
 const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
@@ -97,6 +98,7 @@ const Dashboard = () => {
   return (
     events?.length ? (
       <section className="px-2 py-6 h-full w-full">
+        <Sidebar organizationOrUser={organizationOrUser} />
         <Navbar
           orgId={organizationOrUser?.id}
           organizationOrUser={organizationOrUser}
