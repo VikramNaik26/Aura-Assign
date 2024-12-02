@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
   const [hasSearchQuery, setHasSearchQuery] = useState(false)
   const searchParams = useSearchParams()
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true)
 
   const { data: organizationOrUser, status } = useCurrentOrgORUser()
 
@@ -66,14 +67,18 @@ const Dashboard = () => {
   })
 
   useEffect(() => {
+    setIsLoadingEvents(true)
     const isEnrolled = searchParams.get('enrolled') === 'true'
 
     if (isEnrolled) {
       setEvents(enrolledEvents as OrgEvent[])
+      setIsLoadingEvents(false)
     } else if (events && events.length && hasSearchQuery) {
       setEvents(events)
+      setIsLoadingEvents(false)
     } else if (data && !hasSearchQuery) {
       setEvents(data)
+      setIsLoadingEvents(false)
     }
   }, [data, events, isLoading, hasSearchQuery, organizationOrUser, enrolledEvents, searchParams])
 
@@ -156,7 +161,7 @@ const Dashboard = () => {
         <RoleGate role={organizationOrUser.role} allowedRole={UserRole.ORGANIZATION}>
           <EmptyEvent />
         </RoleGate>
-      ) : (
+      ) : !isLoadingEvents && (
         <section className="px-4 py-6 h-full">
           <Navbar
             orgId={organizationOrUser?.id}
