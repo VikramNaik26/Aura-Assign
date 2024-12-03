@@ -13,7 +13,11 @@ export interface OrgEvent {
   imageUrl?: string | null
   date: Date
   time: Date
-  location?: { address: string; lat: number; lng: number }
+  location?: {
+    address: string
+    lat: number
+    lng: number
+  }
 }
 
 export const createOrUpsertEvent = async (
@@ -54,24 +58,24 @@ export const createOrUpsertEvent = async (
     }
 
     if (organization?.id) {
-      eventData.orgId = organization.id;
+      eventData.orgId = organization.id
     }
 
     if (eventId) {
       await db.event.update({
         where: { id: eventId },
         data: eventData
-      });
-      return { success: 'Event Successfully Updated' };
+      })
+      return { success: 'Event Successfully Updated' }
     } else {
       await db.event.create({
         data: eventData
-      });
-      return { success: 'Event Successfully Created' };
+      })
+      return { success: 'Event Successfully Created' }
     }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { error: 'Validation failed', details: error.errors };
+      return { error: 'Validation failed', details: error.errors }
     } else {
       console.log(error)
     }
@@ -100,6 +104,57 @@ export const getEvents = async () => {
   } catch (error) {
     console.error("Error fetching events:", error)
     throw new Error("Cannot find events")
+  }
+}
+
+// Haversine formula to calculate distance between two lat/lng points
+const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+  const R = 6371 // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c // Distance in kilometers
+}
+
+export const getNearbyEvents = async (userLat?: number | null, userLng?: number | null, maxDistance: number = 100) => {
+  try {
+    // Fetch all events
+    const events = await db.event.findMany()
+
+    // Transform and filter events
+    const nearbyEvents = events
+      .map(transformEvent) // Use the existing transform function
+      .filter(event => {
+        // Check if event has valid location
+        if (!event.location || !event.location.lat || !event.location.lng) {
+          return false
+        }
+
+        if (!userLat) {
+          userLat = 12.92309956737475
+        }
+        if (!userLng) {
+          userLng = 74.8128171745646
+        }
+        // Calculate distance
+        const distance = calculateDistance(
+          userLat,
+          userLng,
+          event.location.lat,
+          event.location.lng
+        )
+
+        // Return events within max distance
+        return distance <= maxDistance
+      })
+    return nearbyEvents
+  } catch (error) {
+    console.error("Error fetching nearby events:", error)
+    throw new Error("Cannot find nearby events")
   }
 }
 
