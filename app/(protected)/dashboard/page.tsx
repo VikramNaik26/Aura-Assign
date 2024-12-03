@@ -8,7 +8,13 @@ import { useSearchParams } from "next/navigation"
 import { UserRole } from "@prisma/client"
 
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
-import { getEventById, getEvents, getEventsByOrgId, OrgEvent } from "@/actions/event"
+import {
+  getEventById,
+  getEvents,
+  getEventsByOrgId,
+  getNearbyEvents,
+  OrgEvent
+} from "@/actions/event"
 import { EventCard } from "../_components/EventCard"
 import { EmptyEvent } from "../_components/EmptyEvent"
 import { Navbar } from "../_components/Navbar"
@@ -25,8 +31,34 @@ const Dashboard = () => {
   const [hasSearchQuery, setHasSearchQuery] = useState(false)
   const searchParams = useSearchParams()
   const [isLoadingEvents, setIsLoadingEvents] = useState(true)
+  const [latitude, setLatitude] = useState<number | null>(null)
+  const [longitude, setLongitude] = useState<number | null>(null)
 
   const { data: organizationOrUser, status } = useCurrentOrgORUser()
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLatitude(position.coords.latitude)
+          setLongitude(position.coords.longitude)
+        },
+        (error) => {
+          console.error("Error fetching location:", error)
+        }
+      )
+    } else {
+      console.error("Geolocation is not supported by this browser.")
+    }
+  }, [])
+
+  const { data: nearByEvents, isLoading: isLoadingNearByEvents } = useQuery<OrgEvent[]>({
+    queryKey: ["nearby-events"],
+    queryFn: () => getNearbyEvents(latitude, longitude),
+    enabled: true
+  })
+
+  console.log(nearByEvents)
 
   const { data, error, isLoading } = useQuery<OrgEvent[]>({
     queryKey: ["events", organizationOrUser?.id],
@@ -144,6 +176,16 @@ const Dashboard = () => {
               </span>
             </div>
           )}
+          <div
+            className={cn(
+              `flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide max-sm:-ml-8 sm:hidden`,
+              hasSearchQuery && 'flex-col max-sm:ml-0 w-full'
+            )}
+          >
+            {nearByEvents && !hasSearchQuery && nearByEvents.map((event) => {
+              return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
+            })}
+          </div>
         </section>
       ) : (hasSearchQuery && !events.length) ? (
         <section className="px-4 py-6 h-full">
@@ -179,4 +221,5 @@ const Dashboard = () => {
 }
 
 export default Dashboard
+
 

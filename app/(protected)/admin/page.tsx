@@ -9,7 +9,6 @@ export default async function AdminDashboard() {
   const users = await getUsers()
   const orgs = await getOrgs()
   const events = await getEvents()
-  console.log({"EVNT: ": events})
 
   return (
     <div className="p-6 space-y-6 scrollbar-hide">
