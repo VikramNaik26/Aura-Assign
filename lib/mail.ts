@@ -1,4 +1,3 @@
-import { Resend } from "resend"
 import nodemailer from "nodemailer"
 import SMTPTransport from "nodemailer/lib/smtp-transport"
 import Mail from "nodemailer/lib/mailer"
@@ -7,7 +6,7 @@ const transporter = nodemailer.createTransport({
   // host: process.env.MAILTRAP_HOST,
   // port: Number(process.env.MAILTRAP_PORT),
   // secure: process.env.NODE_ENV !== "development",
-  port: 465, 
+  port: process.env.MAILTRAP_PORT, 
   secure: true,
   service: "gmail",
   auth: {
