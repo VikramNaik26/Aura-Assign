@@ -6,7 +6,9 @@ import Mail from "nodemailer/lib/mailer"
 const transporter = nodemailer.createTransport({
   // host: process.env.MAILTRAP_HOST,
   // port: Number(process.env.MAILTRAP_PORT),
-  secure: process.env.NODE_ENV !== "development",
+  // secure: process.env.NODE_ENV !== "development",
+  port: 465, 
+  secure: true,
   service: "gmail",
   auth: {
     user: process.env.MAILTRAP_USER,
@@ -31,7 +33,7 @@ export const sendEmail = async (dto: SendEmailDto) => {
   })
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const sendTwoFactorTokenEmail = async (
   email: string,
