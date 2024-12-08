@@ -1,8 +1,10 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Status } from "@prisma/client"
+import { CheckIcon, X } from "lucide-react"
 
-import { ExtendedUserWithProfile, getEnrollmentsForEvent } from "@/actions/enrollment"
+import { ExtendedUserWithProfile, getEnrollmentsForEvent, setEnrollmentStatus } from "@/actions/enrollment"
 import { CardWrapper } from "@/components/auth/CardWrapper"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -16,6 +18,8 @@ import {
 import { OrgEvent } from "@/actions/event"
 import { Skeleton } from "@/components/ui/skeleton"
 import { truncateAddress } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 interface UserTableProps {
   event: OrgEvent
@@ -24,6 +28,7 @@ interface UserTableProps {
 export const UserTable = ({
   event
 }: UserTableProps) => {
+  const queryClient = useQueryClient()
 
   const { data: enrolledUsers, error, isLoading } = useQuery<ExtendedUserWithProfile[]>({
     queryKey: ["enrolled-users", event?.id],
@@ -31,6 +36,24 @@ export const UserTable = ({
     enabled: !!event,
     refetchInterval: 5000
   })
+
+  const updateEnrollmentStatusMutation = useMutation({
+    mutationFn: ({ enrollmentId, status }: { enrollmentId: string, status: Status }) =>
+      setEnrollmentStatus(enrollmentId, status),
+    onSuccess: () => {
+      // Invalidate and refetch the enrolled users query
+      queryClient.invalidateQueries({ queryKey: ["enrolled-users", event?.id] })
+      toast("Enrollment Status Updated")
+    },
+    onError: (error) => {
+      toast("Failed to update enrollment status.")
+      console.error('Error updating enrollment status:', error)
+    }
+  })
+
+  const handleStatusUpdate = (enrollmentId: string, status: Status) => {
+    updateEnrollmentStatusMutation.mutate({ enrollmentId, status })
+  }
 
   if (isLoading) {
     return (
@@ -58,7 +81,7 @@ export const UserTable = ({
     <CardWrapper
       headerText="Enrolled Users"
       headerLabel="List of users enrolled to this event"
-      className="sm:w-full"
+      className="sm:w-full max-lg: mb-28"
       headerClassName="items-start ml-4 text-sm"
     >
       <Table>
@@ -95,9 +118,38 @@ export const UserTable = ({
               </TableCell>
               <TableCell className="hidden md:table-cell">{user?.postalCode ?? "-"}</TableCell>
               <TableCell className="text-right">
-                <Badge className="text-xs" variant="secondary">
-                  Accepted
-                </Badge>
+                {
+                  user?.status === Status.PENDING ? (
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleStatusUpdate(user.enrollmentId, Status.APPROVED)}
+                        disabled={updateEnrollmentStatusMutation.isPending}
+                      >
+                        <CheckIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                          onClick={() => handleStatusUpdate(user.enrollmentId, Status.REJECTED)}
+                        disabled={updateEnrollmentStatusMutation.isPending}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : user?.status === Status.APPROVED ? (
+
+                    <Badge className="text-xs" variant="secondary">
+                      Accepted
+                    </Badge>
+                  ) : (
+                    <Badge className="text-xs" variant="secondary">
+                      Rejected
+                    </Badge>
+                  )
+
+                }
               </TableCell>
             </TableRow>
           ))}
