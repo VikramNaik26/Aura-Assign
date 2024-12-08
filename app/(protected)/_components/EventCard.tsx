@@ -6,8 +6,8 @@ import Image from "next/image"
 import { VisuallyHidden } from "@reach/visually-hidden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { UserRole } from "@prisma/client"
-import { Edit, Loader2, Trash2, CircleCheckBig } from "lucide-react"
+import { Status, UserRole } from "@prisma/client"
+import { Edit, Loader2, Trash2, CircleCheckBig, CircleX, Clock } from "lucide-react"
 
 import {
   Card,
@@ -37,7 +37,7 @@ import { FormError } from "@/components/FormError"
 import { RoleGate } from "@/components/auth/RoleGate"
 import { EnrollForm } from "./EnrollForm"
 import { Enrollments } from "@/actions/enrollment"
-import { cn, hasEventId } from "@/lib/utils"
+import { cn, getEnrollmentStatusText, hasEventId } from "@/lib/utils"
 
 interface EventCardProps {
   event: {
@@ -237,12 +237,21 @@ export const EventCard = ({
               <Button variant="secondary" className="mr-3" disabled={isLoadingEnrollments || hasEventId(enrollments as Enrollments[], event?.id)}>
                 {isLoadingEnrollments
                   ? <Loader2 className="h-4 w-4 animate-spin" />
-                  : hasEventId(enrollments as Enrollments[], event?.id)
-                    ? <span className="flex justify-center items-center">
-                      Enrolled
-                      <CircleCheckBig className="ml-2 h-4 w-4" />
-                    </span>
-                    : "Enroll now!"
+                  : (() => {
+                    const { text, status } = getEnrollmentStatusText(
+                      enrollments as Enrollments[],
+                      event?.id
+                    )
+
+                    return (
+                      <span className="flex justify-center items-center">
+                        {text}
+                        {status === Status.PENDING && <Clock className="ml-2 h-4 w-4" />}
+                        {status === Status.REJECTED && <CircleX className="ml-2 h-4 w-4" />}
+                        {status === Status.APPROVED && <CircleCheckBig className="ml-2 h-4 w-4" />}
+                      </span>
+                    )
+                  })()
                 }
               </Button>
             </DialogTrigger>

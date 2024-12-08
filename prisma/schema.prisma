@@ -81,10 +81,17 @@ model Account {
   @@map("accounts")
 }
 
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Enrollment {
   id         String  @id @default(cuid())
   userId     String
   eventId    String
+  status     Status  @default(PENDING)
   jobDetails String?
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
