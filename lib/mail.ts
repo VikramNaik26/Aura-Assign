@@ -56,7 +56,7 @@ export const sendPasswordResetEmail = async (
   email: string,
   token: string
 ) => {
-  const resetLink = `http://localhost:3000/user/new-password?token=${token}`
+  const resetLink = `https://aura-assign.vercel.app/user/new-password?token=${token}`
 
   try {
     await sendEmail({
@@ -82,8 +82,8 @@ export const sendVerificationEmail = async (
   isOrg?: boolean
 ) => {
   const confirmLink = isOrg
-    ? `http://localhost:3000/org/new-verification?token=${token}`
-    : `http://localhost:3000/user/new-verification?token=${token}`
+    ? `https://aura-assign.vercel.app/org/new-verification?token=${token}`
+    : `https://aura-assign.vercel.app/user/new-verification?token=${token}`
 
   try {
     /* await resend.emails.send({
