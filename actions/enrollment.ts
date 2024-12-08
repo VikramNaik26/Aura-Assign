@@ -2,6 +2,7 @@
 
 import * as z from "zod"
 import { DefaultSession } from "next-auth"
+import { Status } from "@prisma/client"
 
 import { db } from "@/lib/db"
 import { EnrollmentSchema } from "@/schemas"
@@ -118,6 +119,7 @@ export interface Enrollments {
   userId: string
   eventId: string
   jobDetails: string | null
+  status: Status
 }
 
 export const getEnrollmentsByUserId = async (userId?: string) => {
@@ -158,10 +160,12 @@ export interface UserProfile {
 export type MergedUser = Omit<UserFromDB, 'password'> & UserProfile
 
 export type ExtendedUserWithProfile = MergedUser & DefaultSession["user"] & {
+  status: Status
+  enrollmentId: string
   // Add any additional fields here that are not in UserFromDB, UserProfile, or DefaultSession["user"]
 }
 
-function mergeUserData(user: UserFromDB, profile: UserProfile | null): ExtendedUserWithProfile {
+function mergeUserData(user: UserFromDB, profile: UserProfile | null, status: Status, enrollmentId: string): ExtendedUserWithProfile {
   const { password, ...userWithoutPassword } = user
 
   return {
@@ -174,6 +178,8 @@ function mergeUserData(user: UserFromDB, profile: UserProfile | null): ExtendedU
     state: profile?.state ?? null,
     postalCode: profile?.postalCode ?? null,
     country: profile?.country ?? null,
+    status,
+    enrollmentId
     // Add any fields from DefaultSession["user"] if needed
     // Add custom fields here
   }
@@ -191,13 +197,25 @@ export const getEnrollmentsForEvent = async (eventId?: string): Promise<Extended
         const userProfile = await getUserProfileById(enrollment.userId)
         if (!user) return null
 
-        return mergeUserData(user, userProfile)
+        return mergeUserData(user, userProfile, enrollment.status, enrollment.id)
       })
     )
 
     return users.filter((user): user is ExtendedUserWithProfile => user !== null)
   } catch (error) {
     console.error('Error fetching enrollments:', error)
+    throw error
+  }
+}
+
+export const setEnrollmentStatus = async (enrollmentId: string, status: Status): Promise<void> => {
+  try {
+    await db.enrollment.update({
+      where: { id: enrollmentId },
+      data: { status }
+    })
+  } catch (error) {
+    console.error('Error updating enrollment:', error)
     throw error
   }
 }

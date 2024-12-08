@@ -2,8 +2,8 @@
 
 import Image from "next/image"
 import { VisuallyHidden } from "@reach/visually-hidden"
-import { CircleCheckBig, Loader2 } from "lucide-react"
-import { UserRole } from "@prisma/client"
+import { CircleCheckBig, CircleX, Clock, Loader2 } from "lucide-react"
+import { Status, UserRole } from "@prisma/client"
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
@@ -25,7 +25,7 @@ import { RoleGate } from "@/components/auth/RoleGate"
 import { EnrollForm } from "./EnrollForm"
 import { useCurrentRole } from "@/hooks/useCurrentRole"
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
-import { hasEventId } from "@/lib/utils"
+import { getEnrollmentStatusText, hasEventId } from "@/lib/utils"
 import { Enrollments, getEnrollmentsByUserId } from "@/actions/enrollment"
 
 interface EventDetailsProps {
@@ -136,15 +136,24 @@ export const EventDetails = ({
         <Dialog open={isDialogOpen.enrollDialog} onOpenChange={() => setIsDialogOpen({ ...isDialogOpen, enrollDialog: !isDialogOpen.enrollDialog })}>
           <DialogTrigger asChild>
             <Button variant="secondary" className="m-3 sm:max-w-60" disabled={isLoadingEnrollments || hasEventId(enrollments as Enrollments[], event?.id)}>
-              {isLoadingEnrollments
-                ? <Loader2 className="h-4 w-4 animate-spin" />
-                : hasEventId(enrollments as Enrollments[], event?.id)
-                  ? <span className="flex justify-center items-center">
-                    Enrolled
-                    <CircleCheckBig className="ml-2 h-4 w-4" />
-                  </span>
-                  : "Enroll now!"
-              }
+                {isLoadingEnrollments
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : (() => {
+                    const { text, status } = getEnrollmentStatusText(
+                      enrollments as Enrollments[],
+                      event?.id
+                    )
+
+                    return (
+                      <span className="flex justify-center items-center">
+                        {text}
+                        {status === Status.PENDING && <Clock className="ml-2 h-4 w-4" />}
+                        {status === Status.REJECTED && <CircleX className="ml-2 h-4 w-4" />}
+                        {status === Status.APPROVED && <CircleCheckBig className="ml-2 h-4 w-4" />}
+                      </span>
+                    )
+                  })()
+                }
             </Button>
           </DialogTrigger>
           <DialogContent className="p-0 auto bg-transparent border-none z-[99999]">
