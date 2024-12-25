@@ -26,6 +26,8 @@ import { StepForward } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Sidebar } from "../_components/Sidebar"
 
+export type SortOption = 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc';
+
 const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
   const [hasSearchQuery, setHasSearchQuery] = useState(false)
@@ -33,8 +35,30 @@ const Dashboard = () => {
   const [isLoadingEvents, setIsLoadingEvents] = useState(true)
   const [latitude, setLatitude] = useState<number | null>(null)
   const [longitude, setLongitude] = useState<number | null>(null)
+  const [sortBy, setSortBy] = useState<SortOption>('date-desc')
+  const [sortedEvents, setSortedEvents] = useState<OrgEvent[]>([])
 
   const { data: organizationOrUser, status } = useCurrentOrgORUser()
+
+  useEffect(() => {
+    if (events.length > 0) {
+      const sorted = [...events].sort((a, b) => {
+        switch (sortBy) {
+          case 'name-asc':
+            return a.name.localeCompare(b.name)
+          case 'name-desc':
+            return b.name.localeCompare(a.name)
+          case 'date-asc':
+            return new Date(a.date).getTime() - new Date(b.date).getTime()
+          case 'date-desc':
+            return new Date(b.date).getTime() - new Date(a.date).getTime()
+          default:
+            return 0
+        }
+      })
+      setSortedEvents(sorted)
+    }
+  }, [sortBy, events])
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -57,8 +81,6 @@ const Dashboard = () => {
     queryFn: () => getNearbyEvents(latitude, longitude),
     enabled: true
   })
-
-  console.log(nearByEvents)
 
   const { data, error, isLoading } = useQuery<OrgEvent[]>({
     queryKey: ["events", organizationOrUser?.id],
@@ -143,6 +165,8 @@ const Dashboard = () => {
             events={events}
             setEvents={setEvents}
             setHasSearchQuery={setHasSearchQuery}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
           />
           {!hasSearchQuery && (
             <div className="flex justify-between mt-6 sm:hidden">
@@ -160,12 +184,20 @@ const Dashboard = () => {
               hasSearchQuery && 'flex-col max-sm:ml-0 w-full'
             )}
           >
-            {events.map((event) => {
-              if (hasSearchQuery) {
-                return <EventCard key={event.id} event={event} hasSearchQuery={hasSearchQuery} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
-              }
-              return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
-            })}
+            {
+              sortedEvents.length > 0 ? sortedEvents.map((event) => {
+                if (hasSearchQuery) {
+                  return <EventCard key={event.id} event={event} hasSearchQuery={hasSearchQuery} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
+                }
+                return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
+              }) :
+                events.map((event) => {
+                  if (hasSearchQuery) {
+                    return <EventCard key={event.id} event={event} hasSearchQuery={hasSearchQuery} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
+                  }
+                  return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} />
+                })
+            }
           </div>
           {!hasSearchQuery && (
             <div className="flex justify-between mt-4 sm:hidden">
@@ -178,7 +210,7 @@ const Dashboard = () => {
           )}
           <div
             className={cn(
-              `flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide max-sm:-ml-8 sm:hidden`,
+              `flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide max-sm:-ml-8 sm:hidden pb-20`,
               hasSearchQuery && 'flex-col max-sm:ml-0 w-full'
             )}
           >
@@ -195,6 +227,8 @@ const Dashboard = () => {
             events={events}
             setEvents={setEvents}
             setHasSearchQuery={setHasSearchQuery}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
           />
           <EmptySearch />
         </section>
@@ -212,6 +246,8 @@ const Dashboard = () => {
               events={events}
               setEvents={setEvents}
               setHasSearchQuery={setHasSearchQuery}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
             />
             <EmptyEvent isUser />
           </section>

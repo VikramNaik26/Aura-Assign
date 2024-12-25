@@ -99,7 +99,14 @@ const transformEvent = (event: any) => {
 
 export const getEvents = async () => {
   try {
-    const events = await db.event.findMany()
+    const events = await db.event.findMany({
+      where: {
+        AND: [
+          { date: { gte: new Date() } },
+          { time: { gte: new Date() } },
+        ]
+      }
+    })
     return events.map(transformEvent)
   } catch (error) {
     console.error("Error fetching events:", error)
@@ -123,7 +130,14 @@ const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
 export const getNearbyEvents = async (userLat?: number | null, userLng?: number | null, maxDistance: number = 100) => {
   try {
     // Fetch all events
-    const events = await db.event.findMany()
+    const events = await db.event.findMany({
+      where: {
+        AND: [
+          { date: { gte: new Date() } },
+          { time: { gte: new Date() } },
+        ]
+      }
+    })
 
     // Transform and filter events
     const nearbyEvents = events
@@ -162,7 +176,13 @@ export const getEventsByOrgId = async (orgId?: string): Promise<OrgEvent[]> => {
   try {
     const organization = orgId ? await getOrgById(orgId) : null
     const events = await db.event.findMany({
-      where: { orgId: organization?.id },
+      where: {
+        AND: [
+          { orgId: organization?.id },
+          { date: { gte: new Date() } },
+          { time: { gte: new Date() } }
+        ]
+      }
     })
     return events.map(transformEvent)
   } catch (error) {

@@ -6,6 +6,7 @@ import { SearchInput } from "./SearchInput"
 import { UserButton } from "./UserButton"
 import { ExtendedUser } from "@/next-auth"
 import { CurrentLocation } from "./CurrentLocation"
+import { SortOption } from "../dashboard/page"
 
 export interface NavbarProps {
   orgId?: string
@@ -13,6 +14,8 @@ export interface NavbarProps {
   setEvents: Dispatch<SetStateAction<OrgEvent[]>>
   setHasSearchQuery: Dispatch<SetStateAction<boolean>>
   organizationOrUser?: ExtendedUser | undefined
+  sortBy: SortOption,
+  setSortBy: Dispatch<SetStateAction<SortOption>>
 }
 
 export const Navbar = ({
@@ -20,7 +23,9 @@ export const Navbar = ({
   events,
   setEvents,
   setHasSearchQuery,
-  organizationOrUser
+  organizationOrUser,
+  sortBy,
+  setSortBy
 }: NavbarProps) => {
   return (
     <div className="lg:flex lg:flex-1 justify-between">
@@ -32,6 +37,8 @@ export const Navbar = ({
         events={events}
         setEvents={setEvents}
         setHasSearchQuery={setHasSearchQuery}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
       />
       <div className="hidden lg:block">
         <UserButton organizationOrUser={organizationOrUser} />
