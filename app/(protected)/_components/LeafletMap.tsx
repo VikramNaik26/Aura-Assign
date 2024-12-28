@@ -7,6 +7,7 @@ import { MapPin, Crosshair, Loader2, MapPinned } from 'lucide-react'
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
 import { UserRole } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
+import { useRouter } from 'next/navigation'
 
 // CSS Imports
 import 'leaflet/dist/leaflet.css'
@@ -48,11 +49,74 @@ const createMarkerIcon = (iconUrl: string) => {
   })
 }
 
+const createMarkerIconRounded = (iconUrl: string) => {
+  return L.divIcon({
+    className: 'custom-marker-icon',
+    html: `
+      <div style="
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        background: white;
+      ">
+        <img 
+          src="${iconUrl}" 
+          style="
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+          "
+        />
+      </div>
+    `,
+    iconSize: [35, 35],
+    iconAnchor: [17.5, 17.5],
+    popupAnchor: [0, -17.5]
+  })
+}
+
+const createCustomIcon = () =>
+  L.divIcon({
+    className: 'custom-marker',
+    html: `
+      <div style="position: relative; width: 20px; height: 20px;">
+        <div 
+          style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background: url('${markerIcons.default}') no-repeat center center;
+            background-size: contain;
+          "
+        ></div>
+        <div 
+          style="
+            position: absolute;
+            top: -8px;
+            right: -7px;
+            width: 12px;
+            height: 12px;
+            background-color: green;
+            border-radius: 50%;
+            border: 2px solid white;
+          "
+        ></div>
+      </div>
+    `,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  });
+
 const markerIcons = {
-  default: createMarkerIcon('/logoSmall.png'),
+  default: createMarkerIconRounded('/logoSmall.png'),
   red: createMarkerIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png'),
   blue: createMarkerIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png'),
-  green: createMarkerIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png')
 }
 
 // Custom Search Control Styles
@@ -123,9 +187,9 @@ const MapEvents: React.FC<{ onLocationUpdate: (pos: LatLng) => void }> = ({ onLo
 }
 
 // Draggable Marker Component
-const DraggableMarker: React.FC<{ 
-  position: LatLng, 
-  onPositionChange: (pos: LatLng) => void 
+const DraggableMarker: React.FC<{
+  position: LatLng,
+  onPositionChange: (pos: LatLng) => void
 }> = ({ position, onPositionChange }) => {
   const map = useMap()
 
@@ -188,7 +252,13 @@ const Map: React.FC = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
   const [enrolledEvents, setEnrolledEvents] = useState<OrgEvent[]>([])
   const { data: organizationOrUser, status } = useCurrentOrgORUser()
-  
+
+  const router = useRouter()
+
+  const navigateToEvent = (eventId: string) => {
+    router.push(`/dashboard/event/${eventId}`)
+  }
+
   // Events Query
   const { data, error, isLoading: isLoadingEvents } = useQuery<OrgEvent[]>({
     queryKey: ["events", organizationOrUser?.id],
@@ -318,20 +388,30 @@ const Map: React.FC = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          
+
           {/* Event Markers */}
           {events.map((event) => (
             event.location?.lat && event.location?.lng ? (
               <Marker
                 key={event.id}
-                position={{ lat: event.location?.lat, lng: event.location?.lng }}
+                position={{ lat: event.location.lat, lng: event.location.lng }}
                 icon={markerIcons.default}
               >
                 <Popup>
-                  <div className="font-bold">{event.name}</div>
-                  <div>{event.description}</div>
-                  <div className="text-sm text-gray-600">
-                    Date: {new Date(event.date).toLocaleDateString()}
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => navigateToEvent(event.id)}
+                  >
+                    <div className="font-bold hover:text-blue-600 transition-colors">
+                      {event.name}
+                    </div>
+                    <div className="text-sm">{event.description}</div>
+                    <div className="text-sm text-gray-600">
+                      Date: {new Date(event.date).toLocaleDateString()}
+                    </div>
+                    <div className="mt-2 text-xs text-black hover:underline">
+                      Click to view details
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -339,23 +419,34 @@ const Map: React.FC = () => {
           ))}
 
           {/* Enrolled Events Markers */}
-          {enrolledEvents.map((event) => (
+          {enrolledEvents.map((event) =>
             event.location?.lat && event.location?.lng ? (
               <Marker
                 key={event.id}
-                position={{ lat: event.location?.lat, lng: event.location?.lng }}
-                icon={markerIcons.green}
+                position={{ lat: event.location.lat, lng: event.location.lng }}
+                icon={createCustomIcon()}
               >
+                {/* Marker Popup */}
                 <Popup>
-                  <div className="font-bold">{event.name} (Enrolled)</div>
-                  <div>{event.description}</div>
-                  <div className="text-sm text-gray-600">
-                    Date: {new Date(event.date).toLocaleDateString()}
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => navigateToEvent(event.id)}
+                  >
+                    <div className="font-bold hover:text-blue-600 transition-colors">
+                      {event.name} (Enrolled)
+                    </div>
+                    <div className="text-sm">{event.description}</div>
+                    <div className="text-sm text-gray-600">
+                      Date: {new Date(event.date).toLocaleDateString()}
+                    </div>
+                    <div className="mt-2 text-sm text-blue-600 hover:underline">
+                      Click to view details
+                    </div>
                   </div>
                 </Popup>
               </Marker>
             ) : null
-          ))}
+          )}
 
           {/* User's Current Draggable Marker */}
           <DraggableMarker

@@ -133,7 +133,7 @@ export const EventCard = ({
   return (
     <Card
       className={cn(
-        `sm:max-w-[300px] max-sm:w-[100%] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none max-sm:first:ml-8`,
+        `sm:max-w-[300px] max-sm:w-[220px] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none max-sm:first:ml-8`,
         hasSearchQuery && 'flex-row sm:flex-col w-full max-sm:first:ml-0'
       )}
     >
