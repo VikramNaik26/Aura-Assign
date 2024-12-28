@@ -237,10 +237,33 @@ export const getEventByNameAndOrg = async (name: string, orgId?: string) => {
 
 export const getEventById = async (id?: string) => {
   try {
-    const event = await db.event.findUnique({ where: { id } })
-    return event
+    if (!id) {
+      throw new Error("Event ID is required");
+    }
+
+    // Fetch the event by ID
+    const event = await db.event.findUnique({ where: { id } });
+
+    if (!event) {
+      throw new Error("Event not found");
+    }
+
+    // Transform the event data
+    const transformedEvent = transformEvent(event);
+
+    // Ensure the event has valid location details (optional based on requirements)
+    if (
+      !transformedEvent.location ||
+      !transformedEvent.location.lat ||
+      !transformedEvent.location.lng
+    ) {
+      throw new Error("Event does not have a valid location");
+    }
+
+    return transformedEvent;
   } catch (error) {
-    console.error('Error fetching event:', error)
-    return { error: 'Cannot find event' }
+    console.error("Error fetching event:", error);
+    throw new Error("Cannot fetch the event");
   }
-}
+};
+
