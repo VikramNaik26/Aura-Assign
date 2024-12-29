@@ -1,6 +1,13 @@
 'use client'
 
-import { Search, SlidersHorizontal, ShoppingBasketIcon as Basketball, Music, Paintbrush, Utensils, ArrowUpDown } from 'lucide-react'
+import {
+  Search,
+  ShoppingBasketIcon as Basketball,
+  Music,
+  Paintbrush,
+  Utensils,
+  ArrowUpDown
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
   ChangeEvent,
@@ -18,59 +25,28 @@ import { getEventByNameAndOrg } from '@/actions/event'
 import { useCurrentRole } from '@/hooks/useCurrentRole'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Slider } from "@/components/ui/slider"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { SortOption } from '../dashboard/page'
+import FilterForm from './FilterForm'
 
 export const SearchInput = (props: NavbarProps) => {
   const router = useRouter()
   const [value, setValue] = useState('')
   const [debounceValue] = useDebounceValue(value, 500)
-  const [isSheetOpen, setIsSheetOpen] = useState(false)
 
   const { width } = useWindowSize()
 
   const { role } = useCurrentRole()
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('sports')
-  const [selectedDate, setSelectedDate] = useState<'today' | 'tomorrow' | 'week' | 'custom'>('tomorrow')
-  const [priceRange, setPriceRange] = useState([20, 120])
-  const [calendarDate, setCalendarDate] = useState<Date | undefined>(undefined)
-
-  const categories = [
-    { id: 'sports', icon: Basketball, label: 'Sports' },
-    { id: 'music', icon: Music, label: 'Music' },
-    { id: 'art', icon: Paintbrush, label: 'Art' },
-    { id: 'food', icon: Utensils, label: 'Food' },
-    { id: 'food2', icon: Utensils, label: 'Food' },
-  ]
-
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value)
   }
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -144,115 +120,7 @@ export const SearchInput = (props: NavbarProps) => {
         </SelectContent>
       </Select>
 
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetTrigger className='flex items-center'>
-          <SlidersHorizontal className='h-4 w-4 lg:mr-2' />
-          <span className='hidden lg:inline'>Filters</span>
-        </SheetTrigger>
-        <SheetContent side={width > 768 ? 'right' : 'bottom'} className='z-[9990]'>
-          <SheetHeader className='mb-4 space-y-0'>
-            <SheetTitle>Filters</SheetTitle>
-            <SheetDescription>
-              Customize your search
-            </SheetDescription>
-          </SheetHeader>
-          <div className={width < 768 ? 'pb-20' : 'pb-auto'}>
-            <div className="space-y-4 mb-6">
-              <span className="font-medium text-left">Time & Date</span>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    {selectedDate === 'custom' && calendarDate
-                      ? format(calendarDate, 'PPP')
-                      : 'Choose from calendar'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto p-0 z-[9999]"
-                  onClick={(e) => e.stopPropagation()}
-                  align="start"
-                  side="bottom"
-                >
-                  <Calendar
-                    mode="single"
-                    selected={calendarDate}
-                    onSelect={(date) => {
-                      setCalendarDate(date)
-                      setSelectedDate('custom')
-                    }}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <div className="flex gap-2">
-                {['today', 'tomorrow', 'week'].map((date) => (
-                  <Button
-                    key={date}
-                    variant={selectedDate === date ? "default" : "outline"}
-                    onClick={() => {
-                      setSelectedDate(date as typeof selectedDate)
-                      setCalendarDate(undefined) // Clear calendar date when selecting preset
-                    }}
-                    className="flex-1"
-                  >
-                    {date.charAt(0).toUpperCase() + date.slice(1)}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-4 mx-2">
-              <div className="flex justify-between">
-                <span className="font-medium">Select price range</span>
-                <span className="text-blue-600 font-medium">
-                  ${priceRange[0]}-${priceRange[1]}
-                </span>
-              </div>
-              <Slider
-                defaultValue={[20, 120]}
-                max={200}
-                min={0}
-                step={1}
-                value={priceRange}
-                onValueChange={setPriceRange}
-                className="py-4"
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  setSelectedCategory('sports')
-                  setSelectedDate('tomorrow')
-                  setPriceRange([20, 120])
-                  setCalendarDate(undefined)
-                }}
-              >
-                RESET
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={() => {
-                  console.log({
-                    category: selectedCategory,
-                    date: selectedDate === 'custom' ? calendarDate : selectedDate,
-                    priceRange,
-                  })
-                  setIsSheetOpen(false)
-                }}
-              >
-                APPLY
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <FilterForm filteredEvents={props.filteredEvents} setFilteredEvents={props.setFilteredEvents} />
     </div>
   )
 }

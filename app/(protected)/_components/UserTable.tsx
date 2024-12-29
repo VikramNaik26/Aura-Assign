@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Status } from "@prisma/client"
 import { CheckIcon, X } from "lucide-react"
 
-import { ExtendedUserWithProfile, getEnrollmentsForEvent, setEnrollmentStatus } from "@/actions/enrollment"
+import { ExtendedUserWithProfile, getEnrollmentById, getEnrollmentsForEvent, setEnrollmentStatus } from "@/actions/enrollment"
 import { CardWrapper } from "@/components/auth/CardWrapper"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -15,11 +15,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { OrgEvent } from "@/actions/event"
+import { OrgEvent, getEventById } from "@/actions/event"
 import { Skeleton } from "@/components/ui/skeleton"
 import { truncateAddress } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { sendEnrollmentStatusMail } from "@/lib/mail"
+import { getUserById } from "@/data/users"
 
 interface UserTableProps {
   event: OrgEvent
@@ -51,7 +53,12 @@ export const UserTable = ({
     }
   })
 
-  const handleStatusUpdate = (enrollmentId: string, status: Status) => {
+  const handleStatusUpdate = async (enrollmentId: string, enrollmentUser: ExtendedUserWithProfile, status: Status) => {
+    const enrollment = await getEnrollmentById(enrollmentId)
+    const event = await getEventById(enrollment?.eventId)
+
+    sendEnrollmentStatusMail(status, event, enrollmentUser)
+
     updateEnrollmentStatusMutation.mutate({ enrollmentId, status })
   }
 
@@ -98,7 +105,7 @@ export const UserTable = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {enrolledUsers?.map(user => (
+          {enrolledUsers?.map((user, index) => (
             <TableRow key={user.id}>
               <TableCell>
                 <div className="font-medium">{user.name}</div>
@@ -124,7 +131,7 @@ export const UserTable = ({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleStatusUpdate(user.enrollmentId, Status.APPROVED)}
+                        onClick={() => handleStatusUpdate(user.enrollmentId, enrolledUsers[index], Status.APPROVED)}
                         disabled={updateEnrollmentStatusMutation.isPending}
                       >
                         <CheckIcon className="h-4 w-4" />
@@ -132,14 +139,13 @@ export const UserTable = ({
                       <Button
                         variant="outline"
                         size="sm"
-                          onClick={() => handleStatusUpdate(user.enrollmentId, Status.REJECTED)}
+                        onClick={() => handleStatusUpdate(user.enrollmentId, enrolledUsers[index], Status.REJECTED)}
                         disabled={updateEnrollmentStatusMutation.isPending}
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : user?.status === Status.APPROVED ? (
-
                     <Badge className="text-xs" variant="secondary">
                       Accepted
                     </Badge>
@@ -148,7 +154,6 @@ export const UserTable = ({
                       Rejected
                     </Badge>
                   )
-
                 }
               </TableCell>
             </TableRow>

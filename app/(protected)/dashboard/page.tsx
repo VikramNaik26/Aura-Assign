@@ -22,11 +22,16 @@ import { EmptySearch } from "../_components/EmptySearch"
 import { Enrollments, getEnrollmentsByUserId } from "@/actions/enrollment"
 import { RoleGate } from "@/components/auth/RoleGate"
 import { EmptyEnroll } from "../_components/EmptyEnroll"
-import { StepForward } from "lucide-react"
+import { StepForward, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Sidebar } from "../_components/Sidebar"
+import { Button } from "@/components/ui/button"
 
 export type SortOption = 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc';
+export type FilterOptions = {
+  filterApplied: boolean
+  events: OrgEvent[]
+}
 
 const Dashboard = () => {
   const [events, setEvents] = useState<OrgEvent[]>([])
@@ -37,6 +42,10 @@ const Dashboard = () => {
   const [longitude, setLongitude] = useState<number | null>(null)
   const [sortBy, setSortBy] = useState<SortOption>('date-desc')
   const [sortedEvents, setSortedEvents] = useState<OrgEvent[]>([])
+  const [filteredEvents, setFilteredEvents] = useState<FilterOptions>({
+    filterApplied: false,
+    events: [],
+  })
 
   const { data: organizationOrUser, status } = useCurrentOrgORUser()
 
@@ -157,7 +166,62 @@ const Dashboard = () => {
   return (
     <>
       <Sidebar organizationOrUser={organizationOrUser} />
-      {events?.length ? (
+      {filteredEvents.filterApplied ? (
+        filteredEvents.events.length === 0 ? (
+          <section className="px-2 py-6 h-full w-full">
+            <Navbar
+              orgId={organizationOrUser?.id}
+              organizationOrUser={organizationOrUser}
+              events={events}
+              setEvents={setEvents}
+              setHasSearchQuery={setHasSearchQuery}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              filteredEvents={filteredEvents}
+              setFilteredEvents={setFilteredEvents}
+            />
+            <Button variant="link" className="py-1 mt-3 hover:text-red-500" onClick={() => setFilteredEvents({ ...filteredEvents, filterApplied: false })}>
+              <span className="text-xs">Remove Filter</span>
+              <X className="inline ml-1" size={12} fill="currentColor" />
+            </Button>
+            <EmptyEvent isUser />
+          </section>
+        ) : (
+          <section className="px-2 py-6 h-full w-full">
+            <Navbar
+              orgId={organizationOrUser?.id}
+              organizationOrUser={organizationOrUser}
+              events={events}
+              setEvents={setEvents}
+              setHasSearchQuery={setHasSearchQuery}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              filteredEvents={filteredEvents}
+              setFilteredEvents={setFilteredEvents}
+            />
+            <Button variant="link" className="py-1 mt-3 hover:text-red-500" onClick={() => setFilteredEvents({ ...filteredEvents, filterApplied: false })}>
+              <span className="text-xs">Remove Filter</span>
+              <X className="inline ml-1" size={12} fill="currentColor" />
+            </Button>
+            <div
+              className={cn(
+                `flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide max-sm:-ml-8`,
+                hasSearchQuery && 'flex-col max-sm:ml-0 w-full'
+              )}
+            >
+              {filteredEvents.events.map(event => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  hasSearchQuery={hasSearchQuery}
+                  enrollments={enrollments}
+                  isLoadingEnrollments={isLoadingEnrollments}
+                />
+              ))}
+            </div>
+          </section>
+        )
+      ) : events?.length ? (
         <section className="px-2 py-6 h-full w-full">
           <Navbar
             orgId={organizationOrUser?.id}
@@ -167,6 +231,8 @@ const Dashboard = () => {
             setHasSearchQuery={setHasSearchQuery}
             sortBy={sortBy}
             setSortBy={setSortBy}
+            filteredEvents={filteredEvents}
+            setFilteredEvents={setFilteredEvents}
           />
           {!hasSearchQuery && (
             <div className="flex justify-between mt-6 sm:hidden">
@@ -229,6 +295,8 @@ const Dashboard = () => {
             setHasSearchQuery={setHasSearchQuery}
             sortBy={sortBy}
             setSortBy={setSortBy}
+            filteredEvents={filteredEvents}
+            setFilteredEvents={setFilteredEvents}
           />
           <EmptySearch />
         </section>
@@ -248,6 +316,8 @@ const Dashboard = () => {
               setHasSearchQuery={setHasSearchQuery}
               sortBy={sortBy}
               setSortBy={setSortBy}
+              filteredEvents={filteredEvents}
+              setFilteredEvents={setFilteredEvents}
             />
             <EmptyEvent isUser />
           </section>

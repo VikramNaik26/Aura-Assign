@@ -6,7 +6,7 @@ import Image from "next/image"
 import { VisuallyHidden } from "@reach/visually-hidden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { Status, UserRole } from "@prisma/client"
+import { PaymentBasis, Status, UserRole } from "@prisma/client"
 import { Edit, Loader2, Trash2, CircleCheckBig, CircleX, Clock } from "lucide-react"
 
 import {
@@ -44,6 +44,8 @@ interface EventCardProps {
     id: string,
     name: string,
     description?: string | null
+    payment: number
+    paymentBasis?: PaymentBasis | null
     imageUrl?: string | null
     date: Date,
     time: Date,

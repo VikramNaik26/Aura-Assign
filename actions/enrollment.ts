@@ -219,3 +219,15 @@ export const setEnrollmentStatus = async (enrollmentId: string, status: Status):
     throw error
   }
 }
+
+export const getEnrollmentById = async (enrollmentId: string): Promise<Enrollments | null> => {
+  try {
+    const enrollment = await db.enrollment.findUnique({
+      where: { id: enrollmentId },
+    })
+    return enrollment
+  } catch (error) {
+    console.error('Error fetching enrollment:', error)
+    throw error
+  }
+}

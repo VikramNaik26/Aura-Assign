@@ -1,3 +1,4 @@
+import { PaymentBasis } from "@prisma/client";
 import * as z from "zod"
 
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/
@@ -43,6 +44,12 @@ export const EventSchema = z.object({
     message: "Name is required"
   }),
   description: z.optional(z.string()),
+  payment: z.number().nonnegative({
+    message: "Payment must be a non-negative number"
+  }),
+  paymentBasis: z.enum(Object.values(PaymentBasis) as [PaymentBasis, ...PaymentBasis[]], {
+    message: "Payment basis must be a valid enum value"
+  }),
   imageUrl: z.optional(z.string()),
   time: z.string().regex(timeRegex, {
     message: "Time must be in HH:mm format"
