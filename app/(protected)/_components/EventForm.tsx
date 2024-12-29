@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ClassNameValue } from "tailwind-merge"
-import { UserRole } from "@prisma/client"
+import { PaymentBasis, UserRole } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { Loader2, MapPin } from "lucide-react"
@@ -29,6 +29,13 @@ import { OrgEvent, createOrUpsertEvent } from "@/actions/event"
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
 import { Textarea } from "@/components/ui/textarea"
 import { RoleGate } from "@/components/auth/RoleGate"
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+  SelectContent
+} from "@/components/ui/select"
 
 // Dynamically import the Map component with SSR disabled
 const MapComponent = dynamic(() => import('./EventMap'), {
@@ -100,6 +107,8 @@ export const EventForm = (props: EventFormProps) => {
     defaultValues: {
       name: props.eventObject?.name || "",
       description: props.eventObject?.description || "",
+      payment: props.eventObject?.payment || 0,
+      paymentBasis: props.eventObject?.paymentBasis || PaymentBasis.PER_DAY,
       imageUrl: props.eventObject?.imageUrl || "",
       date,
       time,
@@ -194,6 +203,55 @@ export const EventForm = (props: EventFormProps) => {
                     </FormItem>
                   )}
                 />
+                <div className="flex gap-12">
+                  <FormField
+                    control={form.control}
+                    name="payment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Payment</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Enter Payment here"
+                            type="number"
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            disabled={isPending || isInputDisabled}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="paymentBasis"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Payment Basis</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={isPending || isInputDisabled}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select payment basis" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={PaymentBasis.PER_HOUR}>Per Hour</SelectItem>
+                              <SelectItem value={PaymentBasis.PER_DAY}>Per Day</SelectItem>
+                              <SelectItem value={PaymentBasis.PER_WEEK}>Per Week</SelectItem>
+                              <SelectItem value={PaymentBasis.PER_MONTH}>Per Month</SelectItem>
+                              <SelectItem value={PaymentBasis.PER_YEAR}>Per Year</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 {!props.isEdit && (
                   <FormField
                     control={form.control}

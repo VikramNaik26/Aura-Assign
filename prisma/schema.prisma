@@ -100,19 +100,29 @@ model Enrollment {
   @@unique([userId, eventId])
 }
 
+enum PaymentBasis {
+  PER_HOUR
+  PER_DAY
+  PER_WEEK
+  PER_MONTH
+  PER_YEAR
+}
+
 model Event {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  imageUrl    String?
-  time        DateTime
-  date        DateTime
-  orgId       String?
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  payment      Float
+  paymentBasis PaymentBasis? @default(PER_DAY)
+  imageUrl     String?
+  time         DateTime
+  date         DateTime
+  orgId        String?
   organization Organization? @relation(fields: [orgId], references: [id])
-  enrollments Enrollment[]
-  address     String
-  latitude    Float
-  longitude   Float
+  enrollments  Enrollment[]
+  address      String
+  latitude     Float
+  longitude    Float
 
   @@index([orgId])
   @@index([name])

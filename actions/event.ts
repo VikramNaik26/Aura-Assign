@@ -5,6 +5,7 @@ import * as z from "zod"
 import { db } from "@/lib/db"
 import { EventSchema } from "@/schemas"
 import { getOrgById } from "@/data/organizations"
+import { PaymentBasis } from "@prisma/client"
 
 export interface OrgEvent {
   id: string
@@ -13,6 +14,8 @@ export interface OrgEvent {
   imageUrl?: string | null
   date: Date
   time: Date
+  payment: number
+  paymentBasis?: PaymentBasis | null
   location?: {
     address: string
     lat: number
@@ -41,6 +44,8 @@ export const createOrUpsertEvent = async (
       description: string | undefined
       date: Date
       time: Date
+      payment: number
+      paymentBasis?: PaymentBasis
       imageUrl?: string
       orgId?: string
       address: string
@@ -51,6 +56,8 @@ export const createOrUpsertEvent = async (
       description: values.description,
       date: date,
       time: date,
+      payment: values.payment,
+      paymentBasis: values.paymentBasis,
       imageUrl: values.imageUrl,
       address: values.location.address,
       latitude: values.location.lat,
