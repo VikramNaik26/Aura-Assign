@@ -5,8 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { SearchInput } from "./SearchInput"
 import { UserButton } from "./UserButton"
 import { ExtendedUser } from "@/next-auth"
-import { CurrentLocation } from "./CurrentLocation"
-import { SortOption } from "../dashboard/page"
+import { FilterOptions, SortOption } from "../dashboard/page"
 
 export interface NavbarProps {
   orgId?: string
@@ -16,6 +15,8 @@ export interface NavbarProps {
   organizationOrUser?: ExtendedUser | undefined
   sortBy: SortOption,
   setSortBy: Dispatch<SetStateAction<SortOption>>
+  filteredEvents: FilterOptions
+  setFilteredEvents: Dispatch<SetStateAction<FilterOptions>>
 }
 
 export const Navbar = ({
@@ -25,7 +26,9 @@ export const Navbar = ({
   setHasSearchQuery,
   organizationOrUser,
   sortBy,
-  setSortBy
+  setSortBy,
+  filteredEvents,
+  setFilteredEvents
 }: NavbarProps) => {
   return (
     <div className="lg:flex lg:flex-1 justify-between">
@@ -39,6 +42,8 @@ export const Navbar = ({
         setHasSearchQuery={setHasSearchQuery}
         sortBy={sortBy}
         setSortBy={setSortBy}
+        filteredEvents={filteredEvents}
+        setFilteredEvents={setFilteredEvents}
       />
       <div className="hidden lg:block">
         <UserButton organizationOrUser={organizationOrUser} />

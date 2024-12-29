@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { EventSchema } from "@/schemas"
 import { getOrgById } from "@/data/organizations"
 import { PaymentBasis } from "@prisma/client"
+import { FilterParams } from "@/app/(protected)/_components/FilterForm"
 
 export interface OrgEvent {
   id: string
@@ -225,17 +226,22 @@ export const deleteEvent = async ({ id, orgId }: DeleteEventParams) => {
 
 export const getEventByNameAndOrg = async (name: string, orgId?: string) => {
   try {
-    const event = await db.event.findMany({
+    const events = await db.event.findMany({
       where: {
-        name: {
-          contains: name,
-          mode: 'insensitive',
-        },
-        orgId: orgId
+        AND: [
+          {
+            name: {
+              contains: name,
+              mode: 'insensitive'
+            }
+          },
+          // Only include orgId condition if it exists
+          ...(orgId ? [{ orgId }] : [])
+        ]
       },
     })
 
-    return event
+    return events
   } catch (error) {
     console.error('Error fetching event:', error)
     return { error: 'Cannot find event' }
@@ -274,3 +280,96 @@ export const getEventById = async (id?: string) => {
   }
 };
 
+export const getFilteredEvents = async (filterOptions: FilterParams) => {
+  try {
+    const { date, customDate, priceRange } = filterOptions;
+    const [minPrice, maxPrice] = priceRange;
+    
+    // Get current date at start of day
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get tomorrow's date
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    // Get date a week from now
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+
+    // Base filter with price range
+    const baseFilter = {
+      payment: {
+        gte: minPrice,
+        lte: maxPrice,
+      }
+    };
+
+    // Add date filter based on selection
+    let dateFilter = {};
+    switch (date) {
+      case 'today':
+        dateFilter = {
+          date: {
+            gte: today,
+            lt: tomorrow,
+          }
+        };
+        break;
+      
+      case 'tomorrow':
+        dateFilter = {
+          date: {
+            gte: tomorrow,
+            lt: new Date(tomorrow.getTime() + 24 * 60 * 60 * 1000),
+          }
+        };
+        break;
+      
+      case 'week':
+        dateFilter = {
+          date: {
+            gte: today,
+            lt: weekFromNow,
+          }
+        };
+        break;
+      
+      case 'custom':
+        if (customDate) {
+          const selectedDate = new Date(customDate);
+          selectedDate.setHours(0, 0, 0, 0);
+          const nextDay = new Date(selectedDate);
+          nextDay.setDate(nextDay.getDate() + 1);
+          
+          dateFilter = {
+            date: {
+              gte: selectedDate,
+              lt: nextDay,
+            }
+          };
+        }
+        break;
+    }
+
+    // Combine filters
+    const filter = {
+      AND: [
+        baseFilter,
+        dateFilter,
+      ]
+    };
+
+    const events = await db.event.findMany({
+      where: filter,
+      orderBy: {
+        date: 'asc',
+      },
+    });
+
+    return events;
+  } catch (error) {
+    console.error("Error fetching filtered events:", error);
+    throw new Error("Failed to fetch events. Please try again later.");
+  }
+};
