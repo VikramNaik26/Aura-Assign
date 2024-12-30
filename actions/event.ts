@@ -16,6 +16,7 @@ export interface OrgEvent {
   date: Date
   time: Date
   payment: number
+  orgId?: string | null
   paymentBasis?: PaymentBasis | null
   location?: {
     address: string
@@ -180,6 +181,52 @@ export const getNearbyEvents = async (userLat?: number | null, userLng?: number 
   }
 }
 
+export const getNearbyOrgEvents = async (userLat?: number | null, userLng?: number | null, maxDistance: number = 100, orgId?: string) => {
+  try {
+    // Fetch all events
+    const events = await db.event.findMany({
+      where: {
+        AND: [
+          { date: { gte: new Date() } },
+          { time: { gte: new Date() } },
+          { orgId: orgId }
+        ]
+      }
+    })
+
+    // Transform and filter events
+    const nearbyEvents = events
+      .map(transformEvent) // Use the existing transform function
+      .filter(event => {
+        // Check if event has valid location
+        if (!event.location || !event.location.lat || !event.location.lng) {
+          return false
+        }
+
+        if (!userLat) {
+          userLat = 12.92309956737475
+        }
+        if (!userLng) {
+          userLng = 74.8128171745646
+        }
+        // Calculate distance
+        const distance = calculateDistance(
+          userLat,
+          userLng,
+          event.location.lat,
+          event.location.lng
+        )
+
+        // Return events within max distance
+        return distance <= maxDistance
+      })
+    return nearbyEvents
+  } catch (error) {
+    console.error("Error fetching nearby events:", error)
+    throw new Error("Cannot find nearby events")
+  }
+}
+
 export const getEventsByOrgId = async (orgId?: string): Promise<OrgEvent[]> => {
   try {
     const organization = orgId ? await getOrgById(orgId) : null
@@ -284,15 +331,15 @@ export const getFilteredEvents = async (filterOptions: FilterParams) => {
   try {
     const { date, customDate, priceRange } = filterOptions;
     const [minPrice, maxPrice] = priceRange;
-    
+
     // Get current date at start of day
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // Get tomorrow's date
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     // Get date a week from now
     const weekFromNow = new Date(today);
     weekFromNow.setDate(weekFromNow.getDate() + 7);
@@ -316,7 +363,7 @@ export const getFilteredEvents = async (filterOptions: FilterParams) => {
           }
         };
         break;
-      
+
       case 'tomorrow':
         dateFilter = {
           date: {
@@ -325,7 +372,7 @@ export const getFilteredEvents = async (filterOptions: FilterParams) => {
           }
         };
         break;
-      
+
       case 'week':
         dateFilter = {
           date: {
@@ -334,14 +381,14 @@ export const getFilteredEvents = async (filterOptions: FilterParams) => {
           }
         };
         break;
-      
+
       case 'custom':
         if (customDate) {
           const selectedDate = new Date(customDate);
           selectedDate.setHours(0, 0, 0, 0);
           const nextDay = new Date(selectedDate);
           nextDay.setDate(nextDay.getDate() + 1);
-          
+
           dateFilter = {
             date: {
               gte: selectedDate,
