@@ -96,17 +96,19 @@ const createCustomIcon = () =>
             position: absolute;
             top: 0;
             left: 0;
-            width: 20px;
-            height: 20px;
-            background: url('${markerIcons.default}') no-repeat center center;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: url('/logoSmall.png') no-repeat center center;
             background-size: contain;
           "
         ></div>
         <div 
           style="
             position: absolute;
-            top: -8px;
-            right: -7px;
+            top: 0px;
+            right: -15px;
             width: 12px;
             height: 12px;
             background-color: green;
@@ -116,8 +118,9 @@ const createCustomIcon = () =>
         ></div>
       </div>
     `,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    iconSize: [35, 35],
+    iconAnchor: [17.5, 17.5],
+    popupAnchor: [0, -17.5]
   });
 
 const markerIcons = {
@@ -689,7 +692,11 @@ const Map: React.FC = () => {
           />
 
           {/* Event Markers */}
-          {events.map(renderEventMarker)}
+          {events
+            .filter((event) =>
+              !enrolledEvents.some((enrolledEvent) => enrolledEvent.id === event.id)
+            )
+            .map(renderEventMarker)}
 
           {/* Enrolled Events Markers */}
           {enrolledEvents.map((event) =>
@@ -700,7 +707,6 @@ const Map: React.FC = () => {
                 icon={createCustomIcon()}
               >
                 {/* Marker Popup */}
-
                 <Popup>
                   <div className="flex flex-col gap-2">
                     <div
@@ -708,7 +714,7 @@ const Map: React.FC = () => {
                       onClick={() => navigateToEvent(event.id)}
                     >
                       <div className="font-bold hover:text-blue-600 transition-colors">
-                        {event.name}
+                        {event.name} (Enrolled)
                       </div>
                       <div className="text-sm">{event.description}</div>
                       <div className="text-sm text-gray-600">
