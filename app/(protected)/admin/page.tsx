@@ -1,18 +1,29 @@
+import { UserRole } from "@prisma/client"
+import { notFound } from "next/navigation"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { UsersTable } from "@/components/admin/UsersTable"
-import { OrganizationsTable } from "@/components/admin/OrganizationsTable"
-import { EventListingsTable } from "@/components/admin/EventListingsTable"
 import { getUsers, getOrgs } from "@/actions/users"
 import { getEvents } from "@/actions/event"
+import { currentRole } from "@/lib/auth"
+import { UserGrowthChart } from "@/components/admin/UserGrowthChart"
+import { OrganizationGrowthChart } from "@/components/admin/OrganizationGrowthChart"
+import { EventGrowthChart } from "@/components/admin/EventGrowthChart"
+import { EventDistributionChart } from "@/components/admin/EventDistributionChart"
 
 export default async function AdminDashboard() {
   const users = await getUsers()
   const orgs = await getOrgs()
   const events = await getEvents()
 
+  const role = await currentRole()
+
+  if (role !== UserRole.ADMIN) {
+    notFound()
+  }
+
   return (
-    <div className="p-6 space-y-6 scrollbar-hide">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+    <div className="p-6 space-y-6">
+      <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -39,21 +50,24 @@ export default async function AdminDashboard() {
             <div className="text-2xl font-bold">{events.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        {/*<Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Applications This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">573</div>
+            <div className="text-2xl font-bold">{events.reduce((sum, event) => sum + event.enrollments.length, 0)}</div>
           </CardContent>
-        </Card>
+        </Card>*/}
       </div>
 
-      <div className="space-y-6">
-        <UsersTable users={users} />
-        <OrganizationsTable organizations={orgs} />
-        <EventListingsTable events={events}/>
+      <div className="grid gap-6 md:grid-cols-2">
+        <UserGrowthChart users={users} />
+        <OrganizationGrowthChart organizations={orgs} />
+        <EventGrowthChart events={events} />
+        <EventDistributionChart events={events} />
       </div>
     </div>
   )
 }
+
+

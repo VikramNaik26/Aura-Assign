@@ -68,7 +68,7 @@ const Events = () => {
         <TabsContent value="enrolled">
           {!enrolledEvents?.length && isLoadingEnrollments === undefined ? (
             <EmptyEnroll />
-          ) : (
+          ) : enrolledEvents && enrolledEvents.length ? (
             <div
               className="flex flex-col max-sm:ml-0 w-full overflow-x-scroll sm:overflow-x-hidden sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide"
             >
@@ -76,13 +76,18 @@ const Events = () => {
                 return <EventCard key={event.id} event={event} enrollments={enrollments} isLoadingEnrollments={isLoadingEnrollments} hasSearchQuery />
               })}
             </div>
+          ) : (
+            <EmptyEnroll
+              className="mt-52"
+              label="No enrolled events"
+            />
           )
           }
         </TabsContent>
         <TabsContent value="past" className="h-full">
           <section className="w-full h-full">
             <EmptyEnroll
-              className="-mt-6"
+              className="-mt-16"
               label="No past events"
             />
           </section>

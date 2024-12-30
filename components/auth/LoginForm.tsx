@@ -80,9 +80,6 @@ export const LoginForm = ({
               toast.success("Organization login successful")
             }
           })
-          .then(() => {
-            toast.success("Organzation successfully logged in")
-          })
           .catch(() => {
             setError("Something went wrong")
           })
@@ -106,9 +103,6 @@ export const LoginForm = ({
             if (!data?.error) {
               toast.success("User login successful")
             }
-          })
-          .then(() => {
-            toast.success("User successfully logged in")
           })
           .catch(() => {
             setError("Something went wrong")
