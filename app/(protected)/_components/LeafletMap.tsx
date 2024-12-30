@@ -96,17 +96,19 @@ const createCustomIcon = () =>
             position: absolute;
             top: 0;
             left: 0;
-            width: 20px;
-            height: 20px;
-            background: url('${markerIcons.default}') no-repeat center center;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: url('/logoSmall.png') no-repeat center center;
             background-size: contain;
           "
         ></div>
         <div 
           style="
             position: absolute;
-            top: -8px;
-            right: -7px;
+            top: 0px;
+            right: -15px;
             width: 12px;
             height: 12px;
             background-color: green;
@@ -116,8 +118,9 @@ const createCustomIcon = () =>
         ></div>
       </div>
     `,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    iconSize: [35, 35],
+    iconAnchor: [17.5, 17.5],
+    popupAnchor: [0, -17.5]
   });
 
 const markerIcons = {
@@ -191,79 +194,33 @@ const customRoutingStyle = `
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   width: 300px !important;
-  max-height: 70vh;
-  overflow-y: auto;
+  max-height: 340px; /* Reduced fixed height */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(4px);
   border: 1px solid rgba(229, 231, 235, 0.8);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: scroll;
+  text-align: center;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Hide the default scrollbar */
-.leaflet-routing-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.leaflet-routing-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.leaflet-routing-container::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 4px;
-}
-
-/* Container header */
-.leaflet-routing-container h2 {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #374151;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-/* Route alternatives */
+/* Inner container for scrolling */
 .leaflet-routing-alt {
-  background: none;
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  width: 100% !important;
-  max-height: none !important;
+  height: calc(100% - 50px); /* Account for header space */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  padding-right: 10px;
 }
 
-.leaflet-routing-alt:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
+/* Hide scrollbar for Chrome, Safari, Opera */
+.leaflet-routing-alt::-webkit-scrollbar {
+  display: none;
 }
 
-/* Instructions */
-.leaflet-routing-instructions {
-  font-size: 13px;
-}
-
-.leaflet-routing-instruction-row {
-  padding: 8px 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.leaflet-routing-instruction-row:last-child {
-  border-bottom: none;
-}
-
-.leaflet-routing-icon {
-  background-color: #6366F1;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  margin-right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Distance indicators */
 .leaflet-routing-instruction-distance {
   color: #6366F1;
   font-weight: 500;
@@ -271,72 +228,90 @@ const customRoutingStyle = `
   min-width: 40px;
 }
 
-.leaflet-routing-instruction-text {
-  color: #4B5563;
-  line-height: 1.4;
-}
-
-/* Summary */
-.leaflet-routing-summary {
-  font-size: 13px;
-  color: #374151;
-  margin: 8px 0;
-  padding: 8px;
-  background: #f9fafb;
+/* Container when collapsed */
+.leaflet-routing-container.leaflet-routing-container-hide {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0;
+  margin: 10px;
+  overflow: hidden;
+  background: white;
   border-radius: 4px;
-}
-
-/* Warnings */
-.leaflet-routing-warning {
-  background-color: #FEF3C7;
-  color: #92400E;
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin: 8px 0;
-  font-size: 12px;
-  border: 1px solid #FDE68A;
-}
-
-/* Alternatives toggle */
-.leaflet-routing-alternatives-container {
-  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Collapse button */
 .leaflet-routing-collapse-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
   border-radius: 4px;
-  padding: 4px 8px;
-  color: #4B5563;
-  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  float: right;
+  z-index: 2;
+  transition: all 0.3s ease;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .leaflet-routing-collapse-btn::before {
-  content: "X";
-  font-size: 8px;
-  color: #9CA3AF; /* Icon color */
+  content: "−";
+  font-size: 18px;
+  color: #4B5563;
+  line-height: 1;
 }
 
-.leaflet-routing-collapse-btn:hover {
-  background: #e5e7eb;
+.leaflet-routing-container.leaflet-routing-container-hide .leaflet-routing-collapse-btn {
+  position: static;
+  height: 30px;
+  border: none;
+  background: transparent;
 }
 
-/* Container when collapsed */
-.leaflet-routing-container.leaflet-routing-container-hide {
-  width: auto !important;
-  background: none;
-  box-shadow: none;
+.leaflet-routing-container.leaflet-routing-container-hide .leaflet-routing-collapse-btn::before {
+  content: "+";
 }
 
-/* Fix for mobile */
+/* Hide content when collapsed */
+.leaflet-routing-container.leaflet-routing-container-hide .leaflet-routing-alt {
+  display: none;
+}
+
+/* Route instructions styling */
+.leaflet-routing-alt h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+
+.leaflet-routing-instruction-row {
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.leaflet-routing-instruction-distance {
+  color: #6366F1;
+  font-weight: 500;
+}
+
+/* Mobile adjustments */
 @media (max-width: 640px) {
   .leaflet-routing-container {
-    width: calc(100vw - 40px) !important;
-    max-width: 300px;
-    margin: 10px;
+    width: 280px !important;
+    height: 350px;
   }
 }
 `;
@@ -494,6 +469,7 @@ const Map: React.FC = () => {
 
     routingControl.addTo(map);
 
+    // In your createRoute function
     setTimeout(() => {
       const container = routingControl.getContainer();
       if (container) {
@@ -501,6 +477,12 @@ const Map: React.FC = () => {
         container.style.right = '10px';
         container.style.top = '10px';
         container.style.zIndex = '1000';
+
+        // Add a class for proper styling
+        const routingContainer = container.querySelector('.leaflet-routing-container');
+        if (routingContainer) {
+          routingContainer.classList.add('with-custom-scroll');
+        }
       }
     }, 100);
 
@@ -710,7 +692,11 @@ const Map: React.FC = () => {
           />
 
           {/* Event Markers */}
-          {events.map(renderEventMarker)}
+          {events
+            .filter((event) =>
+              !enrolledEvents.some((enrolledEvent) => enrolledEvent.id === event.id)
+            )
+            .map(renderEventMarker)}
 
           {/* Enrolled Events Markers */}
           {enrolledEvents.map((event) =>
@@ -722,20 +708,47 @@ const Map: React.FC = () => {
               >
                 {/* Marker Popup */}
                 <Popup>
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => navigateToEvent(event.id)}
-                  >
-                    <div className="font-bold hover:text-blue-600 transition-colors">
-                      {event.name} (Enrolled)
+                  <div className="flex flex-col gap-2">
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => navigateToEvent(event.id)}
+                    >
+                      <div className="font-bold hover:text-blue-600 transition-colors">
+                        {event.name} (Enrolled)
+                      </div>
+                      <div className="text-sm">{event.description}</div>
+                      <div className="text-sm text-gray-600">
+                        Date: {new Date(event.date).toLocaleDateString()}
+                      </div>
+                      <div className="mt-2 text-xs text-black hover:underline">
+                        Click to view details
+                      </div>
                     </div>
-                    <div className="text-sm">{event.description}</div>
-                    <div className="text-sm text-gray-600">
-                      Date: {new Date(event.date).toLocaleDateString()}
-                    </div>
-                    <div className="mt-2 text-sm text-blue-600 hover:underline">
-                      Click to view details
-                    </div>
+
+                    {userLocation && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (map && userLocation && event.location) {
+                            if (routing.isRouting) {
+                              clearRoute();
+                            } else {
+                              createRoute(map, userLocation, {
+                                lat: event.location.lat,
+                                lng: event.location.lng
+                              });
+                            }
+                          }
+                        }}
+                        className="flex items-center justify-center gap-2 px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+                      >
+                        <Navigation className="w-4 h-4" />
+                        {routing.isRouting && routing.destination?.lat === event.location.lat
+                          ? 'Clear Route'
+                          : 'Get Directions'
+                        }
+                      </button>
+                    )}
                   </div>
                 </Popup>
               </Marker>

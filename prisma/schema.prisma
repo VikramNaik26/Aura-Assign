@@ -28,6 +28,7 @@ model User {
   image              String?
   role               UserRole  @default(USER)
   isTwoFactorEnabled Boolean   @default(false)
+  createdAt          DateTime  @default(now())
 
   accounts              Account[]
   userProfiles          UserProfile[]
@@ -58,6 +59,7 @@ model Organization {
   emailVerified DateTime? @map("email_verified")
   image         String?
   role          UserRole  @default(ORGANIZATION)
+  createdAt     DateTime  @default(now())
 
   event Event[]
 }
@@ -88,11 +90,12 @@ enum Status {
 }
 
 model Enrollment {
-  id         String  @id @default(cuid())
+  id         String   @id @default(cuid())
   userId     String
   eventId    String
-  status     Status  @default(PENDING)
+  status     Status   @default(PENDING)
   jobDetails String?
+  enrolledAt DateTime @default(now())
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -123,6 +126,8 @@ model Event {
   address      String
   latitude     Float
   longitude    Float
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now())
 
   @@index([orgId])
   @@index([name])

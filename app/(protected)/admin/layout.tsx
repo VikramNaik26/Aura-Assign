@@ -1,5 +1,5 @@
-import Header from '@/components/ui/header'
 import { Sidebar } from '@/components/ui/sidebar'
+import Header from '@/components/ui/header'
 
 export default function AdminLayout({
   children,
@@ -11,10 +11,12 @@ export default function AdminLayout({
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 scrollbar-hide">
+        <main className="flex-1 scrollbar-hide overflow-x-hidden overflow-y-auto bg-gray-100">
           {children}
         </main>
       </div>
     </div>
   )
 }
+
+

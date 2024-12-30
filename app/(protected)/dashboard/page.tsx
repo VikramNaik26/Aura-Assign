@@ -7,7 +7,6 @@ import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { UserRole } from "@prisma/client"
 
-import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
 import {
   getEventById,
   getEvents,
@@ -26,6 +25,7 @@ import { StepForward, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Sidebar } from "../_components/Sidebar"
 import { Button } from "@/components/ui/button"
+import useRedirectIfAdmin from "@/hooks/useRedirectIfAdmin"
 
 export type SortOption = 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc';
 export type FilterOptions = {
@@ -47,7 +47,7 @@ const Dashboard = () => {
     events: [],
   })
 
-  const { data: organizationOrUser, status } = useCurrentOrgORUser()
+  const { organizationOrUser, status } = useRedirectIfAdmin()
 
   useEffect(() => {
     if (events.length > 0) {
@@ -304,7 +304,20 @@ const Dashboard = () => {
         ? <EmptyEnroll />
         : organizationOrUser.role === UserRole.ORGANIZATION ? (
           <RoleGate role={organizationOrUser.role} allowedRole={UserRole.ORGANIZATION}>
-            <EmptyEvent />
+            <section className="px-4 py-6 h-full">
+              <Navbar
+                orgId={organizationOrUser?.id}
+                organizationOrUser={organizationOrUser}
+                events={events}
+                setEvents={setEvents}
+                setHasSearchQuery={setHasSearchQuery}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                filteredEvents={filteredEvents}
+                setFilteredEvents={setFilteredEvents}
+              />
+              <EmptyEvent />
+            </section>
           </RoleGate>
         ) : !isLoadingEvents && (
           <section className="px-4 py-6 h-full">
