@@ -122,7 +122,6 @@ export const EventForm = (props: EventFormProps) => {
 
   const onSubmit = (values: z.infer<typeof EventSchema>) => {
     setError("")
-    console.log("values", values)
     startTransition(() => {
       mutation.mutateAsync(values)
         .then(data => {
@@ -203,7 +202,7 @@ export const EventForm = (props: EventFormProps) => {
                     </FormItem>
                   )}
                 />
-                <div className="flex gap-12">
+                <div className="flex flex-col gap-3 lg:flex-row lg:gap-12">
                   <FormField
                     control={form.control}
                     name="payment"
@@ -235,7 +234,7 @@ export const EventForm = (props: EventFormProps) => {
                             value={field.value}
                             disabled={isPending || isInputDisabled}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger isHiddenIcon={organization.role === UserRole.USER}>
                               <SelectValue placeholder="Select payment basis" />
                             </SelectTrigger>
                             <SelectContent>
