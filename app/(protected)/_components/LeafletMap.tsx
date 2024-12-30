@@ -1,13 +1,14 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import { MapPin, Crosshair, Loader2, MapPinned } from 'lucide-react'
+import { MapPin, Crosshair, Loader2, MapPinned, Navigation } from 'lucide-react'
 import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch'
 import { UserRole } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from 'next/navigation'
+import 'leaflet-routing-machine'
 
 // CSS Imports
 import 'leaflet/dist/leaflet.css'
@@ -29,6 +30,12 @@ interface LocationDetails {
   state: string
   district: string
   pincode: string
+}
+
+interface RoutingState {
+  isRouting: boolean;
+  destination: LatLng | null;
+  routingControl: L.Routing.Control | null;
 }
 
 // Default Location
@@ -176,6 +183,164 @@ const customSearchStyle = `
 }
 `;
 
+const customRoutingStyle = `
+.leaflet-routing-container {
+  background-color: white;
+  padding: 1rem;
+  margin: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  width: 300px !important;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+}
+
+/* Hide the default scrollbar */
+.leaflet-routing-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.leaflet-routing-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.leaflet-routing-container::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 4px;
+}
+
+/* Container header */
+.leaflet-routing-container h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #374151;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Route alternatives */
+.leaflet-routing-alt {
+  background: none;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  width: 100% !important;
+  max-height: none !important;
+}
+
+.leaflet-routing-alt:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Instructions */
+.leaflet-routing-instructions {
+  font-size: 13px;
+}
+
+.leaflet-routing-instruction-row {
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.leaflet-routing-instruction-row:last-child {
+  border-bottom: none;
+}
+
+.leaflet-routing-icon {
+  background-color: #6366F1;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Distance indicators */
+.leaflet-routing-instruction-distance {
+  color: #6366F1;
+  font-weight: 500;
+  padding-right: 8px;
+  min-width: 40px;
+}
+
+.leaflet-routing-instruction-text {
+  color: #4B5563;
+  line-height: 1.4;
+}
+
+/* Summary */
+.leaflet-routing-summary {
+  font-size: 13px;
+  color: #374151;
+  margin: 8px 0;
+  padding: 8px;
+  background: #f9fafb;
+  border-radius: 4px;
+}
+
+/* Warnings */
+.leaflet-routing-warning {
+  background-color: #FEF3C7;
+  color: #92400E;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 8px 0;
+  font-size: 12px;
+  border: 1px solid #FDE68A;
+}
+
+/* Alternatives toggle */
+.leaflet-routing-alternatives-container {
+  border: none;
+}
+
+/* Collapse button */
+.leaflet-routing-collapse-btn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #4B5563;
+  font-size: 12px;
+  cursor: pointer;
+  float: right;
+}
+
+.leaflet-routing-collapse-btn::before {
+  content: "X";
+  font-size: 8px;
+  color: #9CA3AF; /* Icon color */
+}
+
+.leaflet-routing-collapse-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Container when collapsed */
+.leaflet-routing-container.leaflet-routing-container-hide {
+  width: auto !important;
+  background: none;
+  box-shadow: none;
+}
+
+/* Fix for mobile */
+@media (max-width: 640px) {
+  .leaflet-routing-container {
+    width: calc(100vw - 40px) !important;
+    max-width: 300px;
+    margin: 10px;
+  }
+}
+`;
+
 // Map Events Component
 const MapEvents: React.FC<{ onLocationUpdate: (pos: LatLng) => void }> = ({ onLocationUpdate }) => {
   useMapEvents({
@@ -243,21 +408,23 @@ const SearchControl: React.FC<{ map: L.Map }> = ({ map }) => {
 
 // Main Map Component
 const Map: React.FC = () => {
+  const router = useRouter()
   const [markerPosition, setMarkerPosition] = useState<LatLng>(defaultCenter)
   const [userLocation, setUserLocation] = useState<LatLng | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [map, setMap] = useState<L.Map | null>(null)
   const [locationDetails, setLocationDetails] = useState<LocationDetails | null>(null)
 
+  const [routing, setRouting] = useState<RoutingState>({
+    isRouting: false,
+    destination: null,
+    routingControl: null
+  });
+
   const [events, setEvents] = useState<OrgEvent[]>([])
   const [enrolledEvents, setEnrolledEvents] = useState<OrgEvent[]>([])
+
   const { data: organizationOrUser, status } = useCurrentOrgORUser()
-
-  const router = useRouter()
-
-  const navigateToEvent = (eventId: string) => {
-    router.push(`/dashboard/event/${eventId}`)
-  }
 
   // Events Query
   const { data, error, isLoading: isLoadingEvents } = useQuery<OrgEvent[]>({
@@ -300,20 +467,173 @@ const Map: React.FC = () => {
     enabled: !!enrollments && !!enrollments.length
   })
 
+  const createRoute = useCallback((map: L.Map, start: LatLng, end: LatLng) => {
+    if (routing.routingControl) {
+      map.removeControl(routing.routingControl);
+    }
+
+    const routingControl = new L.Routing.Control({
+      waypoints: [
+        L.latLng(start.lat, start.lng),
+        L.latLng(end.lat, end.lng)
+      ],
+      routeWhileDragging: true,
+      showAlternatives: true,
+      fitSelectedRoutes: true,
+      lineOptions: {
+        styles: [{ color: '#6366F1', weight: 4 }]
+      },
+      createMarker: function() { return null; },
+      collapsible: true,
+      formatter: new L.Routing.Formatter({
+        units: 'metric',
+        roundingSensitivity: 4,
+        distanceTemplate: '{value} {unit}'
+      })
+    });
+
+    routingControl.addTo(map);
+
+    setTimeout(() => {
+      const container = routingControl.getContainer();
+      if (container) {
+        container.style.position = 'absolute';
+        container.style.right = '10px';
+        container.style.top = '10px';
+        container.style.zIndex = '1000';
+      }
+    }, 100);
+
+    setRouting(prev => ({
+      ...prev,
+      routingControl,
+      isRouting: true,
+      destination: end
+    }));
+  }, [routing.routingControl]);
+
+  const clearRoute = useCallback(() => {
+    if (map && routing.routingControl) {
+      const container = routing.routingControl.getContainer();
+      if (container && container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+      map.removeControl(routing.routingControl);
+      setRouting({
+        isRouting: false,
+        destination: null,
+        routingControl: null
+      });
+    }
+  }, [map, routing.routingControl]);
+
+  const navigateToEvent = useCallback((eventId: string) => {
+    router.push(`/dashboard/event/${eventId}`);
+  }, [router]);
+
+  // Effects
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = customRoutingStyle;
+    document.head.appendChild(style);
+    return () => {
+      style.remove();
+    };
+  }, []);
+
   // Update events and enrolled events
   useEffect(() => {
     if (data) {
-      setEvents(data)
+      setEvents(data);
     }
-  }, [data])
+  }, [data]);
 
   useEffect(() => {
     if (enrolledEventsData) {
-      setEnrolledEvents(enrolledEventsData)
+      setEnrolledEvents(enrolledEventsData);
     }
-  }, [enrolledEventsData])
+  }, [enrolledEventsData]);
 
-  // Fetch Location Details
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position: GeolocationPosition) => {
+          const pos: LatLng = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(pos);
+          setMarkerPosition(pos);
+          setIsLoading(false);
+        },
+        (error: GeolocationPositionError) => {
+          console.error("Error: The Geolocation service failed.", error);
+          setIsLoading(false);
+        }
+      );
+    } else {
+      console.error("Error: Your browser doesn't support geolocation.");
+      setIsLoading(false);
+    }
+  }, []);
+
+  const renderEventMarker = useCallback((event: OrgEvent) => {
+    if (!event.location?.lat || !event.location?.lng) return null;
+
+    return (
+      <Marker
+        key={event.id}
+        position={{ lat: event.location.lat, lng: event.location.lng }}
+        icon={markerIcons.default}
+      >
+        <Popup>
+          <div className="flex flex-col gap-2">
+            <div
+              className="cursor-pointer"
+              onClick={() => navigateToEvent(event.id)}
+            >
+              <div className="font-bold hover:text-blue-600 transition-colors">
+                {event.name}
+              </div>
+              <div className="text-sm">{event.description}</div>
+              <div className="text-sm text-gray-600">
+                Date: {new Date(event.date).toLocaleDateString()}
+              </div>
+              <div className="mt-2 text-xs text-black hover:underline">
+                Click to view details
+              </div>
+            </div>
+
+            {userLocation && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (map && userLocation && event.location) {
+                    if (routing.isRouting) {
+                      clearRoute();
+                    } else {
+                      createRoute(map, userLocation, {
+                        lat: event.location.lat,
+                        lng: event.location.lng
+                      });
+                    }
+                  }
+                }}
+                className="flex items-center justify-center gap-2 px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm"
+              >
+                <Navigation className="w-4 h-4" />
+                {routing.isRouting && routing.destination?.lat === event.location.lat
+                  ? 'Clear Route'
+                  : 'Get Directions'
+                }
+              </button>
+            )}
+          </div>
+        </Popup>
+      </Marker>
+    );
+  }, [userLocation, map, routing.isRouting, routing.destination?.lat, createRoute, clearRoute, navigateToEvent]);
+
   const fetchLocationDetails = async (lat: number, lng: number) => {
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
@@ -390,33 +710,7 @@ const Map: React.FC = () => {
           />
 
           {/* Event Markers */}
-          {events.map((event) => (
-            event.location?.lat && event.location?.lng ? (
-              <Marker
-                key={event.id}
-                position={{ lat: event.location.lat, lng: event.location.lng }}
-                icon={markerIcons.default}
-              >
-                <Popup>
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => navigateToEvent(event.id)}
-                  >
-                    <div className="font-bold hover:text-blue-600 transition-colors">
-                      {event.name}
-                    </div>
-                    <div className="text-sm">{event.description}</div>
-                    <div className="text-sm text-gray-600">
-                      Date: {new Date(event.date).toLocaleDateString()}
-                    </div>
-                    <div className="mt-2 text-xs text-black hover:underline">
-                      Click to view details
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ) : null
-          ))}
+          {events.map(renderEventMarker)}
 
           {/* Enrolled Events Markers */}
           {enrolledEvents.map((event) =>
@@ -460,7 +754,7 @@ const Map: React.FC = () => {
           )}
 
           <MapEvents onLocationUpdate={setMarkerPosition} />
-          {map && <SearchControl map={map} />}
+          {map && !routing.isRouting && <SearchControl map={map} />}
         </MapContainer>
       </div>
 
