@@ -231,3 +231,13 @@ export const getEnrollmentById = async (enrollmentId: string): Promise<Enrollmen
     throw error
   }
 }
+
+export const getEnrollments = async () => {
+  try {
+    const enrollments = await db.enrollment.findMany()
+    return enrollments
+  } catch (error) {
+    console.error('Error fetching enrollments:', error)
+    throw error
+  }
+}

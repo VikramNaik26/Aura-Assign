@@ -1,66 +1,94 @@
 'use client'
-
-import { Event } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts"
+import { getWeekBoundaries } from "@/lib/date-utils"
+import { prepareEnrollmentData, enrollmentChartConfig } from "@/lib/chart-utils"
+import { Enrollments } from "@/actions/enrollment"
 
-interface EnrollmentTrendChartProps {
+export type ExtendedEnrollments = Enrollments & {
+  enrolledAt: Date
+}
+
+export interface EnrollmentTrendChartProps {
   events: Event[]
-  enrollments: any[]
+  enrollments: ExtendedEnrollments[]
 }
 
 export function EnrollmentTrendChart({ events, enrollments }: EnrollmentTrendChartProps) {
-  const enrollmentData = events.reduce((acc, event) => {
-    const date = event.date.toISOString().split('T')[0]
-    acc[date] = (acc[date] || 0) + enrollments.length
-    return acc
-  }, {} as Record<string, number>)
-
-  const chartData = Object.entries(enrollmentData)
-    .map(([date, count]) => ({ date, enrollments: count }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
-  const chartConfig = {
-    enrollments: {
-      label: 'Enrollments',
-      color: 'hsl(var(--chart-4))',
-    },
-  } satisfies ChartConfig
+  const { startOfWeek, endOfWeek } = getWeekBoundaries()
+  const chartData = prepareEnrollmentData(enrollments, startOfWeek, endOfWeek)
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Enrollment Trend</CardTitle>
-        <CardDescription>Number of enrollments per event date</CardDescription>
+        <CardTitle>Enrollment Trend (This Week)</CardTitle>
+        <CardDescription>Number of enrollments per day this week</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px]">
+        <ChartContainer config={enrollmentChartConfig} className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                tickFormatter={(value) => new Date(value).toLocaleDateString()}
+            <RadarChart
+              cx="50%"
+              cy="50%"
+              outerRadius="80%"
+              data={chartData}
+            >
+              <PolarGrid
+                gridType="polygon"
               />
-              <YAxis />
-              <ChartTooltip 
-                content={<ChartTooltipContent />}
-                labelFormatter={(label) => new Date(label).toLocaleDateString()}
+              <PolarAngleAxis
+                dataKey="date"
+                tickFormatter={(value) => {
+                  const date = new Date(value)
+                  return date.toLocaleDateString('en-US', { weekday: 'short' })
+                }}
+                tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="enrollments" 
-                stroke="var(--color-enrollments)" 
-                strokeWidth={2}
-                dot={false}
+              <PolarRadiusAxis
+                angle={30}
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />
-            </LineChart>
+              <ChartTooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const date = new Date(payload[0].payload.date)
+                    return (
+                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="font-medium">
+                          {date.toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
+                        <div className="mt-1 flex items-center">
+                          <div className="w-4 h-4 rounded-full mr-2"
+                            style={{ backgroundColor: 'hsl(120, 40%, 50%)' }} />
+                          <div>Enrollments: {payload[0].value}</div>
+                        </div>
+                      </div>
+                    )
+                  }
+                  return null
+                }}
+              />
+              <Radar
+                name="Enrollments"
+                dataKey="enrollments"
+                
+                stroke="hsl(120, 40%, 50%)"
+                fill="hsl(120, 40%, 50%)"
+                fillOpacity={0.2}
+                dot={{ r: 4, fill: "hsl(120, 40%, 50%)" }}
+                activeDot={{ r: 6, fill: "hsl(120, 40%, 50%)" }}
+                isAnimationActive={true}
+                animationDuration={1000}
+              />
+            </RadarChart>
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
     </Card>
   )
 }
-
-

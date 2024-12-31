@@ -9,11 +9,14 @@ import { UserGrowthChart } from "@/components/admin/UserGrowthChart"
 import { OrganizationGrowthChart } from "@/components/admin/OrganizationGrowthChart"
 import { EventGrowthChart } from "@/components/admin/EventGrowthChart"
 import { EventDistributionChart } from "@/components/admin/EventDistributionChart"
+import { getEnrollments } from "@/actions/enrollment"
+import { EnrollmentTrendChart } from "@/components/admin/EnrollmentTrendChart"
 
 export default async function AdminDashboard() {
   const users = await getUsers()
   const orgs = await getOrgs()
   const events = await getEvents()
+  const enrollments = await getEnrollments()
 
   const role = await currentRole()
 
@@ -50,14 +53,14 @@ export default async function AdminDashboard() {
             <div className="text-2xl font-bold">{events.length}</div>
           </CardContent>
         </Card>
-        {/*<Card>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Enrollments</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{events.reduce((sum, event) => sum + event.enrollments.length, 0)}</div>
+            <div className="text-2xl font-bold">{enrollments.length}</div>
           </CardContent>
-        </Card>*/}
+        </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -65,6 +68,7 @@ export default async function AdminDashboard() {
         <OrganizationGrowthChart organizations={orgs} />
         <EventGrowthChart events={events} />
         <EventDistributionChart events={events} />
+        <EnrollmentTrendChart events={events} enrollments={enrollments} />
       </div>
     </div>
   )

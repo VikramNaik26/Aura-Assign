@@ -32,14 +32,16 @@ export function EventDistributionChart({ events }: EventDistributionChartProps) 
     }))
     : sampleData
 
-  // Define colors for different payment basis types
+  // Updated color scheme
   const COLORS = [
-    'hsl(var(--primary))',
-    'hsl(var(--primary))',
-    'hsl(var(--primary))',
-    'hsl(var(--primary))',
-    'hsl(var(--primary))',
-  ].map((color, index) => `${color}/${(index + 3) * 20}%`)
+    'hsl(207, 50%, 50%)',  // Matte Blue
+    'hsl(120, 40%, 50%)',  // Matte Green
+    'hsl(35, 40%, 50%)',   // Matte Yellow
+    'hsl(10, 50%, 40%)',   // Matte Red
+    'hsl(180, 30%, 50%)',  // Matte Cyan
+  ]
+
+  // ].map((color, index) => `${color}/${(index + 1) * 20}%`)
 
   const chartConfig = {
     value: {
@@ -71,9 +73,9 @@ export function EventDistributionChart({ events }: EventDistributionChartProps) 
                 {chartData.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
+                    fill={COLORS[index % COLORS.length]}  // Apply the color based on index
                     strokeWidth={1}
-                    stroke="hsl(var(--primary))"
+                    stroke={COLORS[index % COLORS.length]}  // Outline stroke color
                   />
                 ))}
               </Pie>
@@ -91,5 +93,4 @@ export function EventDistributionChart({ events }: EventDistributionChartProps) 
     </Card>
   )
 }
-
 
