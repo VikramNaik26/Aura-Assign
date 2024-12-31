@@ -23,7 +23,7 @@ export default async function UsersPage() {
           </p>
         </div>
       </div>
-      <DataTable data={users} columns={columns} />
+      <DataTable data={users} columns={columns} toolbar filename="users" />
     </div>
   )
 }

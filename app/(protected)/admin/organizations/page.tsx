@@ -23,7 +23,7 @@ export default async function OrganizationsPage() {
           </p>
         </div>
       </div>
-      <DataTable data={organizations} columns={columns} />
+      <DataTable data={organizations} columns={columns} toolbar filename="users" />
     </div>
   )
 }
