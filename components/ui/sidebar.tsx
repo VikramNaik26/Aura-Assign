@@ -36,9 +36,9 @@ export function Sidebar() {
           </li>
           <li>
             <Button variant="ghost" className="w-full justify-start" asChild>
-              <Link href="/admin/user-analytics">
+              <Link href="/admin/combined-analytics">
                 <PieChart className="mr-2 h-4 w-4" />
-                User Analytics
+                Combined Analytics
               </Link>
             </Button>
           </li>

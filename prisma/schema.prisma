@@ -29,6 +29,7 @@ model User {
   role               UserRole  @default(USER)
   isTwoFactorEnabled Boolean   @default(false)
   createdAt          DateTime  @default(now())
+  lastLoginAt        DateTime? @default(now())
 
   accounts              Account[]
   userProfiles          UserProfile[]

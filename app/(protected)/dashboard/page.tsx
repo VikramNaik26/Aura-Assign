@@ -12,6 +12,7 @@ import {
   getEvents,
   getEventsByOrgId,
   getNearbyEvents,
+  getNearbyOrgEvents,
   OrgEvent
 } from "@/actions/event"
 import { EventCard } from "../_components/EventCard"
@@ -87,7 +88,12 @@ const Dashboard = () => {
 
   const { data: nearByEvents, isLoading: isLoadingNearByEvents } = useQuery<OrgEvent[]>({
     queryKey: ["nearby-events"],
-    queryFn: () => getNearbyEvents(latitude, longitude),
+    queryFn: () => {
+      if (organizationOrUser.role === UserRole.ORGANIZATION) {
+        return getNearbyOrgEvents(latitude, longitude, 100, organizationOrUser?.id)
+      }
+      return getNearbyEvents(latitude, longitude)
+    },
     enabled: true
   })
 
@@ -302,7 +308,7 @@ const Dashboard = () => {
         </section>
       ) : searchParams.get('enrolled') === 'true'
         ? <EmptyEnroll />
-        : organizationOrUser.role === UserRole.ORGANIZATION ? (
+        : organizationOrUser.role === UserRole.ORGANIZATION && !isLoadingEvents ? (
           <RoleGate role={organizationOrUser.role} allowedRole={UserRole.ORGANIZATION}>
             <section className="px-4 py-6 h-full">
               <Navbar

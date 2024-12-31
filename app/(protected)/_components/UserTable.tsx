@@ -2,7 +2,9 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Status } from "@prisma/client"
-import { CheckIcon, X } from "lucide-react"
+import { CheckIcon, X, FileDown } from "lucide-react"
+import { jsPDF } from "jspdf"
+import autoTable from 'jspdf-autotable'
 
 import { ExtendedUserWithProfile, getEnrollmentById, getEnrollmentsForEvent, setEnrollmentStatus } from "@/actions/enrollment"
 import { CardWrapper } from "@/components/auth/CardWrapper"
@@ -21,7 +23,6 @@ import { truncateAddress } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { sendEnrollmentStatusMail } from "@/lib/mail"
-import { getUserById } from "@/data/users"
 
 interface UserTableProps {
   event: OrgEvent
@@ -62,6 +63,33 @@ export const UserTable = ({
     updateEnrollmentStatusMutation.mutate({ enrollmentId, status })
   }
 
+  const downloadPDF = () => {
+    const doc = new jsPDF()
+
+    doc.text(`Event: ${event.name}`, 14, 15)
+    doc.text(`Date: ${event.date.toLocaleDateString()}`, 14, 25)
+
+    const tableData = enrolledUsers?.map(user => [
+      user.name,
+      user.email,
+      user.gender,
+      user.dateOfBirth?.toLocaleDateString() ?? "-",
+      user.phoneNumber ?? "-",
+      user.streetAddress ?? "-",
+      `${user.city ?? "-"}, ${user.state ?? "-"}`,
+      user.postalCode ?? "-",
+      user.status
+    ])
+
+    autoTable(doc, {
+      head: [['Name', 'Email', 'Gender', 'DOB', 'Phone', 'Address', 'City/State', 'Postal', 'Status']],
+      body: tableData,
+      startY: 35,
+    })
+
+    doc.save(`${event.name}-enrollments.pdf`)
+  }
+
   if (isLoading) {
     return (
       <EnrolledUsersTableSkeleton />
@@ -91,6 +119,11 @@ export const UserTable = ({
       className="sm:w-full max-lg: mb-28"
       headerClassName="items-start ml-4 text-sm"
     >
+      <Button onClick={downloadPDF} disabled={!enrolledUsers?.length} className="mb-4 ml-4">
+        <FileDown className="h-4 w-4 mr-2" />
+        Export as PDF
+      </Button>
+
       <Table>
         <TableHeader>
           <TableRow>

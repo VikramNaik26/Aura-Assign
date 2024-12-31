@@ -3,9 +3,8 @@
 import Image from "next/image"
 import { VisuallyHidden } from "@reach/visually-hidden"
 import { CircleCheckBig, CircleX, Clock, Loader2 } from "lucide-react"
-import { Status, UserRole } from "@prisma/client"
-import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
+import { Organization, Status, UserRole } from "@prisma/client"
+import { useEffect, useState, useTransition } from "react"
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -19,7 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 
-import { OrgEvent, deleteEvent, getEventById } from "@/actions/event"
+import { OrgEvent, deleteEvent } from "@/actions/event"
 import { EventForm } from "./EventForm"
 import { RoleGate } from "@/components/auth/RoleGate"
 import { EnrollForm } from "./EnrollForm"
@@ -27,6 +26,8 @@ import { useCurrentRole } from "@/hooks/useCurrentRole"
 import { useCurrentOrgORUser } from "@/hooks/useCurrentOrgORUser"
 import { getEnrollmentStatusText, hasEventId } from "@/lib/utils"
 import { Enrollments, getEnrollmentsByUserId } from "@/actions/enrollment"
+import { getOrgData } from "@/data/organizations"
+import { DialogPortal } from "@radix-ui/react-dialog"
 
 interface EventDetailsProps {
   event: OrgEvent
@@ -48,8 +49,6 @@ export const EventDetails = ({
   })
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
-
-  const router = useRouter()
 
   const closeEditDialog = () => setIsDialogOpen(prev => ({ ...prev, editDialog: false }))
   const closeDeleteDialog = () => setIsDialogOpen(prev => ({ ...prev, deleteDialog: false }))
@@ -110,6 +109,11 @@ export const EventDetails = ({
     enabled: !!organizationOrUser?.data?.id
   })
 
+  const { data: orgData, isLoading: isOrgDataLoading } = useQuery<Organization | null>({
+    queryKey: ["orgData", event?.orgId],
+    queryFn: () => getOrgData(event.orgId)
+  });
+
   return (
     <>
       <div className="flex flex-col sm:flex-row-reverse gap-4 min-h-full">
@@ -121,6 +125,13 @@ export const EventDetails = ({
             src="/assets/EventImageOne.svg"
             width="300"
           />
+          {!isOrgDataLoading && orgData && (
+            <div className="p-4 rounded-md mb-4">
+              <h3 className="font-semibold mb-2">Organization Details</h3>
+              <p>Name: {orgData.name}</p>
+              <p>Email: {orgData.email}</p>
+            </div>
+          )}
         </div>
         <EventForm
           className="w-full my-0 min-h-full flex flex-col"
@@ -136,41 +147,45 @@ export const EventDetails = ({
         <Dialog open={isDialogOpen.enrollDialog} onOpenChange={() => setIsDialogOpen({ ...isDialogOpen, enrollDialog: !isDialogOpen.enrollDialog })}>
           <DialogTrigger asChild>
             <Button variant="secondary" className="m-3 sm:max-w-60" disabled={isLoadingEnrollments || hasEventId(enrollments as Enrollments[], event?.id)}>
-                {isLoadingEnrollments
-                  ? <Loader2 className="h-4 w-4 animate-spin" />
-                  : (() => {
-                    const { text, status } = getEnrollmentStatusText(
-                      enrollments as Enrollments[],
-                      event?.id
-                    )
+              {isLoadingEnrollments
+                ? <Loader2 className="h-4 w-4 animate-spin" />
+                : (() => {
+                  const { text, status } = getEnrollmentStatusText(
+                    enrollments as Enrollments[],
+                    event?.id
+                  )
 
-                    return (
-                      <span className="flex justify-center items-center">
-                        {text}
-                        {status === Status.PENDING && <Clock className="ml-2 h-4 w-4" />}
-                        {status === Status.REJECTED && <CircleX className="ml-2 h-4 w-4" />}
-                        {status === Status.APPROVED && <CircleCheckBig className="ml-2 h-4 w-4" />}
-                      </span>
-                    )
-                  })()
-                }
+                  return (
+                    <span className="flex justify-center items-center">
+                      {text}
+                      {status === Status.PENDING && <Clock className="ml-2 h-4 w-4" />}
+                      {status === Status.REJECTED && <CircleX className="ml-2 h-4 w-4" />}
+                      {status === Status.APPROVED && <CircleCheckBig className="ml-2 h-4 w-4" />}
+                    </span>
+                  )
+                })()
+              }
             </Button>
           </DialogTrigger>
-          <DialogContent className="p-0 auto bg-transparent border-none z-[99999]">
-            <DialogHeader>
-              <DialogTitle asChild>
-                <VisuallyHidden>Create an event</VisuallyHidden>
-              </DialogTitle>
-              <DialogDescription asChild>
-                <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
-              </DialogDescription>
-            </DialogHeader>
-            <EnrollForm eventId={event?.id} closeDialog={closeEnrollDialog} />
-          </DialogContent>
+          <DialogPortal>
+            <DialogContent className="p-0 auto bg-transparent border-none z-[9999]">
+              <DialogHeader>
+                <DialogTitle asChild>
+                  <VisuallyHidden>Create an event</VisuallyHidden>
+                </DialogTitle>
+                <DialogDescription asChild>
+                  <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
+                </DialogDescription>
+              </DialogHeader>
+              <EnrollForm eventId={event?.id} closeDialog={closeEnrollDialog} />
+            </DialogContent>
+          </DialogPortal>
         </Dialog>
       </RoleGate>
-      <div className="min-h-20">
-      </div>
+      <RoleGate role={role} allowedRole={UserRole.USER}>
+        <div className="min-h-20">
+        </div>
+      </RoleGate>
     </>
   )
 }

@@ -27,7 +27,7 @@ const ProtectedLayout = ({
         <section className="h-[100dvh] w-full px-4">
           <div className="flex gap-x-3 h-full">
             <Suspense fallback={<div>Loading...</div>}>
-              {userpath !== "/admin" && <DashboardSidebar />}
+              {!userpath.startsWith("/admin") && <DashboardSidebar />}
               <BottomNavbar />
             </Suspense>
             <div className="h-full flex-1 w-full">
