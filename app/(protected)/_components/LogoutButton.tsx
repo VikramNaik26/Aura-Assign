@@ -6,15 +6,19 @@ import { useRouter } from "next/navigation"
 
 import { logout } from "@/actions/logout"
 import { Button } from "@/components/ui/button"
+import { ClassNameValue } from "tailwind-merge"
+import { cn } from "@/lib/utils"
 
 interface LogoutButtonProps {
   children: React.ReactNode
   isProfile?: boolean
+  className?: ClassNameValue
 }
 
 export const LogoutButton = ({
   children,
-  isProfile = false
+  isProfile = false,
+  className
 }: LogoutButtonProps) => {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -22,7 +26,7 @@ export const LogoutButton = ({
   const onClick = () => {
     startTransition(() => {
       logout()
-       .then(() => {
+        .then(() => {
           router.push("/user/login")
           location.reload()
         })
@@ -37,7 +41,10 @@ export const LogoutButton = ({
     <Button
       variant={isProfile ? "outline" : "ghost"}
       onClick={onClick}
-      className="cursor-pointer w-full"
+      className={cn(
+        "cursor-pointer w-full",
+        className
+      )}
       disabled={isPending}
     >
       {children}
