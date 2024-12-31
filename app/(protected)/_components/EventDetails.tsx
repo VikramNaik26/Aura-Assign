@@ -120,9 +120,9 @@ export const EventDetails = ({
         <div className="w-full md:max-w-[350px] sm:aspect-auto">
           <Image
             alt="Product image"
-            className="w-full rounded-md object-cover sm:max-w-[400px]"
+            className="w-full h-60 rounded-md object-cover sm:max-w-[400px]"
             height="300"
-            src="/assets/EventImageOne.svg"
+            src={(event?.imageUrl && event?.imageUrl) || "/assets/EventImageOne.svg"}
             width="300"
           />
           {!isOrgDataLoading && orgData && (

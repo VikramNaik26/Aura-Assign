@@ -10,8 +10,10 @@ import { ClassNameValue } from "tailwind-merge"
 import { PaymentBasis, UserRole } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
-import { Loader2, MapPin } from "lucide-react"
+import { Loader2, MapPin, ImageIcon, X } from "lucide-react"
 import dynamic from 'next/dynamic'
+import Image from "next/image"
+
 import { EventSchema } from "@/schemas"
 import {
   Form,
@@ -65,12 +67,16 @@ interface Location {
   lng: number
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+
 export const EventForm = (props: EventFormProps) => {
   const closeDialog = props.closeDialog
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
   const [isInputDisabled, setIsInputDisabled] = useState(props.isEdit)
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(props.eventObject?.location || null)
+  const [imagePreview, setImagePreview] = useState<string | null>(props.eventObject?.imageUrl || null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const { data: organization } = useCurrentOrgORUser()
   const queryClient = useQueryClient()
@@ -84,6 +90,57 @@ export const EventForm = (props: EventFormProps) => {
       setError('Something went wrong');
     },
   })
+
+  const uploadImage = async (file: File): Promise<string> => {
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error("File size must be less than 5MB")
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      )
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const data = await response.json()
+      return data.secure_url
+    } catch (error) {
+      console.error('Upload error:', error)
+      throw new Error('Image upload failed')
+    }
+  }
+
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) return
+
+    try {
+      setIsUploading(true)
+      const url = await uploadImage(file)
+      setImagePreview(url)
+      form.setValue('imageUrl', url)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Upload failed')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removeImage = () => {
+    setImagePreview(null)
+    form.setValue('imageUrl', '')
+  }
 
   const extractDateAndTime = (
     dateTime: Date | undefined
@@ -120,7 +177,7 @@ export const EventForm = (props: EventFormProps) => {
     }
   })
 
-  const onSubmit = (values: z.infer<typeof EventSchema>) => {
+  const onSubmit = async (values: z.infer<typeof EventSchema>) => {
     setError("")
     startTransition(() => {
       mutation.mutateAsync(values)
@@ -257,14 +314,55 @@ export const EventForm = (props: EventFormProps) => {
                     name="imageUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Event image</FormLabel>
+                        <FormLabel>Event Image</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Enter image"
-                            type="text"
-                            disabled={isPending || isInputDisabled}
-                          />
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-4">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                disabled={isPending || isInputDisabled || isUploading}
+                                className="hidden"
+                                id="image-upload"
+                              />
+                              <label
+                                htmlFor="image-upload"
+                                className={cn(
+                                  "flex text-sm items-center gap-2 px-4 py-2 rounded-md border cursor-pointer hover:bg-secondary transition-colors",
+                                  (isPending || isInputDisabled || isUploading) && "opacity-50 cursor-not-allowed"
+                                )}
+                              >
+                                <ImageIcon className="h-4 w-4" />
+                                {isUploading ? "Uploading..." : "Upload Image"}
+                              </label>
+                              {imagePreview && (
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={removeImage}
+                                  disabled={isPending || isInputDisabled || isUploading}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                            {imagePreview && (
+                              <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                                <Image
+                                  src={imagePreview}
+                                  alt="Event preview"
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                            )}
+                            <Input
+                              type="hidden"
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -365,13 +463,13 @@ export const EventForm = (props: EventFormProps) => {
                     <Button
                       type="submit"
                       className="w-full"
+                      disabled={isUploading}
                     >
                       {
-                        props.isUpdate && !isPending
-                          ? "Update"
-                          : isPending
-                            ? <Loader2 className="h-4 animate-spin" />
-                            : "Create"
+                        isUploading ? "Uploading..." :
+                          props.isUpdate && !isPending ? "Update" :
+                            isPending ? <Loader2 className="h-4 animate-spin" /> :
+                              "Create"
                       }
                     </Button>
                     <Button
@@ -379,6 +477,7 @@ export const EventForm = (props: EventFormProps) => {
                       className="w-full"
                       variant="outline"
                       onClick={closeDialog}
+                      disabled={isUploading}
                     >
                       Cancel
                     </Button>
