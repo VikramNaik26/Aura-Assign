@@ -9,6 +9,7 @@ export default function useRedirectIfAdmin() {
 
   useEffect(() => {
     // Only attempt redirect if we have a definitive status and user data
+    console.log({status, organizationOrUser})
     if (status === "authenticated" &&
       organizationOrUser &&
       organizationOrUser.role === UserRole.ADMIN) {
