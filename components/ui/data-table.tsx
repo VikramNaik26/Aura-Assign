@@ -30,6 +30,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   toolbar?: boolean
+  filename: string
 }
 
 // Helper function to format dates consistently
@@ -47,6 +48,7 @@ export function DataTable<TData extends object, TValue>({
   columns,
   data,
   toolbar = true,
+  filename
 }: DataTableProps<TData, TValue>) {
   // Format dates in data before rendering
   const formattedData = React.useMemo(() => {
@@ -90,7 +92,7 @@ export function DataTable<TData extends object, TValue>({
 
   return (
     <div className="space-y-4">
-      {toolbar && <DataTableToolbar table={table} />}
+      {toolbar && <DataTableToolbar table={table} fileName={filename} />}
       <div className="rounded-md border">
         <Table>
           <TableHeader>

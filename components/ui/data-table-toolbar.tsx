@@ -1,18 +1,21 @@
 "use client"
 
 import { Cross2Icon } from "@radix-ui/react-icons"
-import { Table } from "@tanstack/react-table"
+import { Table as TableInstance } from "@tanstack/react-table"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options"
+import { DataTableExportOptions } from "@/components/ui/data-table-export-options"
 
 interface DataTableToolbarProps<TData> {
-  table: Table<TData>
+  table: TableInstance<TData>
+  fileName: string
 }
 
 export function DataTableToolbar<TData>({
   table,
+  fileName,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
@@ -38,7 +41,12 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <div className="flex items-center space-x-2">
+        <DataTableExportOptions table={table} fileName={fileName} />
+        <DataTableViewOptions table={table} />
+      </div>
     </div>
   )
 }
+
+
