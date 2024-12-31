@@ -135,12 +135,14 @@ export const EventCard = ({
   return (
     <Card
       className={cn(
-        `sm:max-w-[300px] max-sm:w-[220px] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none max-sm:first:ml-8`,
+        `sm:max-w-[300px] flex flex-col sm:justify-between shadow-[0_4px_8px_0_rgba(0,0,0,0.06),0_6px_20px_0_rgba(0,0,0,0.05)] border-none max-sm:first:ml-8`,
+        !hasSearchQuery && "max-sm:w-[220px]",
         hasSearchQuery && 'flex-row sm:flex-col w-full max-sm:first:ml-0'
       )}
     >
       <CardContent className={cn(
-        "w-full min-w-[220px] max-w-[300px] max-h-[200px] p-2",
+        "w-full max-h-[200px] p-2",
+        !hasSearchQuery && "min-w-[220px] max-w-[300px]",
         hasSearchQuery && "max-sm:min-w-28 max-sm:w-min"
       )}>
         <Image

@@ -211,15 +211,14 @@ const Dashboard = () => {
             </Button>
             <div
               className={cn(
-                `flex overflow-x-scroll sm:overflow-x-hidden w-screen sm:w-full sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide max-sm:-ml-8`,
-                hasSearchQuery && 'flex-col max-sm:ml-0 w-full'
+                `flex overflow-x-scroll sm:overflow-x-hidden sm:w-full sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 py-4 lg:py-6 scrollbar-hide max-sm:flex-col max-sm:ml-0 w-full`,
               )}
             >
               {filteredEvents.events.map(event => (
                 <EventCard
                   key={event.id}
                   event={event}
-                  hasSearchQuery={hasSearchQuery}
+                  hasSearchQuery
                   enrollments={enrollments}
                   isLoadingEnrollments={isLoadingEnrollments}
                 />
