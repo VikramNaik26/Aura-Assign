@@ -35,9 +35,9 @@ export type FilterOptions = {
 }
 
 const Dashboard = () => {
+  const searchParams = useSearchParams()
   const [events, setEvents] = useState<OrgEvent[]>([])
   const [hasSearchQuery, setHasSearchQuery] = useState(false)
-  const searchParams = useSearchParams()
   const [isLoadingEvents, setIsLoadingEvents] = useState(true)
   const [latitude, setLatitude] = useState<number | null>(null)
   const [longitude, setLongitude] = useState<number | null>(null)
@@ -138,9 +138,13 @@ const Dashboard = () => {
   useEffect(() => {
     setIsLoadingEvents(true)
     const isEnrolled = searchParams.get('enrolled') === 'true'
+    const isNearby = searchParams.get('nearby') === 'true'
 
     if (isEnrolled) {
       setEvents(enrolledEvents as OrgEvent[])
+      setIsLoadingEvents(false)
+    } else if (isNearby) {
+      setEvents(nearByEvents as OrgEvent[])
       setIsLoadingEvents(false)
     } else if (events && events.length && hasSearchQuery) {
       setEvents(events)

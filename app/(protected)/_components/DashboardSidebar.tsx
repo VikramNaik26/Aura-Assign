@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Poppins } from 'next/font/google'
-import { CircleCheckBig, LayoutDashboard, MapPin } from 'lucide-react'
+import { CircleCheckBig, LayoutDashboard, MapPinned,  Radar } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ export const DashboardSidebar = () => {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const enrolled = searchParams.get('enrolled')
+  const nearby = searchParams.get('nearby')
 
   const [isDialogOpen, setDialogOpen] = useState<boolean>(false)
   const closeDialog = () => setDialogOpen(false)
@@ -58,7 +59,7 @@ export const DashboardSidebar = () => {
       </RoleGate>
       <div className="space-y-1 w-full">
         <Button
-          variant={enrolled || pathname === '/dashboard/map' ? 'ghost' : 'secondary'}
+          variant={enrolled || nearby || pathname === '/dashboard/map' ? 'ghost' : 'secondary'}
           asChild
           size='lg'
           className='font-normal justify-start w-full px-2'
@@ -89,13 +90,29 @@ export const DashboardSidebar = () => {
       </RoleGate>
       <div className="space-y-1 w-full">
         <Button
+          variant={nearby ? 'secondary' : 'ghost'}
+          asChild
+          size='lg'
+          className='font-normal justify-start w-full px-2'
+        >
+          <Link href={{
+            pathname: '/dashboard',
+            query: { nearby: true },
+          }}>
+            <Radar className="w-4 h-4 mr-2" />
+            Nearby Events
+          </Link>
+        </Button>
+      </div>
+      <div className="space-y-1 w-full">
+        <Button
           variant={pathname === '/dashboard/map' ? 'secondary' : 'ghost'}
           asChild
           size='lg'
           className='font-normal justify-start w-full px-2'
         >
           <Link href='/dashboard/map'>
-            <MapPin className="w-4 h-4 mr-2" />
+            <MapPinned className="w-4 h-4 mr-2" />
             Map
           </Link>
         </Button>
