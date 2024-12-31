@@ -14,7 +14,7 @@ export function Sidebar() {
   const isActiveParent = (href: string) => pathname === href
 
   return (
-    <div className="flex flex-col w-64 bg-white h-full border-r">
+    <div className="flex flex-col w-64 bg-white h-full border-r shadow-md">
       <div className="flex items-center my-2 gap-x-2">
         <Image
           src="/logo.svg"
