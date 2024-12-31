@@ -1,17 +1,28 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentOrgORUser } from "./useCurrentOrgORUser";
-import { UserRole } from "@prisma/client"
+import { UserRole } from "@prisma/client";
 
 export default function useRedirectIfAdmin() {
-    const router = useRouter();
-    const { data: organizationOrUser, status } = useCurrentOrgORUser();
+  const router = useRouter();
+  const { data: organizationOrUser, status } = useCurrentOrgORUser();
 
-    useEffect(() => {
-        if (status === "authenticated" && organizationOrUser?.role === UserRole.ADMIN) {
-            router.push("/admin");
+  useEffect(() => {
+    // Only attempt redirect if we have a definitive status and user data
+    console.log({status, organizationOrUser})
+    if (status === "authenticated" &&
+      organizationOrUser &&
+      organizationOrUser.role === UserRole.ADMIN) {
+      // Force immediate navigation
+      router.replace("/admin");
+      // As a backup, also try push
+      setTimeout(() => {
+        if (window.location.pathname !== "/admin") {
+          window.location.href = "/admin";
         }
-    }, [status, organizationOrUser, router]);
+      }, 100);
+    }
+  }, [status, organizationOrUser, router]);
 
-    return { organizationOrUser, status };
-};
+  return { organizationOrUser, status };
+}
