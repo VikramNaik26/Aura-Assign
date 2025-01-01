@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Poppins } from 'next/font/google'
-import { CircleCheckBig, LayoutDashboard, MapPinned,  Radar } from 'lucide-react'
+import { CircleCheckBig, LayoutDashboard, LineChart, MapPinned, Radar } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 
 import { Button } from '@/components/ui/button'
@@ -59,7 +59,7 @@ export const DashboardSidebar = () => {
       </RoleGate>
       <div className="space-y-1 w-full">
         <Button
-          variant={enrolled || nearby || pathname === '/dashboard/map' ? 'ghost' : 'secondary'}
+          variant={enrolled || nearby || pathname === '/dashboard/map' || pathname === '/dashboard/analytics' ? 'ghost' : 'secondary'}
           asChild
           size='lg'
           className='font-normal justify-start w-full px-2'
@@ -114,6 +114,19 @@ export const DashboardSidebar = () => {
           <Link href='/dashboard/map'>
             <MapPinned className="w-4 h-4 mr-2" />
             Map
+          </Link>
+        </Button>
+      </div>
+      <div className="space-y-1 w-full">
+        <Button
+          variant={pathname === '/dashboard/analytics' ? 'secondary' : 'ghost'}
+          asChild
+          size='lg'
+          className='font-normal justify-start w-full px-2'
+        >
+          <Link href='/dashboard/analytics'>
+            <LineChart className="w-4 h-4 mr-2" />
+            Analytics
           </Link>
         </Button>
       </div>
