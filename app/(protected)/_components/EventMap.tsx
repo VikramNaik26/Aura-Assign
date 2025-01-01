@@ -223,7 +223,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ selectedLocation, onLocatio
           selectedLocation?.lng || 77.5946
         ]}
         zoom={13}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100%', width: '100%', zIndex: 0 }}
         dragging={!disabled}
         zoomControl={!disabled}
         scrollWheelZoom={!disabled}

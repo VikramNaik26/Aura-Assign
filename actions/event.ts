@@ -7,6 +7,8 @@ import { EventSchema } from "@/schemas"
 import { getOrgById } from "@/data/organizations"
 import { PaymentBasis } from "@prisma/client"
 import { FilterParams } from "@/app/(protected)/_components/FilterForm"
+import { getEnrollmentsForEvent } from "./enrollment"
+import { sendEventCancellationEmail } from "@/lib/mail"
 
 export interface OrgEvent {
   id: string
@@ -257,17 +259,41 @@ export const deleteEvent = async ({ id, orgId }: DeleteEventParams) => {
   }
 
   const organization = orgId ? await getOrgById(orgId) : null
-
   if (!organization) {
     return { error: 'Missing organization' }
   }
 
+  const event = await getEventById(id)
+  if (!event) {
+    return { error: 'Event not found' }
+  }
+
+  const eventDate = new Date(event.date);
+  const currentDate = new Date();
+
+  if (currentDate > new Date(eventDate.getTime() - 24 * 60 * 60 * 1000)) {
+    return { error: 'Event cannot be deleted on or before the day it is scheduled' };
+  }
+
+  const enrolledUsers = await getEnrollmentsForEvent(id)
+
   try {
+    if (enrolledUsers.length > 0) {
+      // First send emails to all enrolled users
+      const emailPromises = enrolledUsers.map(user =>
+        sendEventCancellationEmail(event, user)
+      );
+
+      // Wait for all emails to be sent
+      await Promise.all(emailPromises);
+    }
+
+    // Then delete the event
     await db.event.delete({ where: { id } })
 
     return { success: 'Event Successfully Deleted' }
   } catch (error) {
-    return { error: 'Cannot delete event' }
+    return { error: 'Failed to delete event or send cancellation notifications' }
   }
 }
 
@@ -295,7 +321,7 @@ export const getEventByNameAndOrg = async (name: string, orgId?: string) => {
   }
 }
 
-export const getEventById = async (id?: string) => {
+export const getEventById = async (id?: string): Promise<OrgEvent> => {
   try {
     if (!id) {
       throw new Error("Event ID is required");
@@ -312,13 +338,13 @@ export const getEventById = async (id?: string) => {
     const transformedEvent = transformEvent(event);
 
     // Ensure the event has valid location details (optional based on requirements)
-    if (
+    /* if (
       !transformedEvent.location ||
       !transformedEvent.location.lat ||
       !transformedEvent.location.lng
     ) {
       throw new Error("Event does not have a valid location");
-    }
+    } */
 
     return transformedEvent;
   } catch (error) {

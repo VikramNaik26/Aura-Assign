@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ClassNameValue } from "tailwind-merge"
+import { VisuallyHidden } from "@reach/visually-hidden"
 import { PaymentBasis, UserRole } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
@@ -23,6 +24,23 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form"
+import {
+  Card,
+  CardHeader,
+  CardDescription,
+  CardTitle,
+  CardContent,
+  CardFooter
+} from "@/components/ui/card"
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogHeader,
+  DialogClose
+} from "@/components/ui/dialog"
 import { CardWrapper } from "@/components/auth/CardWrapper"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -59,6 +77,7 @@ interface EventFormProps {
   eventObject?: OrgEvent
   isUpdate?: boolean
   handleDelete?: (id?: string) => void
+  isPending?: boolean
 }
 
 interface Location {
@@ -77,6 +96,7 @@ export const EventForm = (props: EventFormProps) => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(props.eventObject?.location || null)
   const [imagePreview, setImagePreview] = useState<string | null>(props.eventObject?.imageUrl || null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false)
 
   const { data: organization } = useCurrentOrgORUser()
   const queryClient = useQueryClient()
@@ -96,9 +116,12 @@ export const EventForm = (props: EventFormProps) => {
       throw new Error("File size must be less than 5MB")
     }
 
+    const folderName = organization?.name?.toLowerCase().replace(/[^a-z0-9]/g, '-')
+
     const formData = new FormData()
     formData.append('file', file)
     formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
+    formData.append('folder', `organizations/${folderName}`)
 
     try {
       const response = await fetch(
@@ -439,24 +462,58 @@ export const EventForm = (props: EventFormProps) => {
                   <>
                     <Button
                       type="button"
-                      className="px-6"
+                      className="px-6 flex-grow-0"
                       onClick={() => setIsInputDisabled(!isInputDisabled)}
                     >
                       {isInputDisabled ? "Edit" : "Save"}
                     </Button>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        if (props.handleDelete && props.eventObject) {
-                          props.handleDelete?.(props.eventObject?.id)
-                          history.back()
-                        } else {
-                          toast.error("Something went wrong")
-                        }
-                      }}
+
+                    <Dialog
+                      open={isOpenDeleteDialog}
+                      onOpenChange={() => setIsOpenDeleteDialog(!isOpenDeleteDialog)}
                     >
-                      Delete
-                    </Button>
+                      <DialogTrigger className='flex-1' asChild>
+                        <Button
+                          type="button"
+                          className="flex-grow-0"
+                        >
+                          Delete
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="p-0 w-auto bg-transparent border-none z-[9999]">
+                        <DialogHeader>
+                          <DialogTitle asChild>
+                            <VisuallyHidden>Delete an event</VisuallyHidden>
+                          </DialogTitle>
+                          <DialogDescription asChild>
+                            <VisuallyHidden>This will permanently Delete an event</VisuallyHidden>
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Card className="sm:min-w-[500px] -my-4">
+                          <CardHeader>
+                            <CardTitle className="text-lg">{props.eventObject?.name}</CardTitle>
+                            <CardDescription>Are you sure you wanna delete this event?</CardDescription>
+                          </CardHeader>
+                          <CardFooter className="flex gap-4">
+                            <DialogClose asChild>
+                              <Button disabled={isPending} variant="outline">
+                                Cancel
+                              </Button>
+                            </DialogClose>
+                            <Button disabled={isPending} onClick={() => {
+                              if (props.handleDelete && props.eventObject) {
+                                props.handleDelete?.(props.eventObject?.id)
+                              } else {
+                                toast.error("Something went wrong")
+                              }
+                            }}>
+                              {props.isPending ? <Loader2 className="h-4 animate-spin" /> : "Delete"}
+                            </Button>
+                            <FormError message={error} />
+                          </CardFooter>
+                        </Card>
+                      </DialogContent>
+                    </Dialog>
                   </>
                 ) : (
                   <div className="flex flex-col gap-4 w-full">

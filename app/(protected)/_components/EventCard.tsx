@@ -221,7 +221,7 @@ export const EventCard = ({
                       </Button>
                     </DialogClose>
                     <Button disabled={isPending} onClick={() => handleDelete(event?.id)}>
-                      Delete
+                      {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
                     </Button>
                     <FormError message={error} />
                   </CardFooter>
