@@ -8,7 +8,7 @@ import { getOrgById } from "@/data/organizations"
 import { PaymentBasis } from "@prisma/client"
 import { FilterParams } from "@/app/(protected)/_components/FilterForm"
 import { getEnrollmentsForEvent } from "./enrollment"
-import { sendEventCancellationEmail } from "@/lib/mail"
+import { sendEventCancellationEmail, sendEventUpdateEmail } from "@/lib/mail"
 
 export interface OrgEvent {
   id: string
@@ -34,7 +34,6 @@ export const createOrUpsertEvent = async (
 ) => {
   try {
     const organization = orgId ? await getOrgById(orgId) : null
-
     const date = new Date(values.date)
     const [hours, minutes] = values.time.split(':').map(Number)
     date.setHours(hours, minutes)
@@ -43,19 +42,7 @@ export const createOrUpsertEvent = async (
       return { error: 'Invalid Date and Time combination' }
     }
 
-    const eventData: {
-      name: string
-      description: string | undefined
-      date: Date
-      time: Date
-      payment: number
-      paymentBasis?: PaymentBasis
-      imageUrl?: string
-      orgId?: string
-      address: string
-      latitude: number
-      longitude: number
-    } = {
+    const eventData = {
       name: values.name,
       description: values.description,
       date: date,
@@ -65,18 +52,33 @@ export const createOrUpsertEvent = async (
       imageUrl: values.imageUrl,
       address: values.location.address,
       latitude: values.location.lat,
-      longitude: values.location.lng
-    }
-
-    if (organization?.id) {
-      eventData.orgId = organization.id
+      longitude: values.location.lng,
+      ...(organization?.id && { orgId: organization.id })
     }
 
     if (eventId) {
-      await db.event.update({
+      // Get the old event data before updating
+      const oldEvent = await getEventById(eventId);
+      // Get enrolled users
+      const enrolledUsers = await getEnrollmentsForEvent(eventId);
+
+      // Update the event
+      let updatedEvent = await db.event.update({
         where: { id: eventId },
-        data: eventData
-      })
+        data: eventData,
+      });
+
+      updatedEvent = transformEvent(updatedEvent);
+
+      // If there are enrolled users, send update emails
+      if (enrolledUsers.length > 0) {
+        const emailPromises = enrolledUsers.map(user =>
+          sendEventUpdateEmail(oldEvent, updatedEvent, user)
+        );
+
+        await Promise.all(emailPromises);
+      }
+
       return { success: 'Event Successfully Updated' }
     } else {
       await db.event.create({
@@ -88,7 +90,8 @@ export const createOrUpsertEvent = async (
     if (error instanceof z.ZodError) {
       return { error: 'Validation failed', details: error.errors }
     } else {
-      console.log(error)
+      console.error("Error in createOrUpsertEvent:", error)
+      return { error: 'Something went wrong while processing the event' }
     }
   }
 }

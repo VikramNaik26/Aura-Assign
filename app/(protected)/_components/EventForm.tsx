@@ -1,7 +1,7 @@
 "use client"
 
 import * as z from "zod"
-import { useState, useTransition, useEffect } from "react"
+import { useState, useTransition, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
@@ -103,8 +103,17 @@ export const EventForm = (props: EventFormProps) => {
 
   const mutation = useMutation({
     mutationFn: (event: z.infer<typeof EventSchema>) => createOrUpsertEvent(event, organization?.id, props.eventObject?.id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
+      if (data?.success) {
+        const formData = form.getValues();
+        form.reset({
+          ...formData
+        }, {
+          keepValues: true,
+          keepDirty: false
+        });
+      }
     },
     onError: () => {
       setError('Something went wrong');
@@ -211,7 +220,7 @@ export const EventForm = (props: EventFormProps) => {
           }
 
           if (data?.success) {
-            form.reset()
+            setIsInputDisabled(true)
             if (closeDialog) {
               closeDialog()
             }
@@ -461,11 +470,15 @@ export const EventForm = (props: EventFormProps) => {
                 {props.isEdit ? (
                   <>
                     <Button
-                      type="button"
+                      type={isInputDisabled ? "submit" : "button"}
                       className="px-6 flex-grow-0"
-                      onClick={() => setIsInputDisabled(!isInputDisabled)}
-                    >
-                      {isInputDisabled ? "Edit" : "Save"}
+                      onClick={() => {
+                        setIsInputDisabled(!isInputDisabled)
+                      }}>
+                      {isInputDisabled ?
+                        "Edit" :
+                        isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"
+                      }
                     </Button>
 
                     <Dialog
