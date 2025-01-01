@@ -92,6 +92,7 @@ export const EventDetails = ({
           }
 
           if (!data?.error) {
+            history.back()
             toast.success(data?.success)
           }
         })
@@ -120,9 +121,9 @@ export const EventDetails = ({
         <div className="w-full md:max-w-[350px] sm:aspect-auto">
           <Image
             alt="Product image"
-            className="w-full rounded-md object-cover sm:max-w-[400px]"
+            className="w-full h-60 rounded-md object-cover sm:max-w-[400px]"
             height="300"
-            src="/assets/EventImageOne.svg"
+            src={(event?.imageUrl && event?.imageUrl) || "/assets/EventImageOne.svg"}
             width="300"
           />
           {!isOrgDataLoading && orgData && (
@@ -141,12 +142,13 @@ export const EventDetails = ({
           isEdit
           eventObject={event}
           handleDelete={handleDelete}
+          isPending={isPending}
         />
       </div>
       <RoleGate role={role} allowedRole={UserRole.USER}>
         <Dialog open={isDialogOpen.enrollDialog} onOpenChange={() => setIsDialogOpen({ ...isDialogOpen, enrollDialog: !isDialogOpen.enrollDialog })}>
           <DialogTrigger asChild>
-            <Button variant="secondary" className="m-3 sm:max-w-60" disabled={isLoadingEnrollments || hasEventId(enrollments as Enrollments[], event?.id)}>
+            <Button variant="secondary" className="sm:max-w-60 max-sm:mx-12" disabled={isLoadingEnrollments || hasEventId(enrollments as Enrollments[], event?.id)}>
               {isLoadingEnrollments
                 ? <Loader2 className="h-4 w-4 animate-spin" />
                 : (() => {
@@ -171,10 +173,10 @@ export const EventDetails = ({
             <DialogContent className="p-0 auto bg-transparent border-none z-[9999]">
               <DialogHeader>
                 <DialogTitle asChild>
-                  <VisuallyHidden>Create an event</VisuallyHidden>
+                  <VisuallyHidden>Enroll to an event</VisuallyHidden>
                 </DialogTitle>
                 <DialogDescription asChild>
-                  <VisuallyHidden>Fill out the form to create a new event</VisuallyHidden>
+                  <VisuallyHidden>Enroll to an event</VisuallyHidden>
                 </DialogDescription>
               </DialogHeader>
               <EnrollForm eventId={event?.id} closeDialog={closeEnrollDialog} />

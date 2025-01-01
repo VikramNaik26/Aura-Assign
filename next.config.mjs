@@ -10,10 +10,13 @@ const withPWA = withPWAInit({
   workboxOptions: {
     disableDevLogs: true
   },
-  transpilePackages: ['jspdf', 'jspdf-autotable']
   // swcMinify: true
 });
 
-const nextConfig = {};
+const nextConfig = {
+  images: {
+    domains: ['res.cloudinary.com']
+  },
+};
 
 export default withPWA(nextConfig);

@@ -202,3 +202,148 @@ export const sendEnrollmentStatusMail = async (
     return error
   }
 }
+
+export const sendEventCancellationEmail = async (
+  event: OrgEvent,
+  user: ExtendedUserWithProfile
+) => {
+  if (!user.name || !user.email) {
+    return;
+  }
+
+  const dateStr = format(new Date(event.date), "MMMM dd, yyyy");
+  const timeStr = format(new Date(event.time), "hh:mm a");
+
+  const emailTemplate = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333;">Hello ${user.name},</h2>
+      
+      <p style="font-size: 16px; color: #555;">
+        We regret to inform you that the following event has been cancelled:
+      </p>
+
+      <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+        <h3 style="margin: 0 0 10px 0;">Event Details:</h3>
+        <p>🎯 Event: ${event.name}</p>
+        ${event.description ? `<p>📝 Description: ${event.description}</p>` : ""}
+        <p>📅 Originally Scheduled Date: ${dateStr}</p>
+        <p>⏰ Originally Scheduled Time: ${timeStr}</p>
+        ${event.location ? `<p>📍 Location: ${event.location.address}</p>` : ""}
+      </div>
+
+      <p>We apologize for any inconvenience this may cause. If you have any questions or concerns, please don't hesitate to contact us.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="color: #777; font-size: 14px;">
+          Best regards,<br>
+          Aura Assign Team
+        </p>
+      </div>
+    </div>
+  `;
+
+  try {
+    await sendEmail({
+      sender: {
+        name: "Aura Assign",
+        address: "aura.assign@gmail.com"
+      },
+      recipient: [{
+        name: user.name,
+        address: user.email
+      }],
+      subject: `Event Cancelled - ${event.name}`,
+      message: emailTemplate
+    });
+  } catch (error) {
+    return error;
+  }
+};
+
+export const sendEventUpdateEmail = async (
+  oldEvent: OrgEvent,
+  newEvent: OrgEvent,
+  user: ExtendedUserWithProfile
+) => {
+  if (!user.name || !user.email) {
+    return;
+  }
+
+  const oldDateStr = format(new Date(oldEvent.date), "MMMM dd, yyyy");
+  const oldTimeStr = format(new Date(oldEvent.time), "hh:mm a");
+  const newDateStr = format(new Date(newEvent.date), "MMMM dd, yyyy");
+  const newTimeStr = format(new Date(newEvent.time), "hh:mm a");
+
+  // Determine what has changed
+  const changes = [];
+  if (oldEvent.name !== newEvent.name) {
+    changes.push(`Event name updated from "${oldEvent.name}" to "${newEvent.name}"`);
+  }
+  if (oldEvent.description !== newEvent.description) {
+    changes.push(`Event description updated from "${oldEvent.description}" to "${newEvent.description}"`);
+  }
+  if (oldEvent.payment !== newEvent.payment || oldEvent.paymentBasis !== newEvent.paymentBasis) {
+    changes.push(`Event payment updated from ${oldEvent.payment} ${oldEvent.paymentBasis} to ${newEvent.payment} ${newEvent.paymentBasis}`);
+  }
+  if (oldDateStr !== newDateStr) {
+    changes.push(`Date changed from ${oldDateStr} to ${newDateStr}`);
+  }
+  if (oldTimeStr !== newTimeStr) {
+    changes.push(`Time changed from ${oldTimeStr} to ${newTimeStr}`);
+  }
+  if (oldEvent.location?.address !== newEvent.location?.address) {
+    changes.push(`Location changed from "${oldEvent.location?.address}" to "${newEvent.location?.address}"`);
+  }
+
+  const emailTemplate = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333;">Hello ${user.name},</h2>
+      
+      <p style="font-size: 16px; color: #555;">
+        There have been updates to an event you're enrolled in.
+      </p>
+
+      <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+        <h3 style="margin: 0 0 10px 0;">Updated Event Details:</h3>
+        <p>🎯 Event: ${newEvent.name}</p>
+        ${newEvent.description ? `<p>📝 Description: ${newEvent.description}</p>` : ""}
+        <p>📅 Date: ${newDateStr}</p>
+        <p>⏰ Time: ${newTimeStr}</p>
+        ${newEvent.location ? `<p>📍 Location: ${newEvent.location.address}</p>` : ""}
+      </div>
+
+      <div style="margin: 20px 0; padding: 15px; background-color: #fff3cd; border-radius: 5px;">
+        <h4 style="margin: 0 0 10px 0; color: #856404;">Changes Made:</h4>
+        <ul style="margin: 0; padding-left: 20px;">
+          ${changes.map(change => `<li>${change}</li>`).join('')}
+        </ul>
+      </div>
+
+      <p>If these changes affect your ability to attend or if you have any questions, please contact us.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="color: #777; font-size: 14px;">
+          Best regards,<br>
+          Aura Assign Team
+        </p>
+      </div>
+    </div>
+  `;
+
+  try {
+    await sendEmail({
+      sender: {
+        name: "Aura Assign",
+        address: "aura.assign@gmail.com"
+      },
+      recipient: [{
+        name: user.name,
+        address: user.email
+      }],
+      subject: `Event Update - ${newEvent.name}`,
+      message: emailTemplate
+    });
+  } catch (error) {
+    return error;
+  }
+};

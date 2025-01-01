@@ -14,7 +14,7 @@ const Event = async ({ params }: { params: { id: string } }) => {
   if (!event) return null
 
   return (
-    <section className="relative sm:p-4 flex flex-col gap-6 -mx-4 md:mx-auto">
+    <section className="relative sm:p-4 flex flex-col gap-2 md:gap-4 -mx-4 md:mx-auto">
       <BackButtonInAppBar />
       <EventDetails event={event} />
       <RoleGate role={session?.user.role} allowedRole={UserRole.ORGANIZATION}>

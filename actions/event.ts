@@ -7,6 +7,8 @@ import { EventSchema } from "@/schemas"
 import { getOrgById } from "@/data/organizations"
 import { PaymentBasis } from "@prisma/client"
 import { FilterParams } from "@/app/(protected)/_components/FilterForm"
+import { getEnrollmentsForEvent } from "./enrollment"
+import { sendEventCancellationEmail, sendEventUpdateEmail } from "@/lib/mail"
 
 export interface OrgEvent {
   id: string
@@ -32,7 +34,6 @@ export const createOrUpsertEvent = async (
 ) => {
   try {
     const organization = orgId ? await getOrgById(orgId) : null
-
     const date = new Date(values.date)
     const [hours, minutes] = values.time.split(':').map(Number)
     date.setHours(hours, minutes)
@@ -41,19 +42,7 @@ export const createOrUpsertEvent = async (
       return { error: 'Invalid Date and Time combination' }
     }
 
-    const eventData: {
-      name: string
-      description: string | undefined
-      date: Date
-      time: Date
-      payment: number
-      paymentBasis?: PaymentBasis
-      imageUrl?: string
-      orgId?: string
-      address: string
-      latitude: number
-      longitude: number
-    } = {
+    const eventData = {
       name: values.name,
       description: values.description,
       date: date,
@@ -63,18 +52,33 @@ export const createOrUpsertEvent = async (
       imageUrl: values.imageUrl,
       address: values.location.address,
       latitude: values.location.lat,
-      longitude: values.location.lng
-    }
-
-    if (organization?.id) {
-      eventData.orgId = organization.id
+      longitude: values.location.lng,
+      ...(organization?.id && { orgId: organization.id })
     }
 
     if (eventId) {
-      await db.event.update({
+      // Get the old event data before updating
+      const oldEvent = await getEventById(eventId);
+      // Get enrolled users
+      const enrolledUsers = await getEnrollmentsForEvent(eventId);
+
+      // Update the event
+      let updatedEvent = await db.event.update({
         where: { id: eventId },
-        data: eventData
-      })
+        data: eventData,
+      });
+
+      updatedEvent = transformEvent(updatedEvent);
+
+      // If there are enrolled users, send update emails
+      if (enrolledUsers.length > 0) {
+        const emailPromises = enrolledUsers.map(user =>
+          sendEventUpdateEmail(oldEvent, updatedEvent, user)
+        );
+
+        await Promise.all(emailPromises);
+      }
+
       return { success: 'Event Successfully Updated' }
     } else {
       await db.event.create({
@@ -86,7 +90,8 @@ export const createOrUpsertEvent = async (
     if (error instanceof z.ZodError) {
       return { error: 'Validation failed', details: error.errors }
     } else {
-      console.log(error)
+      console.error("Error in createOrUpsertEvent:", error)
+      return { error: 'Something went wrong while processing the event' }
     }
   }
 }
@@ -257,17 +262,41 @@ export const deleteEvent = async ({ id, orgId }: DeleteEventParams) => {
   }
 
   const organization = orgId ? await getOrgById(orgId) : null
-
   if (!organization) {
     return { error: 'Missing organization' }
   }
 
+  const event = await getEventById(id)
+  if (!event) {
+    return { error: 'Event not found' }
+  }
+
+  const eventDate = new Date(event.date);
+  const currentDate = new Date();
+
+  if (currentDate > new Date(eventDate.getTime() - 24 * 60 * 60 * 1000)) {
+    return { error: 'Event cannot be deleted on or before the day it is scheduled' };
+  }
+
+  const enrolledUsers = await getEnrollmentsForEvent(id)
+
   try {
+    if (enrolledUsers.length > 0) {
+      // First send emails to all enrolled users
+      const emailPromises = enrolledUsers.map(user =>
+        sendEventCancellationEmail(event, user)
+      );
+
+      // Wait for all emails to be sent
+      await Promise.all(emailPromises);
+    }
+
+    // Then delete the event
     await db.event.delete({ where: { id } })
 
     return { success: 'Event Successfully Deleted' }
   } catch (error) {
-    return { error: 'Cannot delete event' }
+    return { error: 'Failed to delete event or send cancellation notifications' }
   }
 }
 
@@ -295,7 +324,7 @@ export const getEventByNameAndOrg = async (name: string, orgId?: string) => {
   }
 }
 
-export const getEventById = async (id?: string) => {
+export const getEventById = async (id?: string): Promise<OrgEvent> => {
   try {
     if (!id) {
       throw new Error("Event ID is required");
@@ -312,13 +341,13 @@ export const getEventById = async (id?: string) => {
     const transformedEvent = transformEvent(event);
 
     // Ensure the event has valid location details (optional based on requirements)
-    if (
+    /* if (
       !transformedEvent.location ||
       !transformedEvent.location.lat ||
       !transformedEvent.location.lng
     ) {
       throw new Error("Event does not have a valid location");
-    }
+    } */
 
     return transformedEvent;
   } catch (error) {

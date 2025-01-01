@@ -146,12 +146,12 @@ export const EventCard = ({
         hasSearchQuery && "max-sm:min-w-28 max-sm:w-min"
       )}>
         <Image
-          src="/assets/EventImageOne.svg"
+          src={(event?.imageUrl && event?.imageUrl) || "/assets/EventImageOne.svg"}
           alt="Event"
           width={100}
           height={100}
           className={cn(
-            "w-full h-full object-cover rounded-md cursor-pointer",
+            "w-full object-cover rounded-md cursor-pointer h-32 sm:h-40 md:h-44",
             hasSearchQuery && "max-sm:w-28 max-sm:h-24"
           )}
           onClick={handleCardClick}
@@ -221,7 +221,7 @@ export const EventCard = ({
                       </Button>
                     </DialogClose>
                     <Button disabled={isPending} onClick={() => handleDelete(event?.id)}>
-                      Delete
+                      {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
                     </Button>
                     <FormError message={error} />
                   </CardFooter>

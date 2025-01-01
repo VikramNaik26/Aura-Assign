@@ -1,17 +1,20 @@
 "use client"
 
 import * as z from "zod"
-import { useState, useTransition, useEffect } from "react"
+import { useState, useTransition, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ClassNameValue } from "tailwind-merge"
+import { VisuallyHidden } from "@reach/visually-hidden"
 import { PaymentBasis, UserRole } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
-import { Loader2, MapPin } from "lucide-react"
+import { Loader2, MapPin, ImageIcon, X } from "lucide-react"
 import dynamic from 'next/dynamic'
+import Image from "next/image"
+
 import { EventSchema } from "@/schemas"
 import {
   Form,
@@ -21,6 +24,23 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form"
+import {
+  Card,
+  CardHeader,
+  CardDescription,
+  CardTitle,
+  CardContent,
+  CardFooter
+} from "@/components/ui/card"
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogHeader,
+  DialogClose
+} from "@/components/ui/dialog"
 import { CardWrapper } from "@/components/auth/CardWrapper"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -57,6 +77,7 @@ interface EventFormProps {
   eventObject?: OrgEvent
   isUpdate?: boolean
   handleDelete?: (id?: string) => void
+  isPending?: boolean
 }
 
 interface Location {
@@ -65,25 +86,93 @@ interface Location {
   lng: number
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+
 export const EventForm = (props: EventFormProps) => {
   const closeDialog = props.closeDialog
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | undefined>("")
   const [isInputDisabled, setIsInputDisabled] = useState(props.isEdit)
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(props.eventObject?.location || null)
+  const [imagePreview, setImagePreview] = useState<string | null>(props.eventObject?.imageUrl || null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false)
 
   const { data: organization } = useCurrentOrgORUser()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: (event: z.infer<typeof EventSchema>) => createOrUpsertEvent(event, organization?.id, props.eventObject?.id),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['events'] })
+      if (data?.success) {
+        const formData = form.getValues();
+        form.reset({
+          ...formData
+        }, {
+          keepValues: true,
+          keepDirty: false
+        });
+      }
     },
     onError: () => {
       setError('Something went wrong');
     },
   })
+
+  const uploadImage = async (file: File): Promise<string> => {
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error("File size must be less than 5MB")
+    }
+
+    const folderName = organization?.name?.toLowerCase().replace(/[^a-z0-9]/g, '-')
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
+    formData.append('folder', `organizations/${folderName}`)
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      )
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const data = await response.json()
+      return data.secure_url
+    } catch (error) {
+      console.error('Upload error:', error)
+      throw new Error('Image upload failed')
+    }
+  }
+
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) return
+
+    try {
+      setIsUploading(true)
+      const url = await uploadImage(file)
+      setImagePreview(url)
+      form.setValue('imageUrl', url)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Upload failed')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removeImage = () => {
+    setImagePreview(null)
+    form.setValue('imageUrl', '')
+  }
 
   const extractDateAndTime = (
     dateTime: Date | undefined
@@ -120,7 +209,7 @@ export const EventForm = (props: EventFormProps) => {
     }
   })
 
-  const onSubmit = (values: z.infer<typeof EventSchema>) => {
+  const onSubmit = async (values: z.infer<typeof EventSchema>) => {
     setError("")
     startTransition(() => {
       mutation.mutateAsync(values)
@@ -131,7 +220,7 @@ export const EventForm = (props: EventFormProps) => {
           }
 
           if (data?.success) {
-            form.reset()
+            setIsInputDisabled(true)
             if (closeDialog) {
               closeDialog()
             }
@@ -257,14 +346,55 @@ export const EventForm = (props: EventFormProps) => {
                     name="imageUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Event image</FormLabel>
+                        <FormLabel>Event Image</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Enter image"
-                            type="text"
-                            disabled={isPending || isInputDisabled}
-                          />
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-4">
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                disabled={isPending || isInputDisabled || isUploading}
+                                className="hidden"
+                                id="image-upload"
+                              />
+                              <label
+                                htmlFor="image-upload"
+                                className={cn(
+                                  "flex text-sm items-center gap-2 px-4 py-2 rounded-md border cursor-pointer hover:bg-secondary transition-colors",
+                                  (isPending || isInputDisabled || isUploading) && "opacity-50 cursor-not-allowed"
+                                )}
+                              >
+                                <ImageIcon className="h-4 w-4" />
+                                {isUploading ? "Uploading..." : "Upload Image"}
+                              </label>
+                              {imagePreview && (
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={removeImage}
+                                  disabled={isPending || isInputDisabled || isUploading}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                            {imagePreview && (
+                              <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                                <Image
+                                  src={imagePreview}
+                                  alt="Event preview"
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                            )}
+                            <Input
+                              type="hidden"
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -340,38 +470,76 @@ export const EventForm = (props: EventFormProps) => {
                 {props.isEdit ? (
                   <>
                     <Button
-                      type="button"
-                      className="px-6"
-                      onClick={() => setIsInputDisabled(!isInputDisabled)}
-                    >
-                      {isInputDisabled ? "Edit" : "Save"}
-                    </Button>
-                    <Button
-                      type="button"
+                      type={isInputDisabled ? "submit" : "button"}
+                      className="px-6 flex-grow-0"
                       onClick={() => {
-                        if (props.handleDelete && props.eventObject) {
-                          props.handleDelete?.(props.eventObject?.id)
-                          history.back()
-                        } else {
-                          toast.error("Something went wrong")
-                        }
-                      }}
-                    >
-                      Delete
+                        setIsInputDisabled(!isInputDisabled)
+                      }}>
+                      {isInputDisabled ?
+                        "Edit" :
+                        isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"
+                      }
                     </Button>
+
+                    <Dialog
+                      open={isOpenDeleteDialog}
+                      onOpenChange={() => setIsOpenDeleteDialog(!isOpenDeleteDialog)}
+                    >
+                      <DialogTrigger className='flex-1' asChild>
+                        <Button
+                          type="button"
+                          className="flex-grow-0"
+                        >
+                          Delete
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="p-0 w-auto bg-transparent border-none z-[9999]">
+                        <DialogHeader>
+                          <DialogTitle asChild>
+                            <VisuallyHidden>Delete an event</VisuallyHidden>
+                          </DialogTitle>
+                          <DialogDescription asChild>
+                            <VisuallyHidden>This will permanently Delete an event</VisuallyHidden>
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Card className="sm:min-w-[500px] -my-4">
+                          <CardHeader>
+                            <CardTitle className="text-lg">{props.eventObject?.name}</CardTitle>
+                            <CardDescription>Are you sure you wanna delete this event?</CardDescription>
+                          </CardHeader>
+                          <CardFooter className="flex gap-4">
+                            <DialogClose asChild>
+                              <Button disabled={isPending} variant="outline">
+                                Cancel
+                              </Button>
+                            </DialogClose>
+                            <Button disabled={isPending} onClick={() => {
+                              if (props.handleDelete && props.eventObject) {
+                                props.handleDelete?.(props.eventObject?.id)
+                              } else {
+                                toast.error("Something went wrong")
+                              }
+                            }}>
+                              {props.isPending ? <Loader2 className="h-4 animate-spin" /> : "Delete"}
+                            </Button>
+                            <FormError message={error} />
+                          </CardFooter>
+                        </Card>
+                      </DialogContent>
+                    </Dialog>
                   </>
                 ) : (
                   <div className="flex flex-col gap-4 w-full">
                     <Button
                       type="submit"
                       className="w-full"
+                      disabled={isUploading}
                     >
                       {
-                        props.isUpdate && !isPending
-                          ? "Update"
-                          : isPending
-                            ? <Loader2 className="h-4 animate-spin" />
-                            : "Create"
+                        isUploading ? "Uploading..." :
+                          props.isUpdate && !isPending ? "Update" :
+                            isPending ? <Loader2 className="h-4 animate-spin" /> :
+                              "Create"
                       }
                     </Button>
                     <Button
@@ -379,6 +547,7 @@ export const EventForm = (props: EventFormProps) => {
                       className="w-full"
                       variant="outline"
                       onClick={closeDialog}
+                      disabled={isUploading}
                     >
                       Cancel
                     </Button>
