@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, X, Home, Calendar, Users, Settings } from 'lucide-react'
+import { Menu, X, Home, Calendar, Users, Settings, LineChart } from 'lucide-react'
 import { UserRole } from "@prisma/client"
 
 import { cn } from "@/lib/utils"
@@ -32,6 +32,7 @@ export function Sidebar({ organizationOrUser }: SidebarProps) {
     { icon: Calendar, label: "Events", href: "/events" },
     { icon: Users, label: "Users", href: "/users" },
     { icon: Settings, label: "Settings", href: "/settings" },
+    { icon: LineChart, label: "Analytics", href: "/analytics" },
   ]
 
   return (

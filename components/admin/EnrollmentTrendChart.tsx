@@ -5,6 +5,7 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 import { getWeekBoundaries } from "@/lib/date-utils"
 import { prepareEnrollmentData, enrollmentChartConfig } from "@/lib/chart-utils"
 import { Enrollments } from "@/actions/enrollment"
+import { Event } from "@prisma/client"
 
 export type ExtendedEnrollments = Enrollments & {
   enrolledAt: Date

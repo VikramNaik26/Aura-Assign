@@ -120,6 +120,7 @@ export interface Enrollments {
   eventId: string
   jobDetails: string | null
   status: Status
+  enrolledAt: Date
 }
 
 export const getEnrollmentsByUserId = async (userId?: string) => {
@@ -241,3 +242,22 @@ export const getEnrollments = async () => {
     throw error
   }
 }
+
+export const getEnrollmentsByOrgId = async (orgId?: string) => {
+  try {
+    const enrollments = await db.enrollment.findMany({
+      include: {
+        event: true,
+      },
+    });
+
+    // Filter enrollments based on the orgId of the event
+    const filteredEnrollments = enrollments.filter(enrollment => enrollment.event.orgId === orgId);
+
+    return filteredEnrollments;
+  } catch (error) {
+    console.error('Error fetching enrollments:', error);
+    throw error;
+  }
+}
+
